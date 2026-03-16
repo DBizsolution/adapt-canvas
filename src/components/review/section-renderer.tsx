@@ -258,7 +258,7 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
   return (
     <div
       id={review.targetId}
-      className="mb-5 bg-white rounded-xl overflow-hidden"
+      className="mb-5 bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
       style={{ border: `1px solid ${color.borderHex}22` }}
     >
       {/* Colored header bar */}

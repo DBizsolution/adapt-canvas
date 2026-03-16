@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import type { ConsensusStatus, Reviewer, SectionType } from '@/domain/intent-model/types'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
-import { SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
+import { SECTION_TYPE_TO_MODEL_KEY, SECTION_TYPE_TO_URL_PARAM } from '@/domain/intent-model/types'
 
 type ConsensusDashboardProps = {
   consensus: ConsensusStatus
@@ -99,13 +100,15 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
           if (total === 0) return null
 
           return (
-            <Card key={type} className="p-6">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-base font-medium">{sectionTypeLabels[type]}</h3>
-                <span className="text-sm text-muted-foreground">{approved}/{total}</span>
-              </div>
-              <Progress value={total > 0 ? (approved / total) * 100 : 0} className="h-1.5" />
-            </Card>
+            <Link key={type} href={`/review/${SECTION_TYPE_TO_URL_PARAM[type]}`}>
+              <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-base font-medium">{sectionTypeLabels[type]}</h3>
+                  <span className="text-sm text-muted-foreground">{approved}/{total}</span>
+                </div>
+                <Progress value={total > 0 ? (approved / total) * 100 : 0} className="h-1.5" />
+              </Card>
+            </Link>
           )
         })}
       </div>

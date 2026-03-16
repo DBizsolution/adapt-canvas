@@ -16,7 +16,7 @@ const C = {
   teal: { bg: 'bg-[#F0FDFA]', border: 'border-[#14B8A6]', text: 'text-[#115E59]', borderHex: '#14B8A6' },
   amber: { bg: 'bg-[#FFFBEB]', border: 'border-[#F59E0B]', text: 'text-[#92400E]', borderHex: '#F59E0B' },
   slate: { bg: 'bg-[#F8FAFC]', border: 'border-[#94A3B8]', text: 'text-[#475569]', borderHex: '#94A3B8' },
-  red: { bg: 'bg-[#FEF2F2]', border: 'border-[#EF4444]', text: 'text-[#991B1B]', borderHex: '#EF4444' },
+  red: { bg: 'bg-[#FFF1F2]', border: 'border-[#E11D48]', text: 'text-[#9F1239]', borderHex: '#E11D48' },
 }
 
 const sectionColors: Record<SectionType, typeof C.blue> = {
@@ -75,7 +75,7 @@ function ReviewHistory({ reviews }: { reviews: Review[] }) {
       <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wide">Review history</p>
       {reviews.map((r, i) => (
         <div key={i} className="text-xs flex gap-2 items-start">
-          <span className={r.status === 'approved' ? 'text-[#0D9488]' : 'text-[#DC2626]'}>
+          <span className={r.status === 'approved' ? 'text-[#0D9488]' : 'text-[#E11D48]'}>
             {r.status === 'approved' ? '✓' : '✗'}
           </span>
           <div>
@@ -166,7 +166,7 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border-2 ${
                 s.edge
-                  ? 'bg-[#FEF2F2] border-[#EF4444] text-[#991B1B]'
+                  ? 'bg-[#FFF1F2] border-[#E11D48] text-[#9F1239]'
                   : s.warn
                     ? 'bg-[#FFFBEB] border-[#F59E0B] text-[#92400E]'
                     : 'bg-[#EFF6FF] border-[#3B82F6] text-[#1E40AF]'

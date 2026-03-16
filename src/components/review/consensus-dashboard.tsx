@@ -77,7 +77,7 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
             <p className="text-base text-muted-foreground">Approved</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-red-500">{consensus.disputed}</p>
+            <p className="text-3xl font-bold text-[#E11D48]">{consensus.disputed}</p>
             <p className="text-base text-muted-foreground">Disputed</p>
           </div>
           <div>

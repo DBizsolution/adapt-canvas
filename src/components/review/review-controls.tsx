@@ -59,7 +59,7 @@ export function ReviewControls({ section, currentReviewerId }: ReviewControlsPro
           variant="outline"
           onClick={() => submitReview('dispute')}
           disabled={loading}
-          className="border-red-400 text-red-600 hover:bg-red-50 hover:text-red-700"
+          className="border-[#E11D48] text-[#BE123C] hover:bg-[#FFF1F2] hover:text-[#9F1239]"
         >
           Dispute
         </Button>

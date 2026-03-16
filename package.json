@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
-    "lint": "next lint",
+    "lint": "eslint src/",
     "intent:snapshot": "bash scripts/snapshot.sh"
   },
   "keywords": [],
@@ -28,13 +28,18 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "eslint": "^10.0.3",
+    "eslint-config-next": "^16.1.6",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.0"
   }
 }

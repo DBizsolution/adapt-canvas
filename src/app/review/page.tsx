@@ -7,11 +7,39 @@ import type { ReviewState } from '@/domain/intent-model/types'
 
 export const dynamic = 'force-dynamic'
 
-const howItWorksSteps = [
-  { step: 1, text: 'Select your name from the Reviewer dropdown in the top navbar' },
-  { step: 2, text: 'Navigate to a section (Actors, Entities, Journeys, etc.) using the nav links' },
-  { step: 3, text: 'Review each item — Approve or Dispute with an optional comment' },
-  { step: 4, text: 'Track overall consensus progress on this dashboard' },
+const reviewProcess = [
+  {
+    heading: 'Review',
+    steps: [
+      'Select your name from the Reviewer dropdown',
+      'Navigate to a section — Actors, Entities, Journeys, Rules, Constraints, or Open Questions',
+      'Read each item and either Approve or Dispute it with a comment',
+      'Track consensus progress on this dashboard until all sections are approved',
+    ],
+  },
+  {
+    heading: 'When disputes arise',
+    steps: [
+      'Disputed items are flagged for the model author to revise',
+      'The author updates the intent model (model.ts) via Claude Code',
+      'Changed items automatically reset to "Revised" — reviewers re-review only what changed',
+    ],
+  },
+  {
+    heading: 'When consensus is reached',
+    steps: [
+      'All sections approved by all assigned reviewers → "Ready for Phase 3"',
+      'Run pnpm intent:snapshot to save the approved version',
+      'The approved intent model feeds directly into the next phases:',
+    ],
+  },
+]
+
+const pipeline = [
+  { phase: 'Phase 3', label: 'State Machines', desc: 'Extract lifecycle transitions into formal state machines' },
+  { phase: 'Phase 4', label: 'Domain Types', desc: 'Generate TypeScript types, Zod schemas, and status utilities' },
+  { phase: 'Phase 5', label: 'Info Architecture', desc: 'Derive routes, screens, and navigation from actors and journeys' },
+  { phase: 'Phase 6–9', label: 'Design → Code → Validate', desc: 'Wireframes, design system, code generation, and final validation' },
 ]
 
 export default async function ReviewDashboard() {
@@ -25,17 +53,38 @@ export default async function ReviewDashboard() {
     <div className="pb-32">
       {/* How it works */}
       <div className="mb-8 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">How it works</h2>
-        <ol className="space-y-3">
-          {howItWorksSteps.map(({ step, text }) => (
-            <li key={step} className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#002C61] text-white text-xs font-bold flex items-center justify-center">
-                {step}
-              </span>
-              <span className="text-sm text-gray-600 pt-0.5">{text}</span>
-            </li>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-5">How this works</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {reviewProcess.map(({ heading, steps }) => (
+            <div key={heading}>
+              <h3 className="text-sm font-semibold text-[#002C61] mb-3">{heading}</h3>
+              <ol className="space-y-2">
+                {steps.map((text, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#002C61] text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="text-xs text-gray-600 leading-relaxed">{text}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           ))}
-        </ol>
+        </div>
+
+        {/* Pipeline */}
+        <div className="border-t border-gray-100 pt-4">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">What the approved model feeds into</h3>
+          <div className="flex flex-wrap gap-2">
+            {pipeline.map(({ phase, label, desc }) => (
+              <div key={phase} className="flex items-center gap-2 bg-[#F5F6FA] rounded-lg px-3 py-2 text-xs" title={desc}>
+                <span className="font-semibold text-[#002C61]">{phase}</span>
+                <span className="text-gray-500">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="mb-8">

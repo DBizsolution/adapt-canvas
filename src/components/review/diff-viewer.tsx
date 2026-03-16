@@ -22,8 +22,8 @@ export function DiffViewer({ diffs }: { diffs: DiffItem[] }) {
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+    <div className="space-y-6">
+      <p className="text-base text-muted-foreground">
         {changes.length} changed, {unchanged.length} unchanged
       </p>
       {changes.map(diff => {
@@ -35,18 +35,18 @@ export function DiffViewer({ diffs }: { diffs: DiffItem[] }) {
             : diff.targetId
 
         return (
-          <Card key={diff.targetId} className="p-4">
-            <div className="flex items-start justify-between mb-2">
+          <Card key={diff.targetId} className="p-6">
+            <div className="flex items-start justify-between mb-3">
               <div>
-                <h3 className="font-medium">{displayName as string}</h3>
-                <code className="text-xs text-muted-foreground">{diff.targetId}</code>
+                <h3 className="text-lg font-medium">{displayName as string}</h3>
+                <code className="text-sm text-muted-foreground">{diff.targetId}</code>
               </div>
-              <Badge variant="default" className={config.className}>
+              <Badge variant="default" className={`text-sm ${config.className}`}>
                 {config.label}
               </Badge>
             </div>
             {diff.change === 'modified' && diff.current && diff.previous && (
-              <pre className="text-xs bg-muted p-3 rounded-md overflow-auto mt-2 max-h-60">
+              <pre className="text-sm bg-muted p-4 rounded-md overflow-auto mt-2 max-h-60">
                 {JSON.stringify(diff.current, null, 2)}
               </pre>
             )}

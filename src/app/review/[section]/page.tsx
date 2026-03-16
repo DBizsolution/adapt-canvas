@@ -41,10 +41,10 @@ export default async function SectionPage({
   })
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{sectionLabels[sectionType]}</h1>
-        <p className="text-muted-foreground">
+    <div className="pb-32">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">{sectionLabels[sectionType]}</h1>
+        <p className="text-base text-muted-foreground">
           {items.length} items — {items.filter(i => i.review.effectiveStatus === 'approved').length} approved
         </p>
       </div>

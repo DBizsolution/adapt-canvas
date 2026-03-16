@@ -37,16 +37,16 @@ export function ReviewControls({ section, currentReviewerId }: ReviewControlsPro
   }
 
   return (
-    <div className="flex flex-col gap-3 pt-3 border-t">
+    <div className="flex flex-col gap-4 pt-4 border-t">
       <Textarea
         placeholder="Optional comment..."
         value={comment}
         onChange={e => setComment(e.target.value)}
-        className="min-h-[60px] text-sm"
+        className="min-h-[80px] text-base"
       />
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <Button
-          size="sm"
+          size="default"
           variant="default"
           onClick={() => submitReview('approve')}
           disabled={loading}
@@ -55,7 +55,7 @@ export function ReviewControls({ section, currentReviewerId }: ReviewControlsPro
           Approve
         </Button>
         <Button
-          size="sm"
+          size="default"
           variant="default"
           onClick={() => submitReview('dispute')}
           disabled={loading}

@@ -28,13 +28,13 @@ export default async function ReviewLayout({
       <header className="border-b bg-background sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <h1 className="text-lg font-semibold">VBS Intent Model</h1>
+            <h1 className="text-xl font-semibold">VBS Intent Model</h1>
             <nav className="flex gap-1">
               {navItems.map(item => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-sm px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="text-base px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   {item.label}
                 </Link>
@@ -44,7 +44,7 @@ export default async function ReviewLayout({
           <ReviewerSelector reviewers={reviewState.reviewers} />
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-8">
         {children}
       </main>
     </div>

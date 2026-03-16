@@ -28,8 +28,8 @@ export default async function DiffPage() {
 
   if (!previous) {
     return (
-      <div>
-        <h1 className="text-2xl font-bold mb-6">Version Diff</h1>
+      <div className="pb-32">
+        <h1 className="text-3xl font-bold mb-8">Version Diff</h1>
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">
             No previous version found. Create a snapshot in <code>src/domain/intent-model/history/</code> to enable diffing.
@@ -42,10 +42,10 @@ export default async function DiffPage() {
   const diffs = computeStructuralDiff(intentModel, previous)
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Version Diff</h1>
-        <p className="text-muted-foreground">
+    <div className="pb-32">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Version Diff</h1>
+        <p className="text-base text-muted-foreground">
           Current v{intentModel.meta.version} vs. previous v{previous.meta.version}
         </p>
       </div>

@@ -18,10 +18,10 @@ type SectionRendererProps = {
 function ReviewHistory({ reviews }: { reviews: Review[] }) {
   if (reviews.length === 0) return null
   return (
-    <div className="mt-3 space-y-2">
-      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Review history</p>
+    <div className="mt-4 space-y-3">
+      <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Review history</p>
       {reviews.map((r, i) => (
-        <div key={i} className="text-sm flex gap-2 items-start">
+        <div key={i} className="text-base flex gap-2 items-start">
           <span className={r.status === 'approved' ? 'text-green-600' : 'text-amber-600'}>
             {r.status === 'approved' ? '✓' : '✗'}
           </span>
@@ -38,13 +38,13 @@ function ReviewHistory({ reviews }: { reviews: Review[] }) {
 
 function ActorRenderer({ actor }: { actor: Actor }) {
   return (
-    <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">{actor.description}</p>
-      <p className="text-xs"><span className="font-medium">Auth:</span> {actor.auth}</p>
+    <div className="space-y-3">
+      <p className="text-base text-muted-foreground">{actor.description}</p>
+      <p className="text-sm"><span className="font-medium">Auth:</span> {actor.auth}</p>
       <div className="space-y-1">
         {actor.responsibilities.map(r => (
-          <div key={r.id} className="flex gap-2 items-start text-sm py-1 border-b last:border-0">
-            <code className="text-xs bg-muted px-1 py-0.5 rounded shrink-0">{r.id}</code>
+          <div key={r.id} className="flex gap-2 items-start text-base py-2 border-b last:border-0">
+            <code className="text-sm bg-muted px-1 py-0.5 rounded shrink-0">{r.id}</code>
             <span>{r.description}</span>
             {r.warn && <WarnBadge text={r.warn} />}
             {r.edge && <EdgeBadge text={r.edge} />}
@@ -57,30 +57,30 @@ function ActorRenderer({ actor }: { actor: Actor }) {
 
 function EntityRenderer({ entity }: { entity: Entity }) {
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">{entity.description}</p>
+    <div className="space-y-4">
+      <p className="text-base text-muted-foreground">{entity.description}</p>
       <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Fields</p>
+        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">Fields</p>
         {entity.key_fields.map(f => (
-          <div key={f.name} className="flex gap-2 items-start text-sm py-1 border-b last:border-0">
-            <code className="text-xs bg-muted px-1 py-0.5 rounded shrink-0">{f.name}</code>
-            <code className="text-xs text-blue-600 shrink-0">{f.type}</code>
+          <div key={f.name} className="flex gap-2 items-start text-base py-2 border-b last:border-0">
+            <code className="text-sm bg-muted px-1 py-0.5 rounded shrink-0">{f.name}</code>
+            <code className="text-sm text-blue-600 shrink-0">{f.type}</code>
             <span className="text-muted-foreground">{f.description}</span>
             {f.warn && <WarnBadge text={f.warn} />}
           </div>
         ))}
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
           Lifecycle: {entity.lifecycle.states.join(' → ')}
         </p>
         {entity.lifecycle.transitions.map((t, i) => (
-          <div key={i} className="flex gap-2 items-center text-sm py-1 border-b last:border-0">
-            <code className="text-xs bg-blue-50 text-blue-700 px-1 py-0.5 rounded">{t.from}</code>
+          <div key={i} className="flex gap-2 items-center text-base py-2 border-b last:border-0">
+            <code className="text-sm bg-blue-50 text-blue-700 px-1 py-0.5 rounded">{t.from}</code>
             <span className="text-muted-foreground">→</span>
-            <code className="text-xs bg-green-50 text-green-700 px-1 py-0.5 rounded">{t.to}</code>
-            <span className="text-xs text-muted-foreground">{t.trigger}</span>
-            {t.guard && <span className="text-xs text-muted-foreground italic">guard: {t.guard}</span>}
+            <code className="text-sm bg-green-50 text-green-700 px-1 py-0.5 rounded">{t.to}</code>
+            <span className="text-sm text-muted-foreground">{t.trigger}</span>
+            {t.guard && <span className="text-sm text-muted-foreground italic">guard: {t.guard}</span>}
             {t.warn && <WarnBadge text={t.warn} />}
           </div>
         ))}
@@ -91,42 +91,42 @@ function EntityRenderer({ entity }: { entity: Entity }) {
 
 function JourneyRenderer({ journey }: { journey: Journey }) {
   return (
-    <div className="space-y-3">
-      <p className="text-xs"><span className="font-medium">Actor:</span> {journey.primary_actor}</p>
+    <div className="space-y-4">
+      <p className="text-sm"><span className="font-medium">Actor:</span> {journey.primary_actor}</p>
       <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Preconditions</p>
-        <ul className="text-sm list-disc list-inside space-y-0.5">
+        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">Preconditions</p>
+        <ul className="text-base list-disc list-inside space-y-1">
           {journey.preconditions.map((p, i) => <li key={i}>{p}</li>)}
         </ul>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-3">
         {journey.steps.map(s => (
-          <div key={s.order} className="flex gap-3 py-2 border-b last:border-0">
-            <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold shrink-0">
+          <div key={s.order} className="flex gap-3 py-3 border-b last:border-0">
+            <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold shrink-0">
               {s.order}
             </div>
             <div>
-              <p className="text-sm font-medium">{s.title}</p>
-              <p className="text-sm text-muted-foreground">{s.detail}</p>
-              {s.precondition && <p className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded mt-1 inline-block">Pre: {s.precondition}</p>}
+              <p className="text-base font-medium">{s.title}</p>
+              <p className="text-base text-muted-foreground">{s.detail}</p>
+              {s.precondition && <p className="text-sm text-amber-700 bg-amber-50 px-2 py-0.5 rounded mt-1 inline-block">Pre: {s.precondition}</p>}
               {s.warn && <WarnBadge text={s.warn} />}
               {s.edge && <EdgeBadge text={s.edge} />}
             </div>
           </div>
         ))}
       </div>
-      <p className="text-sm"><span className="font-medium">Success:</span> {journey.success_outcome}</p>
+      <p className="text-base"><span className="font-medium">Success:</span> {journey.success_outcome}</p>
     </div>
   )
 }
 
 function RuleRenderer({ rule }: { rule: BusinessRule }) {
   return (
-    <div className="space-y-1">
-      <p className="text-sm">{rule.description}</p>
+    <div className="space-y-2">
+      <p className="text-base">{rule.description}</p>
       <div className="flex gap-2 items-center">
-        <span className="text-xs text-muted-foreground">Applies to: {rule.applies_to.join(', ')}</span>
-        <span className="text-xs text-muted-foreground">Source: {rule.source}</span>
+        <span className="text-sm text-muted-foreground">Applies to: {rule.applies_to.join(', ')}</span>
+        <span className="text-sm text-muted-foreground">Source: {rule.source}</span>
       </div>
       {rule.warn && <WarnBadge text={rule.warn} />}
     </div>
@@ -135,20 +135,20 @@ function RuleRenderer({ rule }: { rule: BusinessRule }) {
 
 function ConstraintRenderer({ constraint }: { constraint: Constraint }) {
   return (
-    <div className="space-y-1">
-      <p className="text-sm">{constraint.constraint}</p>
-      <code className="text-xs bg-muted px-1 py-0.5 rounded">{constraint.type}</code>
+    <div className="space-y-2">
+      <p className="text-base">{constraint.constraint}</p>
+      <code className="text-sm bg-muted px-1 py-0.5 rounded">{constraint.type}</code>
     </div>
   )
 }
 
 function OpenQuestionRenderer({ question }: { question: OpenQuestion }) {
   return (
-    <div className="space-y-1">
-      <p className="text-sm font-medium">{question.question}</p>
-      <p className="text-sm text-muted-foreground">{question.reason}</p>
-      <code className="text-xs bg-muted px-1 py-0.5 rounded">{question.status}</code>
-      {question.resolution && <p className="text-sm text-green-700">{question.resolution}</p>}
+    <div className="space-y-2">
+      <p className="text-base font-medium">{question.question}</p>
+      <p className="text-base text-muted-foreground">{question.reason}</p>
+      <code className="text-sm bg-muted px-1 py-0.5 rounded">{question.status}</code>
+      {question.resolution && <p className="text-base text-green-700">{question.resolution}</p>}
     </div>
   )
 }
@@ -168,11 +168,11 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
   const displayId = 'name' in item ? (item as { name: string }).name : item.id
 
   return (
-    <Card className="p-4" id={review.targetId}>
-      <div className="flex items-start justify-between mb-3">
+    <Card className="p-6" id={review.targetId}>
+      <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-base">{displayId}</h3>
-          <code className="text-xs text-muted-foreground">{review.targetId}</code>
+          <h3 className="font-semibold text-lg">{displayId}</h3>
+          <code className="text-sm text-muted-foreground">{review.targetId}</code>
         </div>
         <StatusBadge status={review.effectiveStatus} />
       </div>

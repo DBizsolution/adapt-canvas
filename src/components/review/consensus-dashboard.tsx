@@ -42,7 +42,7 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Filters */}
       <div className="flex gap-1">
         {filters.map(f => (
@@ -58,10 +58,10 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
       </div>
 
       {/* Overall readiness */}
-      <Card className="p-6">
+      <Card className="p-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Consensus Status</h2>
-          <span className={`text-sm font-medium px-3 py-1 rounded-full ${
+          <h2 className="text-xl font-semibold">Consensus Status</h2>
+          <span className={`text-base font-medium px-3 py-1 rounded-full ${
             consensus.ready
               ? 'bg-green-100 text-green-800'
               : 'bg-gray-100 text-gray-600'
@@ -70,22 +70,22 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
           </span>
         </div>
         <Progress value={consensus.totalSections > 0 ? (consensus.approved / consensus.totalSections) * 100 : 0} className="h-2 mb-3" />
-        <div className="grid grid-cols-4 gap-4 text-center text-sm">
+        <div className="grid grid-cols-4 gap-4 text-center text-base">
           <div>
-            <p className="text-2xl font-bold text-green-600">{consensus.approved}</p>
-            <p className="text-muted-foreground">Approved</p>
+            <p className="text-3xl font-bold text-green-600">{consensus.approved}</p>
+            <p className="text-base text-muted-foreground">Approved</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-amber-600">{consensus.disputed}</p>
-            <p className="text-muted-foreground">Disputed</p>
+            <p className="text-3xl font-bold text-amber-600">{consensus.disputed}</p>
+            <p className="text-base text-muted-foreground">Disputed</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-blue-600">{consensus.revised}</p>
-            <p className="text-muted-foreground">Revised</p>
+            <p className="text-3xl font-bold text-blue-600">{consensus.revised}</p>
+            <p className="text-base text-muted-foreground">Revised</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-400">{consensus.pending}</p>
-            <p className="text-muted-foreground">Pending</p>
+            <p className="text-3xl font-bold text-gray-400">{consensus.pending}</p>
+            <p className="text-base text-muted-foreground">Pending</p>
           </div>
         </div>
       </Card>
@@ -99,10 +99,10 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
           if (total === 0) return null
 
           return (
-            <Card key={type} className="p-4">
+            <Card key={type} className="p-6">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">{sectionTypeLabels[type]}</h3>
-                <span className="text-xs text-muted-foreground">{approved}/{total}</span>
+                <h3 className="text-base font-medium">{sectionTypeLabels[type]}</h3>
+                <span className="text-sm text-muted-foreground">{approved}/{total}</span>
               </div>
               <Progress value={total > 0 ? (approved / total) * 100 : 0} className="h-1.5" />
             </Card>
@@ -111,9 +111,9 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
       </div>
 
       {/* Reviewer status */}
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Reviewers</h2>
-        <div className="space-y-3">
+      <Card className="p-8">
+        <h2 className="text-xl font-semibold mb-4">Reviewers</h2>
+        <div className="space-y-4">
           {reviewers.map(r => {
             const relevantSections = sections.filter(s => {
               const modelKey = SECTION_TYPE_TO_MODEL_KEY[s.targetType] as string
@@ -127,10 +127,10 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
             return (
               <div key={r.id} className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">{r.name}</p>
-                  <p className="text-xs text-muted-foreground">{r.role.replace('_', ' ')} — {r.focus.join(', ')}</p>
+                  <p className="text-base font-medium">{r.name}</p>
+                  <p className="text-sm text-muted-foreground">{r.role.replace('_', ' ')} — {r.focus.join(', ')}</p>
                 </div>
-                <span className="text-sm text-muted-foreground">{reviewed}/{total} reviewed</span>
+                <span className="text-base text-muted-foreground">{reviewed}/{total} reviewed</span>
               </div>
             )
           })}

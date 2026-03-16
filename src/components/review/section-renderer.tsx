@@ -2,6 +2,7 @@
 
 import { StatusBadge, WarnIndicator, EdgeIndicator } from './status-badge'
 import { ReviewControls } from './review-controls'
+import { OpenQuestionControls } from './open-question-controls'
 import { HelpTip } from './help-tip'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
 import type {
@@ -279,7 +280,15 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
         <ReviewHistory reviews={review.reviews} />
         {currentReviewerId && (
           <div className="mt-4 pt-4 border-t border-[#F1F5F9]">
-            <ReviewControls section={review} currentReviewerId={currentReviewerId} />
+            {type === 'open_question' ? (
+              <OpenQuestionControls
+                section={review}
+                currentReviewerId={currentReviewerId}
+                questionStatus={(item as OpenQuestion).status}
+              />
+            ) : (
+              <ReviewControls section={review} currentReviewerId={currentReviewerId} />
+            )}
           </div>
         )}
       </div>

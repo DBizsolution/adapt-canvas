@@ -62,10 +62,17 @@ export async function POST(request: NextRequest) {
   }
 
   // Add review
+  const reviewStatus = (action === 'approve' || action === 'resolve' || action === 'defer')
+    ? 'approved'
+    : 'disputed'
   section.reviews.push({
     reviewerId,
-    status: action === 'approve' ? 'approved' : 'disputed',
-    comment,
+    status: reviewStatus,
+    comment: action === 'resolve'
+      ? `[RESOLVED] ${comment}`
+      : action === 'defer'
+        ? `[DEFERRED] ${comment}`
+        : comment,
     timestamp: new Date().toISOString(),
   })
 

@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const ReviewActionSchema = z.object({
   targetId: z.string().regex(/^[a-z_]+:.+$/, 'targetId must be in format "type:id"'),
   reviewerId: z.string().min(1),
-  action: z.enum(['approve', 'dispute']),
+  action: z.enum(['approve', 'dispute', 'resolve', 'defer']),
   comment: z.string().optional(),
 })
 

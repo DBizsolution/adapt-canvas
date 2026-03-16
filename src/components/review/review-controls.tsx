@@ -50,16 +50,16 @@ export function ReviewControls({ section, currentReviewerId }: ReviewControlsPro
           variant="default"
           onClick={() => submitReview('approve')}
           disabled={loading}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[#0D9488] hover:bg-[#0F766E] text-white"
         >
           Approve
         </Button>
         <Button
           size="default"
-          variant="default"
+          variant="outline"
           onClick={() => submitReview('dispute')}
           disabled={loading}
-          className="bg-amber-600 hover:bg-amber-700"
+          className="border-red-400 text-red-600 hover:bg-red-50 hover:text-red-700"
         >
           Dispute
         </Button>

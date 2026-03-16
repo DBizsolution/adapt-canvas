@@ -73,11 +73,11 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
         <Progress value={consensus.totalSections > 0 ? (consensus.approved / consensus.totalSections) * 100 : 0} className="h-2 mb-3" />
         <div className="grid grid-cols-4 gap-4 text-center text-base">
           <div>
-            <p className="text-3xl font-bold text-green-600">{consensus.approved}</p>
+            <p className="text-3xl font-bold text-[#0D9488]">{consensus.approved}</p>
             <p className="text-base text-muted-foreground">Approved</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-amber-600">{consensus.disputed}</p>
+            <p className="text-3xl font-bold text-red-500">{consensus.disputed}</p>
             <p className="text-base text-muted-foreground">Disputed</p>
           </div>
           <div>

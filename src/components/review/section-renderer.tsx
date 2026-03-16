@@ -75,7 +75,7 @@ function ReviewHistory({ reviews }: { reviews: Review[] }) {
       <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wide">Review history</p>
       {reviews.map((r, i) => (
         <div key={i} className="text-xs flex gap-2 items-start">
-          <span className={r.status === 'approved' ? 'text-[#166534]' : 'text-[#92400E]'}>
+          <span className={r.status === 'approved' ? 'text-[#0D9488]' : 'text-[#DC2626]'}>
             {r.status === 'approved' ? '✓' : '✗'}
           </span>
           <div>

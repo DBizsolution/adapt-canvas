@@ -23,6 +23,15 @@ export async function getReviewState(): Promise<ReviewState> {
   return JSON.parse(raw)
 }
 
+export async function resetReviewState(): Promise<ReviewState> {
+  const raw = await readFile(REVIEW_STATE_PATH, 'utf-8')
+  const state: ReviewState = JSON.parse(raw)
+  if (isVercel) {
+    await kv.set(KV_KEY, state)
+  }
+  return state
+}
+
 export async function setReviewState(state: ReviewState): Promise<void> {
   if (isVercel) {
     await kv.set(KV_KEY, state)

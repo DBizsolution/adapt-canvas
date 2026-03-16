@@ -5,14 +5,14 @@ import type { ReviewState } from '@/domain/intent-model/types'
 import Link from 'next/link'
 
 const navItems = [
-  { label: 'Dashboard', href: '/review' },
-  { label: 'Actors', href: '/review/actors' },
-  { label: 'Entities', href: '/review/entities' },
-  { label: 'Journeys', href: '/review/journeys' },
-  { label: 'Business Rules', href: '/review/business-rules' },
-  { label: 'Constraints', href: '/review/constraints' },
-  { label: 'Open Questions', href: '/review/open-questions' },
-  { label: 'Diff', href: '/review/diff' },
+  { label: 'Dashboard', href: '/review', icon: '📊' },
+  { label: 'Actors', href: '/review/actors', icon: '👥' },
+  { label: 'Entities', href: '/review/entities', icon: '📐' },
+  { label: 'Journeys', href: '/review/journeys', icon: '🔀' },
+  { label: 'Rules', href: '/review/business-rules', icon: '⚖️' },
+  { label: 'Constraints', href: '/review/constraints', icon: '🔒' },
+  { label: 'Open Qs', href: '/review/open-questions', icon: '❓' },
+  { label: 'Diff', href: '/review/diff', icon: '📝' },
 ]
 
 export default async function ReviewLayout({
@@ -34,9 +34,10 @@ export default async function ReviewLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-base px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="text-sm px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center gap-1.5"
                 >
-                  {item.label}
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
                 </Link>
               ))}
             </nav>

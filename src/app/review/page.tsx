@@ -1,9 +1,7 @@
-import { readFile } from 'node:fs/promises'
-import { REVIEW_STATE_PATH } from '@/lib/paths'
+import { getReviewState } from '@/lib/review-store'
 import { intentModel } from '@/domain/intent-model/model'
 import { enrichSectionReviews, computeConsensus } from '@/lib/review-utils'
 import { ConsensusDashboard } from '@/components/review/consensus-dashboard'
-import type { ReviewState } from '@/domain/intent-model/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,8 +41,7 @@ const pipeline = [
 ]
 
 export default async function ReviewDashboard() {
-  const raw = await readFile(REVIEW_STATE_PATH, 'utf-8')
-  const reviewState: ReviewState = JSON.parse(raw)
+  const reviewState = await getReviewState()
 
   const enrichedSections = await enrichSectionReviews(intentModel, reviewState)
   const consensus = computeConsensus(enrichedSections, reviewState.reviewers)

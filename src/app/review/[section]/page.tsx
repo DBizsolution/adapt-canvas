@@ -1,10 +1,9 @@
-import { readFile } from 'node:fs/promises'
 import { notFound } from 'next/navigation'
-import { REVIEW_STATE_PATH } from '@/lib/paths'
+import { getReviewState } from '@/lib/review-store'
 import { intentModel } from '@/domain/intent-model/model'
 import { enrichSectionReviews, buildTargetId } from '@/lib/review-utils'
 import { SectionPageClient } from '@/components/review/section-page-client'
-import type { ReviewState, SectionType } from '@/domain/intent-model/types'
+import type { SectionType } from '@/domain/intent-model/types'
 import { URL_PARAM_TO_SECTION_TYPE, SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
 
 export const dynamic = 'force-dynamic'
@@ -27,8 +26,7 @@ export default async function SectionPage({
   const sectionType = URL_PARAM_TO_SECTION_TYPE[section]
   if (!sectionType) notFound()
 
-  const raw = await readFile(REVIEW_STATE_PATH, 'utf-8')
-  const reviewState: ReviewState = JSON.parse(raw)
+  const reviewState = await getReviewState()
   const enrichedSections = await enrichSectionReviews(intentModel, reviewState)
 
   const modelKey = SECTION_TYPE_TO_MODEL_KEY[sectionType] as keyof typeof intentModel

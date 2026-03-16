@@ -1,16 +1,13 @@
-import { readFile } from 'node:fs/promises'
-import { REVIEW_STATE_PATH } from '@/lib/paths'
+import { getReviewState } from '@/lib/review-store'
 import { ReviewerSelector } from '@/components/review/reviewer-selector'
 import { NavLinks } from '@/components/review/nav-links'
-import type { ReviewState } from '@/domain/intent-model/types'
 
 export default async function ReviewLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const raw = await readFile(REVIEW_STATE_PATH, 'utf-8')
-  const reviewState: ReviewState = JSON.parse(raw)
+  const reviewState = await getReviewState()
 
   return (
     <div className="min-h-screen bg-[#F5F6FA]">

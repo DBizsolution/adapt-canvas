@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile, writeFile } from 'node:fs/promises'
-import { REVIEW_STATE_PATH } from '@/lib/paths'
+import { getReviewState, setReviewState } from '@/lib/review-store'
 import { ReviewActionSchema } from '@/lib/review-schemas'
 import { hashItem, getAllModelItems, buildTargetId } from '@/lib/review-utils'
 import { intentModel } from '@/domain/intent-model/model'
-import type { ReviewState, SectionReview } from '@/domain/intent-model/types'
 
 export async function GET() {
-  const raw = await readFile(REVIEW_STATE_PATH, 'utf-8')
-  const reviewState: ReviewState = JSON.parse(raw)
+  const reviewState = await getReviewState()
   return NextResponse.json(reviewState)
 }
 
@@ -22,8 +19,7 @@ export async function POST(request: NextRequest) {
 
   const { targetId, reviewerId, action, comment } = parsed.data
 
-  const raw = await readFile(REVIEW_STATE_PATH, 'utf-8')
-  const reviewState: ReviewState = JSON.parse(raw)
+  const reviewState = await getReviewState()
 
   const reviewer = reviewState.reviewers.find(r => r.id === reviewerId)
   if (!reviewer) {
@@ -90,7 +86,7 @@ export async function POST(request: NextRequest) {
     section.status = 'pending'
   }
 
-  await writeFile(REVIEW_STATE_PATH, JSON.stringify(reviewState, null, 2))
+  await setReviewState(reviewState)
 
   return NextResponse.json({ success: true, section })
 }

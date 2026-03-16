@@ -8,14 +8,14 @@
       "focus": ["actors", "entities", "journeys", "business_rules", "constraints", "open_questions"]
     },
     {
-      "id": "po",
-      "name": "Product Owner",
+      "id": "roni",
+      "name": "Roni",
       "role": "product_owner",
       "focus": ["actors", "journeys", "business_rules", "open_questions"]
     },
     {
-      "id": "tech-lead",
-      "name": "Tech Lead",
+      "id": "kavya",
+      "name": "Kavya",
       "role": "tech_lead",
       "focus": ["entities", "constraints"]
     }

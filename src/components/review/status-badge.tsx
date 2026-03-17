@@ -4,7 +4,7 @@ import type { EnrichedSectionReview } from '@/lib/review-utils'
 const statusConfig = {
   approved: { label: 'Approved', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#F0FDFA] text-[#115E59] border-[#14B8A6] hover:bg-[#F0FDFA]' },
   disputed: { label: 'Disputed', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-white text-[#BE123C] border-[#E11D48] hover:bg-[#FFF1F2]' },
-  pending: { label: 'Pending', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#F8FAFC] text-[#475569] border-[#94A3B8] hover:bg-[#F8FAFC]' },
+  pending: { label: 'Pending Consensus', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#F8FAFC] text-[#475569] border-[#94A3B8] hover:bg-[#F8FAFC]' },
   revised: { label: 'Revised', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#EFF6FF] text-[#1E40AF] border-[#3B82F6] hover:bg-[#EFF6FF]' },
 }
 

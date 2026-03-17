@@ -38,7 +38,7 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
     { value: 'all', label: 'All' },
     { value: 'approved', label: 'Approved' },
     { value: 'disputed', label: 'Disputed' },
-    { value: 'pending', label: 'Pending' },
+    { value: 'pending', label: 'Pending Consensus' },
     { value: 'revised', label: 'Revised' },
   ]
 
@@ -86,7 +86,7 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
           </div>
           <div>
             <p className="text-3xl font-bold text-gray-400">{consensus.pending}</p>
-            <p className="text-base text-muted-foreground">Pending</p>
+            <p className="text-base text-muted-foreground">Pending Consensus</p>
           </div>
         </div>
       </Card>

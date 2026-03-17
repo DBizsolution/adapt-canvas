@@ -43,45 +43,43 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
   }
 
   if (mode === 'idle') {
-    return (
-      <div className="space-y-4">
-        <div className="flex gap-2 flex-wrap">
+    if (questionStatus === 'resolved') {
+      return (
+        <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => setMode('resolve')}
-            className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+            onClick={() => submitReview('approve')}
+            disabled={loading}
+            className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
             style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
           >
-            <CheckCircle size={14} />
-            Resolve with decision
+            <ThumbsUp size={14} />
+            Confirm resolution
           </button>
-          <button
-            type="button"
-            onClick={() => setMode('defer')}
-            className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200"
-            style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-dark)' }}
-          >
-            <Clock size={14} />
-            Defer to later phase
-          </button>
-          {questionStatus === 'resolved' && (
-            <button
-              type="button"
-              onClick={() => submitReview('approve')}
-              disabled={loading}
-              className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
-              style={{ background: 'rgba(37,186,59,0.08)', color: 'var(--accent-green)', border: '1px solid rgba(37,186,59,0.2)' }}
-            >
-              <ThumbsUp size={14} />
-              Confirm resolution
-            </button>
-          )}
         </div>
+      )
+    }
 
-        <div className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-          <span className="font-semibold">How this works:</span> Resolve provides a decision that the model author will incorporate into model.ts.
-          Once updated, this question&apos;s status changes to &quot;resolved&quot; and other reviewers can confirm.
-        </div>
+    return (
+      <div className="flex gap-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setMode('resolve')}
+          className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+          style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
+        >
+          <CheckCircle size={14} />
+          Resolve
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('defer')}
+          className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+          style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-dark)' }}
+        >
+          <Clock size={14} />
+          Defer
+        </button>
       </div>
     )
   }

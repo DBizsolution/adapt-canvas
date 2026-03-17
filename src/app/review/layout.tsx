@@ -24,13 +24,10 @@ export default async function ReviewLayout({
       {/* Main Area */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Chat Panel — Left 40% */}
-        <ChatPanel model={model} latestVersionId={latestVersionId} />
-
-        {/* Model Panel — Right 60% */}
+        {/* Model Panel — Left 60% */}
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Model toolbar */}
-          <div className="flex h-[54px] shrink-0 items-center justify-between px-3">
+          <div className="flex h-[54px] shrink-0 items-center justify-between px-3 pl-4">
             <h2 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
               Intent Model
             </h2>
@@ -42,7 +39,7 @@ export default async function ReviewLayout({
 
           {/* Model content card */}
           <div
-            className="mr-3 flex-1 overflow-y-auto rounded-xl custom-scroll"
+            className="ml-1 flex-1 overflow-y-auto rounded-xl custom-scroll"
             style={{
               background: 'var(--bg-card-gray)',
               border: '1px solid var(--border-default)',
@@ -56,6 +53,9 @@ export default async function ReviewLayout({
           {/* Bottom spacer */}
           <div className="h-3 shrink-0" />
         </div>
+
+        {/* Chat Panel — Right 40% */}
+        <ChatPanel model={model} latestVersionId={latestVersionId} />
       </div>
     </div>
   )

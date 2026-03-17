@@ -63,7 +63,7 @@ export function ChatPanel({
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!dragRef.current) return
-      const delta = e.clientX - dragRef.current.startX
+      const delta = dragRef.current.startX - e.clientX
       setPanelWidth(Math.max(360, Math.min(700, dragRef.current.startWidth + delta)))
     }
 
@@ -225,6 +225,18 @@ export function ChatPanel({
 
   return (
     <div className="flex shrink-0" style={{ width: panelWidth }}>
+      {/* Drag handle — left edge */}
+      <div
+        className="flex w-1.5 cursor-col-resize items-center justify-center transition-colors duration-200 hover:bg-black/[0.04] active:bg-[var(--bg-blue-subtle)]"
+        onMouseDown={(e) => {
+          e.preventDefault()
+          dragRef.current = { startX: e.clientX, startWidth: panelWidth }
+          setIsDragging(true)
+        }}
+      >
+        <GripVertical size={10} style={{ color: 'var(--text-muted)', opacity: 0.4 }} />
+      </div>
+
       {/* Chat panel */}
       <div className="flex flex-1 flex-col overflow-hidden" style={{ background: 'var(--bg-page)' }}>
 
@@ -455,17 +467,6 @@ export function ChatPanel({
         )}
       </div>
 
-      {/* Drag handle */}
-      <div
-        className="flex w-1.5 cursor-col-resize items-center justify-center transition-colors duration-200 hover:bg-black/[0.04] active:bg-[var(--bg-blue-subtle)]"
-        onMouseDown={(e) => {
-          e.preventDefault()
-          dragRef.current = { startX: e.clientX, startWidth: panelWidth }
-          setIsDragging(true)
-        }}
-      >
-        <GripVertical size={10} style={{ color: 'var(--text-muted)', opacity: 0.4 }} />
-      </div>
     </div>
   )
 }

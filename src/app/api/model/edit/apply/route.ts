@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getProposal, addVersion, getLatestVersionId } from '@/lib/model-store'
 import type { ModelVersion } from '@/lib/model-store'
+import { computeModelStatus } from '@/lib/model-validation'
 
 const ApplyRequestSchema = z.object({
   proposalId: z.string(),
@@ -24,12 +25,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'version_conflict', currentVersionId: currentLatest }, { status: 409 })
     }
 
+    // Recompute status before persisting
+    const model = proposal.proposedModel
+    model.meta.status = computeModelStatus(model)
+    model.meta.lastUpdated = new Date().toISOString().split('T')[0]
+
     const version: ModelVersion = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       author,
       prompt,
-      model: proposal.proposedModel,
+      model,
       parentId: proposal.latestVersionId,
     }
 

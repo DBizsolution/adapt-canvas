@@ -11,6 +11,7 @@ import {
   Lock,
   HelpCircle,
   GitCompare,
+  FileText,
   Settings,
 } from 'lucide-react'
 
@@ -23,6 +24,7 @@ const navItems = [
   { label: 'Constraints', href: '/review/constraints', icon: Lock },
   { label: 'Open Qs', href: '/review/open-questions', icon: HelpCircle },
   { label: 'Diff', href: '/review/diff', icon: GitCompare },
+  { label: 'Docs', href: '/review/docs', icon: FileText },
 ]
 
 export function NavSidebar() {

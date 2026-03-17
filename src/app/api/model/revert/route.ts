@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getVersion, addVersion, getLatestVersionId } from '@/lib/model-store'
 import type { ModelVersion } from '@/lib/model-store'
+import { computeModelStatus } from '@/lib/model-validation'
 
 const RevertRequestSchema = z.object({
   versionId: z.string(),
@@ -20,12 +21,16 @@ export async function POST(request: Request) {
 
     const parentId = await getLatestVersionId()
 
+    const model = structuredClone(targetVersion.model)
+    model.meta.status = computeModelStatus(model)
+    model.meta.lastUpdated = new Date().toISOString().split('T')[0]
+
     const version: ModelVersion = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       author,
       prompt: `Reverted to version ${versionId}`,
-      model: targetVersion.model,
+      model,
       parentId,
     }
 

@@ -41,7 +41,7 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
       </div>
 
       {/* Sections — simple list */}
-      <div className="space-y-1">
+      <div className="space-y-2">
         {sectionTypes.map(type => {
           const typeSections = sections.filter(s => s.targetType === type)
           const approved = typeSections.filter(s => s.effectiveStatus === 'approved').length
@@ -53,19 +53,24 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
           return (
             <Link key={type} href={`/review/${SECTION_TYPE_TO_URL_PARAM[type]}`}>
               <div
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-black/[0.02]"
+                className="flex items-center gap-4 rounded-lg px-4 py-3.5 transition-all duration-200 hover:shadow-md"
+                style={{
+                  background: 'var(--bg-white)',
+                  border: '1px solid var(--border-default)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                }}
               >
-                <span className="text-sm font-medium w-[140px] shrink-0" style={{ color: 'var(--acfs-navy)' }}>
+                <span className="text-sm font-semibold w-[140px] shrink-0" style={{ color: 'var(--acfs-navy)' }}>
                   {sectionTypeLabels[type]}
                 </span>
                 <div className="flex-1">
                   <Progress value={sectionPct} className="h-1" />
                 </div>
-                <span className="text-xs w-[60px] text-right" style={{ color: 'var(--text-muted)' }}>
+                <span className="text-xs font-medium w-[60px] text-right" style={{ color: 'var(--text-muted)' }}>
                   {approved}/{total}
                 </span>
                 {disputed > 0 && (
-                  <span className="text-xs" style={{ color: '#E11D48' }}>{disputed} disputed</span>
+                  <span className="text-xs font-medium" style={{ color: '#E11D48' }}>{disputed} disputed</span>
                 )}
               </div>
             </Link>

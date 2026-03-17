@@ -91,45 +91,91 @@ function ActorRenderer({ actor }: { actor: Actor }) {
 }
 
 function EntityRenderer({ entity }: { entity: Entity }) {
+  const [showTransitions, setShowTransitions] = useState(false)
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
+      {/* Fields as a clean table */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Fields</p>
-        {entity.key_fields.map(f => (
-          <div key={f.name} className="row-border flex gap-3 py-2 items-start">
-            <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
-            <StateBadge>{f.type}</StateBadge>
-            <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
-              <AbbrText text={f.description} />
-              {f.warn && <WarnIndicator text={f.warn} />}
-            </span>
-          </div>
-        ))}
+        <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <th className="py-1.5 pr-3 text-left font-medium" style={{ color: 'var(--text-muted)', width: '140px' }}>Name</th>
+              <th className="py-1.5 pr-3 text-left font-medium" style={{ color: 'var(--text-muted)', width: '120px' }}>Type</th>
+              <th className="py-1.5 text-left font-medium" style={{ color: 'var(--text-muted)' }}>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entity.key_fields.map((f, i) => (
+              <tr key={f.name} style={{ borderBottom: i < entity.key_fields.length - 1 ? '1px solid var(--border-default)' : 'none' }}>
+                <td className="py-2 pr-3 align-top font-mono text-xs" style={{ color: 'var(--text-primary)' }}>{f.name}</td>
+                <td className="py-2 pr-3 align-top"><StateBadge>{f.type}</StateBadge></td>
+                <td className="py-2 align-top leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  <AbbrText text={f.description} />
+                  {f.warn && <WarnIndicator text={f.warn} />}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* Lifecycle — states as flow, transitions collapsible */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Lifecycle</p>
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>
+          Lifecycle — {entity.lifecycle.states.length} states, {entity.lifecycle.transitions.length} transitions
+        </p>
+        <div className="flex flex-wrap items-center gap-1 mb-2">
           {entity.lifecycle.states.map((s, i) => (
-            <span key={s} className="flex items-center gap-1.5">
-              <StateBadge>{s}</StateBadge>
-              {i < entity.lifecycle.states.length - 1 && <span className="text-sm" style={{ color: 'var(--text-muted)' }}>→</span>}
+            <span key={s} className="flex items-center gap-1">
+              <span
+                className="rounded px-2 py-0.5 text-xs font-mono font-medium"
+                style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-primary)', border: '1px solid var(--border-light)' }}
+              >
+                {s}
+              </span>
+              {i < entity.lifecycle.states.length - 1 && <span style={{ color: 'var(--text-muted)' }}>→</span>}
             </span>
           ))}
         </div>
-        {entity.lifecycle.transitions.map((t, i) => (
-          <div key={i} className="row-border grid grid-cols-[1fr_30px_1fr_1.5fr_1.5fr] gap-2 py-2 items-center">
-            <StateBadge>{t.from}</StateBadge>
-            <span className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>→</span>
-            <StateBadge>{t.to}</StateBadge>
-            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <AbbrText text={t.trigger} />
-              {t.warn && <WarnIndicator text={t.warn} />}
-            </span>
-            <span className="text-sm" style={{ color: 'var(--text-muted)', fontStyle: t.guard ? 'normal' : 'italic' }}>
-              {t.guard || 'None'}
-            </span>
-          </div>
-        ))}
+
+        <button
+          type="button"
+          onClick={() => setShowTransitions(!showTransitions)}
+          className="text-xs font-medium transition-colors duration-200"
+          style={{ color: 'var(--accent-blue)' }}
+        >
+          {showTransitions ? '▾ Hide transitions' : '▸ Show transitions'}
+        </button>
+
+        {showTransitions && (
+          <table className="mt-2 w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
+                <th className="py-1.5 pr-2 text-left font-medium" style={{ color: 'var(--text-muted)', width: '100px' }}>From</th>
+                <th className="py-1.5 pr-2 text-left font-medium" style={{ color: 'var(--text-muted)', width: '100px' }}>To</th>
+                <th className="py-1.5 pr-2 text-left font-medium" style={{ color: 'var(--text-muted)' }}>Trigger</th>
+                <th className="py-1.5 text-left font-medium" style={{ color: 'var(--text-muted)', width: '180px' }}>Guard</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entity.lifecycle.transitions.map((t, i) => (
+                <tr key={i} style={{ borderBottom: i < entity.lifecycle.transitions.length - 1 ? '1px solid var(--border-default)' : 'none' }}>
+                  <td className="py-2 pr-2 align-top font-mono text-xs" style={{ color: 'var(--text-primary)' }}>{t.from}</td>
+                  <td className="py-2 pr-2 align-top font-mono text-xs" style={{ color: 'var(--text-primary)' }}>{t.to}</td>
+                  <td className="py-2 pr-2 align-top leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                    <AbbrText text={t.trigger} />
+                    {t.warn && <WarnIndicator text={t.warn} />}
+                  </td>
+                  <td className="py-2 align-top text-xs" style={{ color: 'var(--text-muted)', fontStyle: t.guard ? 'normal' : 'italic' }}>
+                    {t.guard || '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )

@@ -1,3 +1,7 @@
+// Co-dependencies: when modifying these types, also update:
+// - src/lib/model-schemas.ts (zod schemas)
+// - src/lib/ai-prompt.ts (hardcoded type definitions in system prompt)
+
 export type IntentModel = {
   meta: ModelMeta
   actors: Actor[]

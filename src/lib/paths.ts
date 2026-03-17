@@ -4,3 +4,5 @@ export const REVIEW_STATE_PATH = path.join(
   process.cwd(),
   'src/domain/intent-model/review-state.json'
 )
+
+export const MODEL_HISTORY_PATH = path.join(process.cwd(), 'model-history.json')

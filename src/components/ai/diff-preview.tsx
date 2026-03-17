@@ -89,7 +89,8 @@ export function DiffPreview({
           type="button"
           onClick={onApprove}
           disabled={isApplying}
-          className="flex-1 rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+          className="flex-1 rounded-[10px] px-3.5 py-2 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+          style={{ background: 'var(--accent-blue)', color: 'var(--text-white)' }}
         >
           {isApplying ? 'Applying...' : 'Approve'}
         </button>
@@ -97,7 +98,8 @@ export function DiffPreview({
           type="button"
           onClick={onReject}
           disabled={isApplying}
-          className="flex-1 rounded border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+          className="flex-1 rounded-[10px] px-3.5 py-2 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+          style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
         >
           Reject
         </button>

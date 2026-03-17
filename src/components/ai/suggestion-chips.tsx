@@ -85,7 +85,12 @@ export function SuggestionChips({
           key={s}
           type="button"
           onClick={() => onSelect(s)}
-          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+          className="rounded-[15px] px-3 py-1.5 text-sm transition-colors duration-200"
+          style={{
+            background: 'var(--bg-gray-subtle)',
+            border: '1px solid var(--border-light)',
+            color: 'var(--text-primary)',
+          }}
         >
           {s}
         </button>

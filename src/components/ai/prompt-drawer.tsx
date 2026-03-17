@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Sparkles, X, Loader2, RefreshCw, GripVertical } from 'lucide-react'
+import { Sparkles, Loader2, RefreshCw, GripVertical, Send } from 'lucide-react'
 import { useDrawerStore } from '@/stores/ai-drawer-store'
 import { useReviewerStore } from '@/stores/reviewer-store'
 import { SuggestionChips } from './suggestion-chips'
@@ -34,7 +34,7 @@ function getSectionTypeFromPath(pathname: string): SectionType | null {
   return URL_PARAM_TO_SECTION_TYPE[segment] ?? null
 }
 
-export function PromptDrawer({
+export function ChatPanel({
   model,
   latestVersionId,
 }: {
@@ -51,6 +51,7 @@ export function PromptDrawer({
   const [isStale, setIsStale] = useState(false)
   const [isReverting, setIsReverting] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [panelWidth, setPanelWidth] = useState(460)
   const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const sectionType = getSectionTypeFromPath(pathname)
@@ -62,8 +63,8 @@ export function PromptDrawer({
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!dragRef.current) return
-      const delta = dragRef.current.startX - e.clientX
-      store.setWidth(dragRef.current.startWidth + delta)
+      const delta = e.clientX - dragRef.current.startX
+      setPanelWidth(Math.max(360, Math.min(700, dragRef.current.startWidth + delta)))
     }
 
     const handleMouseUp = () => {
@@ -81,11 +82,10 @@ export function PromptDrawer({
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, store])
+  }, [isDragging])
 
-  // Check staleness on drawer open
+  // Fetch versions on mount
   useEffect(() => {
-    if (!store.isOpen) return
     fetch('/api/model/versions')
       .then(r => r.json())
       .then(data => {
@@ -96,7 +96,7 @@ export function PromptDrawer({
         }
       })
       .catch(() => {})
-  }, [store.isOpen, latestVersionId])
+  }, [latestVersionId])
 
   const handleSubmit = useCallback(async (text?: string) => {
     const p = text ?? prompt
@@ -223,183 +223,211 @@ export function PromptDrawer({
     }
   }, [currentReviewerId, router])
 
-  if (!store.isOpen) {
-    return (
-      <button
-        type="button"
-        onClick={store.open}
-        className="fixed bottom-6 right-6 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-[#002C61] text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
-        title="AI Editor"
-      >
-        <Sparkles size={20} />
-      </button>
-    )
-  }
-
   return (
-    <div className="flex h-full shrink-0" style={{ width: store.width }}>
+    <div className="flex shrink-0" style={{ width: panelWidth }}>
+      {/* Chat panel */}
+      <div className="flex flex-1 flex-col overflow-hidden" style={{ background: 'var(--bg-page)' }}>
+
+        {/* Sticky header */}
+        <header
+          className="flex h-[56px] shrink-0 items-center gap-3 px-4"
+          style={{ background: 'var(--bg-page)' }}
+        >
+          <Sparkles size={18} style={{ color: 'var(--accent-blue)' }} />
+          <span className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
+            VBS Chat
+          </span>
+          <span
+            className="rounded-full px-2 py-0.5 text-xs"
+            style={{
+              background: 'var(--bg-gray-subtle)',
+              border: '1px solid var(--border-light)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            gpt-4o-mini
+          </span>
+        </header>
+
+        {/* Chat scroll area */}
+        <div className="flex-1 overflow-y-auto custom-scroll">
+          <div className="mx-auto max-w-[768px] space-y-4 px-6 pt-4 pb-20">
+
+            {/* Staleness banner */}
+            {isStale && (
+              <div
+                className="flex items-center gap-2 rounded-xl p-3 text-sm"
+                style={{ background: 'rgba(0,129,242,0.06)', color: 'var(--accent-blue)' }}
+              >
+                <span>Model has been updated.</span>
+                <button
+                  type="button"
+                  onClick={() => { router.refresh(); setIsStale(false) }}
+                  className="flex items-center gap-1 font-medium underline"
+                >
+                  <RefreshCw size={12} /> Refresh
+                </button>
+              </div>
+            )}
+
+            {/* Scope toggle */}
+            <div className="flex gap-1">
+              {sectionLabel ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => store.setScope('section')}
+                    className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200"
+                    style={{
+                      background: store.scope === 'section' ? 'var(--bg-blue-subtle)' : 'var(--bg-gray-subtle)',
+                      color: store.scope === 'section' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                      border: store.scope === 'section' ? '1px solid rgba(0,129,242,0.2)' : '1px solid var(--border-light)',
+                    }}
+                  >
+                    {sectionLabel} only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => store.setScope('full')}
+                    className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200"
+                    style={{
+                      background: store.scope === 'full' ? 'var(--bg-blue-subtle)' : 'var(--bg-gray-subtle)',
+                      color: store.scope === 'full' ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                      border: store.scope === 'full' ? '1px solid rgba(0,129,242,0.2)' : '1px solid var(--border-light)',
+                    }}
+                  >
+                    Full model
+                  </button>
+                </>
+              ) : (
+                <span
+                  className="rounded-full px-3 py-1.5 text-xs font-medium"
+                  style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
+                >
+                  Editing full model
+                </span>
+              )}
+            </div>
+
+            {/* Suggestions */}
+            <SuggestionChips model={model} onSelect={(s) => setPrompt(s)} />
+
+            {/* Error state */}
+            {store.status === 'error' && store.error && (
+              <div className="space-y-2">
+                <div
+                  className="whitespace-pre-wrap rounded-xl p-3 text-sm"
+                  style={{ background: '#FEF2F2', color: '#B91C1C', border: '1px solid rgba(185,28,28,0.1)' }}
+                >
+                  {store.error}
+                </div>
+                <button
+                  type="button"
+                  onClick={store.reset}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+                  style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {/* Diff preview */}
+            {(store.status === 'diff_preview' || store.status === 'applying') && store.currentProposal && (
+              <DiffPreview
+                diff={store.currentProposal.diff}
+                warnings={store.currentProposal.warnings}
+                onApprove={handleApprove}
+                onReject={store.reject}
+                isApplying={store.status === 'applying'}
+              />
+            )}
+
+            {/* Success state */}
+            {store.status === 'success' && (
+              <div
+                className="rounded-xl p-3 text-sm"
+                style={{ background: 'rgba(37,186,59,0.08)', color: '#15803D' }}
+              >
+                Changes applied successfully.
+              </div>
+            )}
+
+            {/* Loading state - tool pill */}
+            {store.status === 'loading' && (
+              <div
+                className="inline-flex items-center gap-2 rounded-[15px] px-3 py-1.5 text-sm"
+                style={{ background: 'var(--bg-gray-subtle)', border: '1px solid var(--border-light)', color: 'var(--text-primary)' }}
+              >
+                <Loader2 size={14} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
+                Generating changes...
+              </div>
+            )}
+
+            {/* Version history */}
+            <VersionHistory
+              versions={versions}
+              onRevert={handleRevert}
+              isReverting={isReverting}
+            />
+          </div>
+        </div>
+
+        {/* Input dock — sticky bottom */}
+        {(store.status === 'idle' || store.status === 'loading') && (
+          <div className="shrink-0 px-6 pb-3" style={{ background: 'var(--bg-page)' }}>
+            <div
+              className="flex items-end gap-2 rounded-[22px] p-3"
+              style={{
+                background: 'var(--bg-white)',
+                border: '1px solid var(--border-default)',
+                boxShadow: 'var(--shadow-float)',
+              }}
+            >
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe the change you want to make..."
+                disabled={store.status === 'loading'}
+                rows={1}
+                className="flex-1 resize-none bg-transparent text-base leading-6 outline-none placeholder:text-[var(--text-muted)] disabled:opacity-50"
+                style={{ color: 'var(--text-primary)', maxHeight: '120px' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit()
+                  }
+                }}
+                onInput={(e) => {
+                  const el = e.currentTarget
+                  el.style.height = 'auto'
+                  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => handleSubmit()}
+                disabled={!prompt.trim() || store.status === 'loading'}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
+                style={{ background: 'var(--accent-blue)', color: 'var(--text-white)' }}
+              >
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Drag handle */}
       <div
-        className="flex w-2 cursor-col-resize items-center justify-center border-l border-slate-200 bg-slate-50 hover:bg-slate-100 active:bg-blue-100"
+        className="flex w-1.5 cursor-col-resize items-center justify-center transition-colors duration-200 hover:bg-black/[0.04] active:bg-[var(--bg-blue-subtle)]"
         onMouseDown={(e) => {
           e.preventDefault()
-          dragRef.current = { startX: e.clientX, startWidth: store.width }
+          dragRef.current = { startX: e.clientX, startWidth: panelWidth }
           setIsDragging(true)
         }}
       >
-        <GripVertical size={12} className="text-slate-300" />
-      </div>
-
-      {/* Panel */}
-      <div className="flex flex-1 flex-col overflow-hidden bg-white">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-[#002C61]" />
-            <h3 className="text-sm font-semibold text-slate-800">AI Editor</h3>
-          </div>
-          <button type="button" onClick={store.close} className="text-slate-400 hover:text-slate-600">
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Scope toggle */}
-        <div className="flex border-b border-slate-100">
-          {sectionLabel ? (
-            <>
-              <button
-                type="button"
-                onClick={() => store.setScope('section')}
-                className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
-                  store.scope === 'section'
-                    ? 'border-b-2 border-[#002C61] text-[#002C61] bg-blue-50/50'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                {sectionLabel} only
-              </button>
-              <button
-                type="button"
-                onClick={() => store.setScope('full')}
-                className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
-                  store.scope === 'full'
-                    ? 'border-b-2 border-[#002C61] text-[#002C61] bg-blue-50/50'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                Full model
-              </button>
-            </>
-          ) : (
-            <div className="flex-1 px-3 py-2 text-xs font-medium text-slate-500">
-              Editing full model
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          {/* Staleness banner */}
-          {isStale && (
-            <div className="flex items-center gap-2 rounded bg-amber-50 p-2 text-xs text-amber-700">
-              <span>Model has been updated.</span>
-              <button
-                type="button"
-                onClick={() => { router.refresh(); setIsStale(false) }}
-                className="flex items-center gap-1 font-medium underline"
-              >
-                <RefreshCw size={12} /> Refresh
-              </button>
-            </div>
-          )}
-
-          {/* Idle state: suggestions + input */}
-          {(store.status === 'idle' || store.status === 'loading') && (
-            <>
-              <SuggestionChips model={model} onSelect={(s) => setPrompt(s)} />
-
-              <div className="space-y-2">
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe the change you want to make..."
-                  disabled={store.status === 'loading'}
-                  className="h-24 w-full resize-none rounded border border-slate-200 p-3 text-sm placeholder:text-slate-400 focus:border-[#002C61] focus:outline-none focus:ring-1 focus:ring-[#002C61] disabled:opacity-50"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit()
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSubmit()}
-                  disabled={!prompt.trim() || store.status === 'loading'}
-                  className="flex w-full items-center justify-center gap-2 rounded bg-[#002C61] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#003a7d] disabled:opacity-50"
-                >
-                  {store.status === 'loading' ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      Thinking...
-                    </>
-                  ) : (
-                    'Submit'
-                  )}
-                </button>
-              </div>
-            </>
-          )}
-
-          {/* Error state */}
-          {store.status === 'error' && store.error && (
-            <div className="space-y-2">
-              <div className="rounded bg-red-50 p-3 text-sm text-red-700 whitespace-pre-wrap">
-                {store.error}
-              </div>
-              <button
-                type="button"
-                onClick={store.reset}
-                className="w-full rounded border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {/* Diff preview state */}
-          {store.status === 'diff_preview' && store.currentProposal && (
-            <DiffPreview
-              diff={store.currentProposal.diff}
-              warnings={store.currentProposal.warnings}
-              onApprove={handleApprove}
-              onReject={store.reject}
-              isApplying={false}
-            />
-          )}
-
-          {/* Applying state */}
-          {store.status === 'applying' && store.currentProposal && (
-            <DiffPreview
-              diff={store.currentProposal.diff}
-              warnings={store.currentProposal.warnings}
-              onApprove={handleApprove}
-              onReject={store.reject}
-              isApplying={true}
-            />
-          )}
-
-          {/* Success state */}
-          {store.status === 'success' && (
-            <div className="rounded bg-emerald-50 p-3 text-sm text-emerald-700">
-              Changes applied successfully.
-            </div>
-          )}
-
-          {/* Version history */}
-          <VersionHistory
-            versions={versions}
-            onRevert={handleRevert}
-            isReverting={isReverting}
-          />
-        </div>
+        <GripVertical size={10} style={{ color: 'var(--text-muted)', opacity: 0.4 }} />
       </div>
     </div>
   )

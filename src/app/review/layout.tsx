@@ -1,9 +1,9 @@
 import { getReviewState } from '@/lib/review-store'
 import { getCurrentModel, getLatestVersionId } from '@/lib/model-store'
 import { ReviewerSelector } from '@/components/review/reviewer-selector'
-import { NavLinks } from '@/components/review/nav-links'
+import { NavSidebar } from '@/components/review/nav-links'
 import { IdentityModal } from '@/components/review/identity-modal'
-import { PromptDrawer } from '@/components/ai/prompt-drawer'
+import { ChatPanel } from '@/components/ai/prompt-drawer'
 
 export default async function ReviewLayout({
   children,
@@ -15,25 +15,47 @@ export default async function ReviewLayout({
   const latestVersionId = await getLatestVersionId()
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#F5F6FA]">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
       <IdentityModal />
-      <header className="sticky top-0 z-10" style={{ backgroundColor: '#002C61' }}>
-        <div className="mx-auto px-4 py-2.5 flex items-center gap-4">
-          <h1 className="text-base font-bold text-white shrink-0">VBS Intent Model</h1>
-          <NavLinks />
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-white/60">Reviewer</span>
-            <ReviewerSelector reviewers={reviewState.reviewers} />
-          </div>
-        </div>
-      </header>
+
+      {/* Left Nav Sidebar */}
+      <NavSidebar />
+
+      {/* Main Area */}
       <div className="flex flex-1 overflow-hidden">
-        <main className="flex-1 overflow-y-auto px-4 py-8">
-          <div className="mx-auto max-w-7xl">
-            {children}
+
+        {/* Chat Panel — Left 40% */}
+        <ChatPanel model={model} latestVersionId={latestVersionId} />
+
+        {/* Model Panel — Right 60% */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Model toolbar */}
+          <div className="flex h-[54px] shrink-0 items-center justify-between px-3">
+            <h2 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
+              Intent Model
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Reviewer</span>
+              <ReviewerSelector reviewers={reviewState.reviewers} />
+            </div>
           </div>
-        </main>
-        <PromptDrawer model={model} latestVersionId={latestVersionId} />
+
+          {/* Model content card */}
+          <div
+            className="mr-3 flex-1 overflow-y-auto rounded-xl custom-scroll"
+            style={{
+              background: 'var(--bg-card-gray)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <div className="mx-auto max-w-5xl px-6 py-6">
+              {children}
+            </div>
+          </div>
+
+          {/* Bottom spacer */}
+          <div className="h-3 shrink-0" />
+        </div>
       </div>
     </div>
   )

@@ -11,6 +11,7 @@ import {
   Lock,
   HelpCircle,
   GitCompare,
+  Settings,
 } from 'lucide-react'
 
 const navItems = [
@@ -24,32 +25,53 @@ const navItems = [
   { label: 'Diff', href: '/review/diff', icon: GitCompare },
 ]
 
-export function NavLinks() {
+export function NavSidebar() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex gap-1 overflow-x-auto flex-1">
-      {navItems.map(item => {
-        const Icon = item.icon
-        const isActive = item.href === '/review'
-          ? pathname === '/review'
-          : pathname.startsWith(item.href)
+    <nav
+      className="flex w-[52px] shrink-0 flex-col items-center gap-1 py-3"
+      style={{ background: 'var(--bg-nav)', height: '100vh' }}
+    >
+      {/* Logo mark */}
+      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold" style={{ background: 'var(--accent-blue)', color: 'var(--text-white)' }}>
+        V
+      </div>
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`text-sm px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1.5 shrink-0 ${
-              isActive
-                ? 'bg-white/15 text-white font-medium'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <Icon size={14} />
-            <span>{item.label}</span>
-          </Link>
-        )
-      })}
+      {/* Nav icons */}
+      <div className="flex flex-1 flex-col gap-0.5">
+        {navItems.map(item => {
+          const Icon = item.icon
+          const isActive = item.href === '/review'
+            ? pathname === '/review'
+            : pathname.startsWith(item.href)
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={item.label}
+              className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200"
+              style={{
+                background: isActive ? 'var(--bg-blue-subtle)' : 'transparent',
+                color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
+              }}
+            >
+              <Icon size={20} />
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* Bottom: settings */}
+      <Link
+        href="#"
+        title="Settings"
+        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        <Settings size={20} />
+      </Link>
     </nav>
   )
 }

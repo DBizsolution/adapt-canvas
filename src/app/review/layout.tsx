@@ -1,7 +1,9 @@
 import { getReviewState } from '@/lib/review-store'
+import { getCurrentModel, getLatestVersionId } from '@/lib/model-store'
 import { ReviewerSelector } from '@/components/review/reviewer-selector'
 import { NavLinks } from '@/components/review/nav-links'
 import { IdentityModal } from '@/components/review/identity-modal'
+import { PromptDrawer } from '@/components/ai/prompt-drawer'
 
 export default async function ReviewLayout({
   children,
@@ -9,6 +11,8 @@ export default async function ReviewLayout({
   children: React.ReactNode
 }) {
   const reviewState = await getReviewState()
+  const model = await getCurrentModel()
+  const latestVersionId = await getLatestVersionId()
 
   return (
     <div className="min-h-screen bg-[#F5F6FA]">
@@ -26,6 +30,7 @@ export default async function ReviewLayout({
       <main className="max-w-7xl mx-auto px-4 py-8 bg-[#F5F6FA] min-h-screen">
         {children}
       </main>
+      <PromptDrawer model={model} latestVersionId={latestVersionId} />
     </div>
   )
 }

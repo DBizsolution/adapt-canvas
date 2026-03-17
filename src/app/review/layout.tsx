@@ -4,6 +4,7 @@ import { ReviewerSelector } from '@/components/review/reviewer-selector'
 import { NavSidebar } from '@/components/review/nav-links'
 import { IdentityModal } from '@/components/review/identity-modal'
 import { ChatPanel } from '@/components/ai/prompt-drawer'
+import { PageLoading } from '@/components/review/page-loading'
 
 export default async function ReviewLayout({
   children,
@@ -16,6 +17,7 @@ export default async function ReviewLayout({
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
+      <PageLoading />
       <IdentityModal />
 
       {/* Left Nav Sidebar */}

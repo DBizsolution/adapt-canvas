@@ -29,19 +29,13 @@ export function NavSidebar() {
   const pathname = usePathname()
 
   return (
-    <nav
-      className="flex w-[200px] shrink-0 flex-col py-3 px-2"
-      style={{ background: 'var(--bg-nav)', height: '100vh' }}
-    >
+    <nav className="nav-sidebar flex w-[200px] shrink-0 flex-col py-3 px-2">
       {/* Logo */}
       <div className="mb-4 flex items-center gap-2.5 px-2">
-        <div
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold"
-          style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
-        >
+        <div className="nav-logo flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold">
           V
         </div>
-        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+        <span className="nav-title text-sm font-semibold">
           VBS Intent
         </span>
       </div>
@@ -58,12 +52,7 @@ export function NavSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors duration-200"
-              style={{
-                background: isActive ? 'var(--bg-blue-subtle)' : 'transparent',
-                color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 400,
-              }}
+              className={`nav-item flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors duration-200 ${isActive ? 'nav-item-active' : ''}`}
             >
               <Icon size={18} />
               <span>{item.label}</span>
@@ -75,8 +64,7 @@ export function NavSidebar() {
       {/* Bottom: settings */}
       <Link
         href="#"
-        className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors duration-200"
-        style={{ color: 'var(--text-muted)' }}
+        className="nav-item nav-item-muted flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors duration-200"
       >
         <Settings size={18} />
         <span>Settings</span>

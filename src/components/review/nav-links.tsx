@@ -30,15 +30,15 @@ export function NavSidebar() {
 
   return (
     <nav className="nav-sidebar flex w-[200px] shrink-0 flex-col py-3 px-2">
-      {/* Logo */}
-      <div className="mb-4 flex items-center gap-2.5 px-2">
+      {/* Logo — links home */}
+      <Link href="/review" className="mb-4 flex items-center gap-2.5 px-2 no-underline">
         <div className="nav-logo flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold">
           V
         </div>
         <span className="nav-title text-sm font-semibold">
           VBS Intent
         </span>
-      </div>
+      </Link>
 
       {/* Nav items */}
       <div className="flex flex-1 flex-col gap-0.5">

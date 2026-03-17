@@ -245,10 +245,12 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
       style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-subtle)' }}
     >
       {/* Clickable header */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors duration-200"
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsOpen(!isOpen) } }}
+        className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left transition-colors duration-200"
         style={{ background: isOpen ? 'var(--bg-card-gray)' : 'var(--bg-white)', borderBottom: isOpen ? '1px solid var(--border-default)' : 'none' }}
       >
         <div className="flex items-center gap-2">
@@ -257,7 +259,7 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
           <HelpTip text={`${sectionTypeExplanations[type]} — ${description || displayId}`} />
         </div>
         <StatusBadge status={review.effectiveStatus} />
-      </button>
+      </div>
 
       {/* Collapsible body */}
       {isOpen && (

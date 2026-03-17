@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, Clock, ThumbsUp } from 'lucide-react'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
@@ -46,41 +45,39 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
   if (mode === 'idle') {
     return (
       <div className="space-y-4">
-        {/* Action buttons */}
         <div className="flex gap-2 flex-wrap">
-          <Button
-            size="sm"
-            variant="default"
+          <button
+            type="button"
             onClick={() => setMode('resolve')}
-            className="bg-[#0D9488] hover:bg-[#0F766E] text-white gap-1.5"
+            className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+            style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
           >
             <CheckCircle size={14} />
             Resolve with decision
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
+          </button>
+          <button
+            type="button"
             onClick={() => setMode('defer')}
-            className="border-[#94A3B8] text-[#475569] hover:bg-[#F8FAFC] gap-1.5"
+            className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200"
+            style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-secondary)', border: '1px solid var(--border-dark)' }}
           >
             <Clock size={14} />
             Defer to later phase
-          </Button>
+          </button>
           {questionStatus === 'resolved' && (
-            <Button
-              size="sm"
-              variant="outline"
+            <button
+              type="button"
               onClick={() => submitReview('approve')}
               disabled={loading}
-              className="border-[#14B8A6] text-[#0D9488] hover:bg-[#F0FDFA] gap-1.5"
+              className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+              style={{ background: 'rgba(37,186,59,0.08)', color: 'var(--accent-green)', border: '1px solid rgba(37,186,59,0.2)' }}
             >
               <ThumbsUp size={14} />
               Confirm resolution
-            </Button>
+            </button>
           )}
         </div>
 
-        {/* Guidance */}
         <div className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
           <span className="font-semibold">How this works:</span> Resolve provides a decision that the model author will incorporate into model.ts.
           Once updated, this question&apos;s status changes to &quot;resolved&quot; and other reviewers can confirm.
@@ -93,28 +90,31 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
 
   return (
     <div className="space-y-3">
-      {/* Format guidance */}
-      <div className={`rounded-lg px-3 py-2.5 text-sm leading-relaxed ${
-        isResolve ? 'bg-[#F0FDFA] border border-[#14B8A6]/20' : 'bg-[#F8FAFC] border border-[#94A3B8]/20'
-      }`}>
-        <p className={`font-semibold mb-1.5 ${isResolve ? 'text-[#115E59]' : 'text-[#334155]'}`}>
+      <div
+        className="rounded-lg px-3 py-2.5 text-sm leading-relaxed"
+        style={{
+          background: isResolve ? 'rgba(37,186,59,0.04)' : 'var(--bg-card-gray)',
+          border: isResolve ? '1px solid rgba(37,186,59,0.15)' : '1px solid var(--border-default)',
+          color: 'var(--text-secondary)',
+        }}
+      >
+        <p className="font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
           {isResolve ? 'Write the resolution' : 'Write the deferral reason'}
         </p>
         {isResolve ? (
-          <div className="space-y-1" style={{ color: 'var(--text-secondary)' }}>
+          <div className="space-y-1">
             <p><span className="font-semibold">Decision:</span> State the answer clearly — e.g., &quot;Flat rate of $45 per HBL&quot;</p>
             <p><span className="font-semibold">Impact:</span> Note what this changes — e.g., &quot;Update booking entity fee_amount field description&quot;</p>
             <p><span className="font-semibold">Source:</span> Who decided this — e.g., &quot;Confirmed with PO in standup 2026-03-16&quot;</p>
           </div>
         ) : (
-          <div className="space-y-1" style={{ color: 'var(--text-secondary)' }}>
+          <div className="space-y-1">
             <p><span className="font-semibold">Reason:</span> Why this can wait — e.g., &quot;Depends on payment gateway selection in Phase 4&quot;</p>
             <p><span className="font-semibold">Revisit:</span> When to come back — e.g., &quot;Before Phase 4 domain typing&quot;</p>
           </div>
         )}
       </div>
 
-      {/* Input */}
       <Textarea
         placeholder={isResolve
           ? 'Decision: ...\nImpact: ...\nSource: ...'
@@ -125,7 +125,6 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
         className="min-h-[100px] text-sm font-mono"
       />
 
-      {/* What happens next */}
       <div className="text-sm leading-relaxed rounded px-3 py-2" style={{ background: 'var(--bg-card-gray)', color: 'var(--text-muted)' }}>
         <span className="font-semibold">What happens next:</span>
         {isResolve ? (
@@ -139,28 +138,25 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
         )}
       </div>
 
-      {/* Submit / Cancel */}
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="default"
+        <button
+          type="button"
           onClick={() => submitReview(isResolve ? 'resolve' : 'defer')}
           disabled={loading || !comment.trim()}
-          className={isResolve
-            ? 'bg-[#0D9488] hover:bg-[#0F766E] text-white'
-            : 'bg-[#475569] hover:bg-[#334155] text-white'
-          }
+          className="rounded-[10px] px-4 py-2 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
+          style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
         >
           {isResolve ? 'Submit Resolution' : 'Submit Deferral'}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
+        </button>
+        <button
+          type="button"
           onClick={() => { setMode('idle'); setComment('') }}
           disabled={loading}
+          className="rounded-[10px] px-4 py-2 text-sm font-medium transition-colors duration-200"
+          style={{ color: 'var(--text-secondary)' }}
         >
           Cancel
-        </Button>
+        </button>
       </div>
     </div>
   )

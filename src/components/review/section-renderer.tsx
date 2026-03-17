@@ -62,7 +62,7 @@ function ReviewHistory({ reviews }: { reviews: Review[] }) {
       <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Review history</p>
       {reviews.map((r, i) => (
         <div key={i} className="text-sm flex gap-2 items-start">
-          <span className={r.status === 'approved' ? 'text-[#0D9488]' : 'text-[#E11D48]'}>
+          <span style={{ color: r.status === 'approved' ? 'var(--accent-green)' : '#E11D48' }}>
             {r.status === 'approved' ? '✓' : '✗'}
           </span>
           <div>
@@ -187,7 +187,7 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
       <FieldRow label="Primary actor" value={journey.primary_actor} />
 
       {journey.preconditions.length > 0 && (
-        <div className="text-sm px-3 py-2 rounded-lg" style={{ background: '#FFFBEB', color: '#92400E', border: '1px solid rgba(245,158,11,0.2)' }}>
+        <div className="text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(245,158,11,0.06)', color: '#92400E', border: '1px solid rgba(245,158,11,0.15)' }}>
           <span className="font-semibold">Preconditions: </span>
           {journey.preconditions.join(' · ')}
         </div>
@@ -211,7 +211,7 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
               </div>
               <p className="text-sm leading-relaxed mt-0.5" style={{ color: 'var(--text-secondary)' }}><AbbrText text={s.detail} /></p>
               {s.precondition && (
-                <span className="inline-block text-xs px-2 py-0.5 rounded mt-1" style={{ background: '#FFFBEB', color: '#92400E' }}>
+                <span className="inline-block text-xs px-2 py-0.5 rounded mt-1" style={{ background: 'rgba(245,158,11,0.06)', color: '#92400E' }}>
                   Precondition: {s.precondition}
                 </span>
               )}

@@ -12,7 +12,12 @@ export function HelpTip({ text }: { text: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger className="inline-flex items-center justify-center cursor-help shrink-0 text-[#94A3B8] hover:text-[#64748B] transition-colors">
+        <TooltipTrigger
+          className="inline-flex items-center justify-center cursor-help shrink-0 transition-colors duration-200"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)' }}
+        >
           <Info size={14} />
         </TooltipTrigger>
         <TooltipContent className="max-w-sm text-sm leading-relaxed">

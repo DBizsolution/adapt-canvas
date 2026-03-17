@@ -99,11 +99,56 @@ export function ChatPanel({
       .catch(() => {})
   }, [latestVersionId])
 
-  const handleSubmit = useCallback(async (text?: string) => {
+  // Step 1: Ask AI to explain what it plans to change (streamed)
+  const handlePlan = useCallback(async (text?: string) => {
     const p = text ?? prompt
     if (!p.trim()) return
 
     store.setLastPrompt(p)
+    store.setPlan('')
+    store.setStatus('planning')
+
+    try {
+      const res = await fetch('/api/model/plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: p,
+          scope: store.scope === 'section' && sectionType ? 'section' : 'full',
+          sectionType: store.scope === 'section' && sectionType ? sectionType : undefined,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        store.setError(data.message ?? 'Failed to generate plan')
+        return
+      }
+
+      const reader = res.body?.getReader()
+      if (!reader) {
+        store.setError('Stream not available')
+        return
+      }
+
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        store.appendPlan(decoder.decode(value))
+      }
+
+      store.setStatus('plan_ready')
+    } catch {
+      store.setError('Failed to connect to the server')
+    }
+  }, [prompt, store, sectionType])
+
+  // Step 2: User confirmed — generate the actual JSON diff
+  const handleConfirm = useCallback(async () => {
+    const p = useDrawerStore.getState().lastPrompt
+    if (!p) return
+
     store.setStatus('loading')
 
     try {
@@ -144,7 +189,7 @@ export function ChatPanel({
     } catch {
       store.setError('Failed to connect to the server')
     }
-  }, [prompt, store, sectionType])
+  }, [store, sectionType])
 
   const handleApprove = useCallback(async () => {
     if (!store.currentProposal || !currentReviewerId) return
@@ -168,7 +213,7 @@ export function ChatPanel({
         const lastPrompt = useDrawerStore.getState().lastPrompt
         if (lastPrompt) {
           store.reset()
-          handleSubmit(lastPrompt)
+          handlePlan(lastPrompt)
           return
         }
       }
@@ -178,7 +223,7 @@ export function ChatPanel({
         setTimeout(() => {
           const lastPrompt = useDrawerStore.getState().lastPrompt
           store.reset()
-          if (lastPrompt) handleSubmit(lastPrompt)
+          if (lastPrompt) handlePlan(lastPrompt)
         }, 1000)
         return
       }
@@ -199,7 +244,7 @@ export function ChatPanel({
     } catch {
       store.setError('Failed to connect to the server')
     }
-  }, [store, currentReviewerId, router, handleSubmit])
+  }, [store, currentReviewerId, router, handlePlan])
 
   const handleRevert = useCallback(async (versionId: string) => {
     if (!currentReviewerId) return
@@ -383,6 +428,41 @@ export function ChatPanel({
               </div>
             )}
 
+            {/* Planning — streaming AI explanation */}
+            {(store.status === 'planning' || store.status === 'plan_ready') && store.plan && (
+              <div className="space-y-3">
+                <div
+                  className="rounded-xl p-4 text-sm leading-relaxed whitespace-pre-wrap"
+                  style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+                >
+                  {store.plan}
+                  {store.status === 'planning' && (
+                    <span className="inline-block w-1.5 h-4 ml-0.5 animate-pulse rounded-sm" style={{ background: 'var(--accent-blue)' }} />
+                  )}
+                </div>
+                {store.status === 'plan_ready' && (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleConfirm}
+                      className="flex-1 rounded-[10px] px-3.5 py-2 text-sm font-medium transition-colors duration-200"
+                      style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
+                    >
+                      Go ahead
+                    </button>
+                    <button
+                      type="button"
+                      onClick={store.reject}
+                      className="flex-1 rounded-[10px] px-3.5 py-2 text-sm font-medium transition-colors duration-200"
+                      style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Diff preview */}
             {(store.status === 'diff_preview' || store.status === 'applying') && store.currentProposal && (
               <DiffPreview
@@ -448,14 +528,14 @@ export function ChatPanel({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
-                    handleSubmit()
+                    handlePlan()
                   }
                 }}
               />
               <div className="flex items-center justify-end pt-1">
                 <button
                   type="button"
-                  onClick={() => handleSubmit()}
+                  onClick={() => handlePlan()}
                   disabled={!prompt.trim() || store.status === 'loading'}
                   className="flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
                   style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}

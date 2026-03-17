@@ -18,8 +18,9 @@ const GLOSSARY: Record<string, string> = {
 }
 
 // Sort by length descending so longer matches take priority (e.g., "ACFS" before "FF")
+// Allow optional trailing "s" for plurals (HBLs, DOs, FFs, etc.)
 const ABBR_PATTERN = new RegExp(
-  `\\b(${Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).join('|')})\\b`,
+  `\\b(${Object.keys(GLOSSARY).sort((a, b) => b.length - a.length).join('|')})s?\\b`,
   'g',
 )
 
@@ -35,7 +36,10 @@ export function AbbrText({ text }: { text: string }) {
       parts.push({ type: 'text', value: text.slice(lastIndex, index) })
     }
 
-    parts.push({ type: 'abbr', value: abbr, expansion: GLOSSARY[abbr] })
+    const base = abbr.endsWith('s') && !GLOSSARY[abbr] ? abbr.slice(0, -1) : abbr
+    const expansion = GLOSSARY[base] ?? GLOSSARY[abbr]
+    const plural = abbr.endsWith('s') && base !== abbr
+    parts.push({ type: 'abbr', value: abbr, expansion: expansion ? (plural ? expansion + 's' : expansion) : abbr })
     lastIndex = index + abbr.length
   }
 

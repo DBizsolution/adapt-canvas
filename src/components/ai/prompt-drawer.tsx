@@ -333,37 +333,9 @@ export function ChatPanel({
 
             {/* Welcome / how it works — always visible when idle */}
             {store.status === 'idle' && !store.currentProposal && (
-              <div className="space-y-4 pt-4">
-                <div
-                  className="rounded-xl p-5"
-                  style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)' }}
-                >
-                  <div className="mb-3 flex items-center gap-2">
-                    <Sparkles size={16} style={{ color: 'var(--acfs-navy)' }} />
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      Edit with AI
-                    </span>
-                  </div>
-                  <p className="mb-4 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                    Describe changes in plain English. I can add actors, modify entities,
-                    create business rules, or update any part of the intent model.
-                  </p>
-                  <div className="space-y-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}>1</span>
-                      Type your edit below or click a suggestion
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}>2</span>
-                      Review the diff — see exactly what changed
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}>3</span>
-                      Approve or reject — nothing changes until you say so
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <p className="text-sm leading-relaxed pt-2" style={{ color: 'var(--text-muted)' }}>
+                Describe changes in plain English. I&apos;ll explain what I plan to change before making any edits.
+              </p>
             )}
 
             {/* Suggestions */}

@@ -286,8 +286,8 @@ export function ChatPanel({
               </div>
             )}
 
-            {/* Welcome / onboarding when idle with no activity */}
-            {store.status === 'idle' && versions.length <= 1 && !store.currentProposal && (
+            {/* Welcome / how it works — always visible when idle */}
+            {store.status === 'idle' && !store.currentProposal && (
               <div className="space-y-4 pt-4">
                 <div
                   className="rounded-xl p-5"

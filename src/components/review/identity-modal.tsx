@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useReviewerStore } from '@/stores/reviewer-store'
 import { User } from 'lucide-react'
 
@@ -14,8 +14,12 @@ const REVIEWERS = [
 export function IdentityModal() {
   const { currentReviewerId, setCurrentReviewer } = useReviewerStore()
   const [selected, setSelected] = useState<string | null>(null)
+  const [hydrated, setHydrated] = useState(false)
 
-  if (currentReviewerId) return null
+  useEffect(() => { setHydrated(true) }, [])
+
+  // Don't render until client has hydrated (prevents flash from localStorage delay)
+  if (!hydrated || currentReviewerId) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>

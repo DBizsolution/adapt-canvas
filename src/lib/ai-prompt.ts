@@ -145,7 +145,18 @@ ${req.prompt}`
     const result = schema.parse(parsed)
     // Merge back into full model
     const merged = structuredClone(req.currentModel)
-    ;(merged as Record<string, unknown>)[modelKey] = (result as Record<string, unknown>)[modelKey]
+    const newItems = (result as Record<string, unknown>)[modelKey] as Array<{ id: string }>
+    const originalItems = (req.currentModel[modelKey] as Array<{ id: string }>)
+
+    // Restore any items the LLM dropped (common with gpt-4o-mini on scoped edits)
+    const newIds = new Set(newItems.map(i => i.id))
+    for (const original of originalItems) {
+      if (!newIds.has(original.id)) {
+        newItems.push(structuredClone(original))
+      }
+    }
+
+    ;(merged as Record<string, unknown>)[modelKey] = newItems
     return { model: merged }
   }
 

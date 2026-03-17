@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 import { Textarea } from '@/components/ui/textarea'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
 
@@ -11,6 +11,7 @@ type ReviewControlsProps = {
 }
 
 export function ReviewControls({ section, currentReviewerId }: ReviewControlsProps) {
+  const router = useRouter()
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -29,7 +30,7 @@ export function ReviewControls({ section, currentReviewerId }: ReviewControlsPro
       })
       if (res.ok) {
         setComment('')
-        window.location.reload()
+        router.refresh()
       }
     } finally {
       setLoading(false)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, Clock, ThumbsUp } from 'lucide-react'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
@@ -14,6 +15,7 @@ type OpenQuestionControlsProps = {
 type Mode = 'idle' | 'resolve' | 'defer'
 
 export function OpenQuestionControls({ section, currentReviewerId, questionStatus }: OpenQuestionControlsProps) {
+  const router = useRouter()
   const [mode, setMode] = useState<Mode>('idle')
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
@@ -35,7 +37,7 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
       if (res.ok) {
         setComment('')
         setMode('idle')
-        window.location.reload()
+        router.refresh()
       }
     } finally {
       setLoading(false)

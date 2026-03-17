@@ -32,9 +32,9 @@ const sectionTypeExplanations: Record<SectionType, string> = {
 
 function FieldRow({ label, value, warn, edge }: { label: string; value: string; warn?: string; edge?: string }) {
   return (
-    <div className="flex gap-2 py-1.5 border-b border-[#F1F5F9] items-start last:border-0">
-      <span className="text-xs font-semibold text-[#334155] min-w-[160px] shrink-0">{label}</span>
-      <span className="text-xs text-[#475569] leading-relaxed flex-1">
+    <div className="flex gap-3 py-2 items-start last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+      <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{label}</span>
+      <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
         {value}
         {warn && <WarnIndicator text={warn} />}
         {edge && <EdgeIndicator text={edge} />}
@@ -46,7 +46,7 @@ function FieldRow({ label, value, warn, edge }: { label: string; value: string; 
 function StateBadge({ children }: { children: React.ReactNode; variant?: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded px-2 py-0.5 text-[11px] font-semibold"
+      className="inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold"
       style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)', border: '1px solid rgba(0,129,242,0.15)' }}
     >
       {children}
@@ -57,17 +57,17 @@ function StateBadge({ children }: { children: React.ReactNode; variant?: string 
 function ReviewHistory({ reviews }: { reviews: Review[] }) {
   if (reviews.length === 0) return null
   return (
-    <div className="mt-4 space-y-2 pt-4 border-t border-[#F1F5F9]">
-      <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wide">Review history</p>
+    <div className="mt-4 space-y-2 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
+      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Review history</p>
       {reviews.map((r, i) => (
-        <div key={i} className="text-xs flex gap-2 items-start">
+        <div key={i} className="text-sm flex gap-2 items-start">
           <span className={r.status === 'approved' ? 'text-[#0D9488]' : 'text-[#E11D48]'}>
             {r.status === 'approved' ? '✓' : '✗'}
           </span>
           <div>
-            <span className="font-semibold text-[#334155]">{r.reviewerId}</span>
-            <span className="text-[#94A3B8]"> — {new Date(r.timestamp).toLocaleDateString()}</span>
-            {r.comment && <p className="text-[#64748B] mt-0.5">{r.comment}</p>}
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{r.reviewerId}</span>
+            <span style={{ color: 'var(--text-muted)' }}> — {new Date(r.timestamp).toLocaleDateString()}</span>
+            {r.comment && <p className="mt-0.5" style={{ color: 'var(--text-secondary)' }}>{r.comment}</p>}
           </div>
         </div>
       ))}
@@ -91,14 +91,14 @@ function ActorRenderer({ actor }: { actor: Actor }) {
 
 function EntityRenderer({ entity }: { entity: Entity }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
-        <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wide mb-2">Fields</p>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Fields</p>
         {entity.key_fields.map(f => (
-          <div key={f.name} className="flex gap-2 py-1.5 border-b border-[#F1F5F9] items-start last:border-0">
-            <span className="text-xs font-semibold text-[#334155] min-w-[160px] shrink-0">{f.name}</span>
-            <StateBadge variant="blue">{f.type}</StateBadge>
-            <span className="text-xs text-[#475569] leading-relaxed flex-1">
+          <div key={f.name} className="flex gap-3 py-2 items-start last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
+            <StateBadge>{f.type}</StateBadge>
+            <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
               {f.description}
               {f.warn && <WarnIndicator text={f.warn} />}
             </span>
@@ -106,25 +106,25 @@ function EntityRenderer({ entity }: { entity: Entity }) {
         ))}
       </div>
       <div>
-        <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wide mb-2">Lifecycle</p>
+        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Lifecycle</p>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {entity.lifecycle.states.map((s, i) => (
             <span key={s} className="flex items-center gap-1.5">
-              <StateBadge variant="slate">{s}</StateBadge>
-              {i < entity.lifecycle.states.length - 1 && <span className="text-[#94A3B8] text-sm">→</span>}
+              <StateBadge>{s}</StateBadge>
+              {i < entity.lifecycle.states.length - 1 && <span className="text-sm" style={{ color: 'var(--text-muted)' }}>→</span>}
             </span>
           ))}
         </div>
         {entity.lifecycle.transitions.map((t, i) => (
-          <div key={i} className="grid grid-cols-[1fr_30px_1fr_1.5fr_1.5fr] gap-1.5 py-2 border-b border-[#F1F5F9] items-center last:border-0">
-            <StateBadge variant="blue">{t.from}</StateBadge>
-            <span className="text-center text-[#94A3B8] text-sm">→</span>
-            <StateBadge variant="green">{t.to}</StateBadge>
-            <span className="text-[11px] text-[#475569]">
+          <div key={i} className="grid grid-cols-[1fr_30px_1fr_1.5fr_1.5fr] gap-2 py-2 items-center last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <StateBadge>{t.from}</StateBadge>
+            <span className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>→</span>
+            <StateBadge>{t.to}</StateBadge>
+            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               {t.trigger}
               {t.warn && <WarnIndicator text={t.warn} />}
             </span>
-            <span className="text-[11px] text-[#64748B]" style={{ fontStyle: t.guard ? 'normal' : 'italic' }}>
+            <span className="text-sm" style={{ color: 'var(--text-muted)', fontStyle: t.guard ? 'normal' : 'italic' }}>
               {t.guard || 'None'}
             </span>
           </div>
@@ -140,7 +140,7 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
       <FieldRow label="Primary actor" value={journey.primary_actor} />
 
       {journey.preconditions.length > 0 && (
-        <div className="bg-[#FFFBEB] text-[#92400E] text-xs px-3 py-2 rounded-lg border border-[#F59E0B]/20">
+        <div className="text-sm px-3 py-2 rounded-lg" style={{ background: '#FFFBEB', color: '#92400E', border: '1px solid rgba(245,158,11,0.2)' }}>
           <span className="font-semibold">Preconditions: </span>
           {journey.preconditions.join(' · ')}
         </div>
@@ -148,28 +148,23 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
 
       <div>
         {journey.steps.map(s => (
-          <div key={s.order} className="flex gap-3 py-2.5 border-b border-[#F1F5F9] last:border-0">
+          <div key={s.order} className="flex gap-3 py-3 last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border-2 ${
-                s.edge
-                  ? 'bg-[#FFF1F2] border-[#E11D48] text-[#9F1239]'
-                  : s.warn
-                    ? 'bg-[#FFFBEB] border-[#F59E0B] text-[#92400E]'
-                    : 'bg-[#EFF6FF] border-[#3B82F6] text-[#1E40AF]'
-              }`}
+              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}
             >
               {s.order}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-[13px] font-semibold text-[#1E293B]">{s.title}</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{s.title}</span>
                 {s.warn && <WarnIndicator text={s.warn} />}
                 {s.edge && <EdgeIndicator text={s.edge} />}
                 <HelpTip text={`Step ${s.order}: ${s.detail}`} />
               </div>
-              <p className="text-xs text-[#475569] leading-relaxed mt-0.5">{s.detail}</p>
+              <p className="text-sm leading-relaxed mt-0.5" style={{ color: 'var(--text-secondary)' }}>{s.detail}</p>
               {s.precondition && (
-                <span className="inline-block text-[11px] text-[#92400E] bg-[#FFFBEB] px-2 py-0.5 rounded mt-1">
+                <span className="inline-block text-xs px-2 py-0.5 rounded mt-1" style={{ background: '#FFFBEB', color: '#92400E' }}>
                   Precondition: {s.precondition}
                 </span>
               )}
@@ -185,39 +180,38 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
 
 function RuleRenderer({ rule }: { rule: BusinessRule }) {
   return (
-    <div className="grid grid-cols-[60px_1fr_120px] gap-2 items-start">
-      <StateBadge variant={rule.warn ? 'amber' : 'blue'}>{rule.id}</StateBadge>
-      <span className="text-xs text-[#334155] leading-relaxed">
+    <div className="grid grid-cols-[70px_1fr_120px] gap-3 items-start">
+      <StateBadge>{rule.id}</StateBadge>
+      <span className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
         {rule.description}
         {rule.warn && <WarnIndicator text={rule.warn} />}
       </span>
-      <span className="text-[10px] text-[#94A3B8] text-right">{rule.source}</span>
+      <span className="text-xs text-right" style={{ color: 'var(--text-muted)' }}>{rule.source}</span>
     </div>
   )
 }
 
 function ConstraintRenderer({ constraint }: { constraint: Constraint }) {
   return (
-    <div className="flex gap-2 items-start">
-      <StateBadge variant="orange">{constraint.type}</StateBadge>
-      <span className="text-xs text-[#334155] leading-relaxed flex-1">{constraint.constraint}</span>
+    <div className="flex gap-3 items-start">
+      <StateBadge>{constraint.type}</StateBadge>
+      <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-primary)' }}>{constraint.constraint}</span>
       <HelpTip text={`${constraint.type} constraint: ${constraint.constraint}`} />
     </div>
   )
 }
 
 function OpenQuestionRenderer({ question }: { question: OpenQuestion }) {
-  const statusVariant = question.status === 'resolved' ? 'green' : question.status === 'deferred' ? 'amber' : 'purple'
   return (
     <div className="space-y-2">
       <div className="flex items-start gap-2">
-        <StateBadge variant={statusVariant}>{question.status}</StateBadge>
-        <span className="text-xs font-semibold text-[#1E293B] flex-1">{question.question}</span>
+        <StateBadge>{question.status}</StateBadge>
+        <span className="text-sm font-semibold flex-1" style={{ color: 'var(--text-primary)' }}>{question.question}</span>
         <HelpTip text={`This question is ${question.status}. ${question.reason}`} />
       </div>
-      <p className="text-xs text-[#64748B] leading-relaxed">{question.reason}</p>
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{question.reason}</p>
       {question.resolution && (
-        <p className="text-xs text-[#166534] bg-[#F0FDF4] px-2 py-1 rounded inline-block">
+        <p className="text-sm px-2 py-1 rounded inline-block" style={{ background: 'rgba(37,186,59,0.08)', color: '#166534' }}>
           Resolution: {question.resolution}
         </p>
       )}

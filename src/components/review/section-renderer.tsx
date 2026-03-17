@@ -43,10 +43,12 @@ function FieldRow({ label, value, warn, edge }: { label: string; value: string; 
   )
 }
 
-function StateBadge({ children, variant }: { children: React.ReactNode; variant: keyof typeof C }) {
-  const colors = C[variant]
+function StateBadge({ children }: { children: React.ReactNode; variant?: string }) {
   return (
-    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${colors.bg} ${colors.text} border ${colors.border} whitespace-nowrap`}>
+    <span
+      className="inline-block whitespace-nowrap rounded px-2 py-0.5 text-[11px] font-semibold"
+      style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)', border: '1px solid rgba(0,129,242,0.15)' }}
+    >
       {children}
     </span>
   )

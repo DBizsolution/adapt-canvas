@@ -366,44 +366,45 @@ export function ChatPanel({
               </div>
             )}
 
-            {/* Scope toggle */}
-            <div className="flex gap-1.5">
-              {sectionLabel ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => store.setScope('section')}
-                    className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200"
-                    style={{
-                      background: store.scope === 'section' ? 'var(--bg-blue-subtle)' : 'var(--bg-gray-subtle)',
-                      color: store.scope === 'section' ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                      border: store.scope === 'section' ? '1px solid rgba(0,129,242,0.2)' : '1px solid var(--border-light)',
-                    }}
-                  >
-                    {sectionLabel} only
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => store.setScope('full')}
-                    className="rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200"
-                    style={{
-                      background: store.scope === 'full' ? 'var(--bg-blue-subtle)' : 'var(--bg-gray-subtle)',
-                      color: store.scope === 'full' ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                      border: store.scope === 'full' ? '1px solid rgba(0,129,242,0.2)' : '1px solid var(--border-light)',
-                    }}
-                  >
-                    Full model
-                  </button>
-                </>
-              ) : (
-                <span
-                  className="rounded-full px-3 py-1.5 text-xs font-medium"
-                  style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
+            {/* Scope tab */}
+            {sectionLabel ? (
+              <div
+                className="inline-flex rounded-lg p-0.5"
+                style={{ background: 'var(--bg-gray-subtle)', border: '1px solid var(--border-light)' }}
+              >
+                <button
+                  type="button"
+                  onClick={() => store.setScope('section')}
+                  className="rounded-md px-3 py-1 text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: store.scope === 'section' ? 'var(--bg-white)' : 'transparent',
+                    color: store.scope === 'section' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    boxShadow: store.scope === 'section' ? 'var(--shadow-subtle)' : 'none',
+                  }}
                 >
-                  Editing full model
-                </span>
-              )}
-            </div>
+                  {sectionLabel} only
+                </button>
+                <button
+                  type="button"
+                  onClick={() => store.setScope('full')}
+                  className="rounded-md px-3 py-1 text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: store.scope === 'full' ? 'var(--bg-white)' : 'transparent',
+                    color: store.scope === 'full' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    boxShadow: store.scope === 'full' ? 'var(--shadow-subtle)' : 'none',
+                  }}
+                >
+                  Full model
+                </button>
+              </div>
+            ) : (
+              <div
+                className="inline-flex rounded-lg px-3 py-1.5 text-xs font-medium"
+                style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
+              >
+                Editing full model
+              </div>
+            )}
 
             {/* Suggestions */}
             <SuggestionChips model={model} onSelect={(s) => setPrompt(s)} />

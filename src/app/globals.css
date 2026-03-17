@@ -242,6 +242,21 @@
   animation: page-loading 1s ease-in-out infinite;
 }
 
+/* Abbreviation terms */
+.abbr-term {
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--border-dark);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: help;
+  font-style: normal;
+}
+.abbr-term:hover {
+  text-decoration-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
 /* Custom scrollbar */
 .custom-scroll::-webkit-scrollbar {
   width: 4px;

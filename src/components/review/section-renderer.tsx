@@ -6,6 +6,7 @@ import { StatusBadge, WarnIndicator, EdgeIndicator } from './status-badge'
 import { ReviewControls } from './review-controls'
 import { OpenQuestionControls } from './open-question-controls'
 import { HelpTip } from './help-tip'
+import { AbbrText } from './abbr-text'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
 import type {
   Actor, Entity, Journey, BusinessRule, Constraint, OpenQuestion, SectionType, Review
@@ -35,7 +36,7 @@ function FieldRow({ label, value, warn, edge }: { label: string; value: string; 
     <div className="flex gap-3 py-2 items-start last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
       <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{label}</span>
       <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
-        {value}
+        <AbbrText text={value} />
         {warn && <WarnIndicator text={warn} />}
         {edge && <EdgeIndicator text={edge} />}
       </span>
@@ -99,7 +100,7 @@ function EntityRenderer({ entity }: { entity: Entity }) {
             <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
             <StateBadge>{f.type}</StateBadge>
             <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
-              {f.description}
+              <AbbrText text={f.description} />
               {f.warn && <WarnIndicator text={f.warn} />}
             </span>
           </div>
@@ -121,7 +122,7 @@ function EntityRenderer({ entity }: { entity: Entity }) {
             <span className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>→</span>
             <StateBadge>{t.to}</StateBadge>
             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              {t.trigger}
+              <AbbrText text={t.trigger} />
               {t.warn && <WarnIndicator text={t.warn} />}
             </span>
             <span className="text-sm" style={{ color: 'var(--text-muted)', fontStyle: t.guard ? 'normal' : 'italic' }}>
@@ -162,7 +163,7 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
                 {s.edge && <EdgeIndicator text={s.edge} />}
                 <HelpTip text={`Step ${s.order}: ${s.detail}`} />
               </div>
-              <p className="text-sm leading-relaxed mt-0.5" style={{ color: 'var(--text-secondary)' }}>{s.detail}</p>
+              <p className="text-sm leading-relaxed mt-0.5" style={{ color: 'var(--text-secondary)' }}><AbbrText text={s.detail} /></p>
               {s.precondition && (
                 <span className="inline-block text-xs px-2 py-0.5 rounded mt-1" style={{ background: '#FFFBEB', color: '#92400E' }}>
                   Precondition: {s.precondition}
@@ -183,7 +184,7 @@ function RuleRenderer({ rule }: { rule: BusinessRule }) {
     <div className="grid grid-cols-[70px_1fr_120px] gap-3 items-start">
       <StateBadge>{rule.id}</StateBadge>
       <span className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-        {rule.description}
+        <AbbrText text={rule.description} />
         {rule.warn && <WarnIndicator text={rule.warn} />}
       </span>
       <span className="text-xs text-right" style={{ color: 'var(--text-muted)' }}>{rule.source}</span>
@@ -195,7 +196,7 @@ function ConstraintRenderer({ constraint }: { constraint: Constraint }) {
   return (
     <div className="flex gap-3 items-start">
       <StateBadge>{constraint.type}</StateBadge>
-      <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-primary)' }}>{constraint.constraint}</span>
+      <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-primary)' }}><AbbrText text={constraint.constraint} /></span>
       <HelpTip text={`${constraint.type} constraint: ${constraint.constraint}`} />
     </div>
   )
@@ -206,10 +207,10 @@ function OpenQuestionRenderer({ question }: { question: OpenQuestion }) {
     <div className="space-y-2">
       <div className="flex items-start gap-2">
         <StateBadge>{question.status}</StateBadge>
-        <span className="text-sm font-semibold flex-1" style={{ color: 'var(--text-primary)' }}>{question.question}</span>
+        <span className="text-sm font-semibold flex-1" style={{ color: 'var(--text-primary)' }}><AbbrText text={question.question} /></span>
         <HelpTip text={`This question is ${question.status}. ${question.reason}`} />
       </div>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{question.reason}</p>
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}><AbbrText text={question.reason} /></p>
       {question.resolution && (
         <p className="text-sm px-2 py-1 rounded inline-block" style={{ background: 'rgba(37,186,59,0.08)', color: '#166534' }}>
           Resolution: {question.resolution}

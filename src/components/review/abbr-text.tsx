@@ -1,5 +1,7 @@
 'use client'
 
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
+
 const GLOSSARY: Record<string, string> = {
   HBL: 'House Bill of Lading',
   WFF: 'Wholesale Freight Forwarder',
@@ -41,27 +43,27 @@ export function AbbrText({ text }: { text: string }) {
     parts.push({ type: 'text', value: text.slice(lastIndex) })
   }
 
-  // No abbreviations found — return plain text
   if (parts.every(p => p.type === 'text')) {
     return <>{text}</>
   }
 
   return (
-    <>
+    <TooltipProvider>
       {parts.map((part, i) => {
         if (part.type === 'abbr') {
           return (
-            <abbr
-              key={i}
-              title={part.expansion}
-              className="abbr-term"
-            >
-              {part.value}
-            </abbr>
+            <Tooltip key={i}>
+              <TooltipTrigger asChild>
+                <abbr className="abbr-term">{part.value}</abbr>
+              </TooltipTrigger>
+              <TooltipContent className="text-sm px-3 py-1.5">
+                {part.expansion}
+              </TooltipContent>
+            </Tooltip>
           )
         }
         return <span key={i}>{part.value}</span>
       })}
-    </>
+    </TooltipProvider>
   )
 }

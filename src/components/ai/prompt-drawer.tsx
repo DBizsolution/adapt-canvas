@@ -150,6 +150,9 @@ export function PromptDrawer({
 
       store.setStatus('success')
       setPrompt('')
+      // Refresh version history
+      const versionsData = await fetch('/api/model/versions').then(r => r.json())
+      setVersions(versionsData.versions ?? [])
       setTimeout(() => {
         store.reset()
         router.refresh()

@@ -57,8 +57,8 @@ export function AbbrText({ text }: { text: string }) {
         if (part.type === 'abbr') {
           return (
             <Tooltip key={i}>
-              <TooltipTrigger asChild>
-                <abbr className="abbr-term">{part.value}</abbr>
+              <TooltipTrigger render={<abbr className="abbr-term" />}>
+                {part.value}
               </TooltipTrigger>
               <TooltipContent className="text-sm px-3 py-1.5">
                 {part.expansion}

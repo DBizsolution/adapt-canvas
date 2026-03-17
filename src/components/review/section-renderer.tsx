@@ -34,7 +34,7 @@ const sectionTypeExplanations: Record<SectionType, string> = {
 function FieldRow({ label, value, warn, edge }: { label: string; value: string; warn?: string; edge?: string }) {
   return (
     <div className="flex gap-3 py-2 items-start last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
-      <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{label}</span>
+      <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{label.includes(':') ? label.toUpperCase() : label}</span>
       <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
         <AbbrText text={value} />
         {warn && <WarnIndicator text={warn} />}

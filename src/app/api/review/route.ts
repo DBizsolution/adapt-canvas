@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getReviewState, setReviewState } from '@/lib/review-store'
 import { ReviewActionSchema } from '@/lib/review-schemas'
 import { hashItem, getAllModelItems, buildTargetId } from '@/lib/review-utils'
-import { intentModel } from '@/domain/intent-model/model'
+import { getCurrentModel } from '@/lib/model-store'
 
 export async function GET() {
   const reviewState = await getReviewState()
@@ -10,6 +10,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const intentModel = await getCurrentModel()
   const body = await request.json()
   const parsed = ReviewActionSchema.safeParse(body)
 

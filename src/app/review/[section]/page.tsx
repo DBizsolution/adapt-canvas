@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getReviewState } from '@/lib/review-store'
-import { intentModel } from '@/domain/intent-model/model'
+import { getCurrentModel } from '@/lib/model-store'
 import { enrichSectionReviews, buildTargetId } from '@/lib/review-utils'
 import { SectionPageClient } from '@/components/review/section-page-client'
 import type { SectionType } from '@/domain/intent-model/types'
@@ -26,6 +26,7 @@ export default async function SectionPage({
   const sectionType = URL_PARAM_TO_SECTION_TYPE[section]
   if (!sectionType) notFound()
 
+  const intentModel = await getCurrentModel()
   const reviewState = await getReviewState()
   const enrichedSections = await enrichSectionReviews(intentModel, reviewState)
 

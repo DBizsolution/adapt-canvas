@@ -1,5 +1,5 @@
 import { getReviewState } from '@/lib/review-store'
-import { intentModel } from '@/domain/intent-model/model'
+import { getCurrentModel } from '@/lib/model-store'
 import { enrichSectionReviews, computeConsensus } from '@/lib/review-utils'
 import { ConsensusDashboard } from '@/components/review/consensus-dashboard'
 
@@ -41,6 +41,7 @@ const pipeline = [
 ]
 
 export default async function ReviewDashboard() {
+  const intentModel = await getCurrentModel()
   const reviewState = await getReviewState()
 
   const enrichedSections = await enrichSectionReviews(intentModel, reviewState)

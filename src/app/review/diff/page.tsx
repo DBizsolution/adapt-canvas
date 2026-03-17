@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { intentModel } from '@/domain/intent-model/model'
+import { getCurrentModel } from '@/lib/model-store'
 import { computeStructuralDiff } from '@/lib/review-utils'
 import { DiffViewer } from '@/components/review/diff-viewer'
 import { Card } from '@/components/ui/card'
@@ -24,6 +24,7 @@ async function getPreviousModel(): Promise<IntentModel | null> {
 }
 
 export default async function DiffPage() {
+  const intentModel = await getCurrentModel()
   const previous = await getPreviousModel()
 
   if (!previous) {

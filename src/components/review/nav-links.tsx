@@ -30,15 +30,23 @@ export function NavSidebar() {
 
   return (
     <nav
-      className="flex w-[52px] shrink-0 flex-col items-center gap-1 py-3"
+      className="flex w-[200px] shrink-0 flex-col py-3 px-2"
       style={{ background: 'var(--bg-nav)', height: '100vh' }}
     >
-      {/* Logo mark */}
-      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold" style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}>
-        V
+      {/* Logo */}
+      <div className="mb-4 flex items-center gap-2.5 px-2">
+        <div
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold"
+          style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
+        >
+          V
+        </div>
+        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+          VBS Intent
+        </span>
       </div>
 
-      {/* Nav icons */}
+      {/* Nav items */}
       <div className="flex flex-1 flex-col gap-0.5">
         {navItems.map(item => {
           const Icon = item.icon
@@ -50,14 +58,15 @@ export function NavSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              title={item.label}
-              className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200"
+              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors duration-200"
               style={{
                 background: isActive ? 'var(--bg-blue-subtle)' : 'transparent',
                 color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                fontWeight: isActive ? 600 : 400,
               }}
             >
-              <Icon size={20} />
+              <Icon size={18} />
+              <span>{item.label}</span>
             </Link>
           )
         })}
@@ -66,11 +75,11 @@ export function NavSidebar() {
       {/* Bottom: settings */}
       <Link
         href="#"
-        title="Settings"
-        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200"
+        className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors duration-200"
         style={{ color: 'var(--text-muted)' }}
       >
-        <Settings size={20} />
+        <Settings size={18} />
+        <span>Settings</span>
       </Link>
     </nav>
   )

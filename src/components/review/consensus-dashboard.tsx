@@ -41,7 +41,7 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
       </div>
 
       {/* Sections — simple list */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {sectionTypes.map(type => {
           const typeSections = sections.filter(s => s.targetType === type)
           const approved = typeSections.filter(s => s.effectiveStatus === 'approved').length

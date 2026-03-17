@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { StatusBadge, WarnIndicator, EdgeIndicator } from './status-badge'
 import { ReviewControls } from './review-controls'
 import { OpenQuestionControls } from './open-question-controls'
@@ -9,25 +11,6 @@ import type {
   Actor, Entity, Journey, BusinessRule, Constraint, OpenQuestion, SectionType, Review
 } from '@/domain/intent-model/types'
 
-const C = {
-  blue: { bg: 'bg-[#EFF6FF]', border: 'border-[#3B82F6]', text: 'text-[#1E40AF]', borderHex: '#3B82F6' },
-  green: { bg: 'bg-[#F0FDF4]', border: 'border-[#22C55E]', text: 'text-[#166534]', borderHex: '#22C55E' },
-  orange: { bg: 'bg-[#FFF7ED]', border: 'border-[#F97316]', text: 'text-[#9A3412]', borderHex: '#F97316' },
-  purple: { bg: 'bg-[#FAF5FF]', border: 'border-[#A855F7]', text: 'text-[#6B21A8]', borderHex: '#A855F7' },
-  teal: { bg: 'bg-[#F0FDFA]', border: 'border-[#14B8A6]', text: 'text-[#115E59]', borderHex: '#14B8A6' },
-  amber: { bg: 'bg-[#FFFBEB]', border: 'border-[#F59E0B]', text: 'text-[#92400E]', borderHex: '#F59E0B' },
-  slate: { bg: 'bg-[#F8FAFC]', border: 'border-[#94A3B8]', text: 'text-[#475569]', borderHex: '#94A3B8' },
-  red: { bg: 'bg-[#FFF1F2]', border: 'border-[#E11D48]', text: 'text-[#9F1239]', borderHex: '#E11D48' },
-}
-
-const sectionColors: Record<SectionType, typeof C.blue> = {
-  actor: C.blue,
-  entity: C.blue,
-  journey: C.teal,
-  business_rule: C.green,
-  constraint: C.orange,
-  open_question: C.purple,
-}
 
 type SectionRendererProps = {
   item: Actor | Entity | Journey | BusinessRule | Constraint | OpenQuestion
@@ -252,44 +235,50 @@ function renderItem(item: SectionRendererProps['item'], type: SectionType) {
 }
 
 export function SectionCard({ item, type, review, currentReviewerId }: SectionRendererProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const displayId = 'name' in item ? (item as { name: string }).name : item.id
   const description = 'description' in item ? (item as { description: string }).description : ''
   return (
     <div
       id={review.targetId}
-      className="mb-5 overflow-hidden rounded-xl transition-shadow hover:shadow-md"
+      className="mb-3 overflow-hidden rounded-xl transition-shadow"
       style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-subtle)' }}
     >
-      {/* Header bar */}
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--bg-card-gray)' }}
+      {/* Clickable header */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors duration-200"
+        style={{ background: isOpen ? 'var(--bg-card-gray)' : 'var(--bg-white)', borderBottom: isOpen ? '1px solid var(--border-default)' : 'none' }}
       >
         <div className="flex items-center gap-2">
+          {isOpen ? <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} /> : <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />}
           <h3 className="m-0 text-sm font-bold" style={{ color: 'var(--acfs-navy)' }}>{displayId}</h3>
           <HelpTip text={`${sectionTypeExplanations[type]} — ${description || displayId}`} />
         </div>
         <StatusBadge status={review.effectiveStatus} />
-      </div>
+      </button>
 
-      {/* White body */}
-      <div className="p-4">
-        {renderItem(item, type)}
-        <ReviewHistory reviews={review.reviews} />
-        {currentReviewerId && (
-          <div className="mt-4 pt-4 border-t border-[#F1F5F9]">
-            {type === 'open_question' ? (
-              <OpenQuestionControls
-                section={review}
-                currentReviewerId={currentReviewerId}
-                questionStatus={(item as OpenQuestion).status}
-              />
-            ) : (
-              <ReviewControls section={review} currentReviewerId={currentReviewerId} />
-            )}
-          </div>
-        )}
-      </div>
+      {/* Collapsible body */}
+      {isOpen && (
+        <div className="p-4">
+          {renderItem(item, type)}
+          <ReviewHistory reviews={review.reviews} />
+          {currentReviewerId && (
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
+              {type === 'open_question' ? (
+                <OpenQuestionControls
+                  section={review}
+                  currentReviewerId={currentReviewerId}
+                  questionStatus={(item as OpenQuestion).status}
+                />
+              ) : (
+                <ReviewControls section={review} currentReviewerId={currentReviewerId} />
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

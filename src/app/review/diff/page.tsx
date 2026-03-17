@@ -1,26 +1,18 @@
-import { readdir, readFile } from 'node:fs/promises'
-import path from 'node:path'
-import { getCurrentModel } from '@/lib/model-store'
+import { getCurrentModel, getVersions, getVersion } from '@/lib/model-store'
 import { computeStructuralDiff } from '@/lib/review-utils'
 import { DiffViewer } from '@/components/review/diff-viewer'
-import { Card } from '@/components/ui/card'
 import type { IntentModel } from '@/domain/intent-model/types'
 
 export const dynamic = 'force-dynamic'
 
 async function getPreviousModel(): Promise<IntentModel | null> {
-  const historyDir = path.join(process.cwd(), 'src/domain/intent-model/history')
-  try {
-    const files = await readdir(historyDir)
-    const jsonFiles = files.filter(f => f.endsWith('.json')).sort().reverse()
-    if (jsonFiles.length === 0) return null
+  const versions = await getVersions()
+  if (versions.length < 2) return null
 
-    const latestSnapshot = path.join(historyDir, jsonFiles[0])
-    const raw = await readFile(latestSnapshot, 'utf-8')
-    return JSON.parse(raw) as IntentModel
-  } catch {
-    return null
-  }
+  // Second-to-last version is the "previous"
+  const previousMeta = versions[versions.length - 2]
+  const previousVersion = await getVersion(previousMeta.id)
+  return previousVersion?.model ?? null
 }
 
 export default async function DiffPage() {
@@ -30,12 +22,12 @@ export default async function DiffPage() {
   if (!previous) {
     return (
       <div className="pb-32">
-        <h1 className="text-3xl font-bold mb-8">Version Diff</h1>
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">
-            No previous version found. Create a snapshot in <code>src/domain/intent-model/history/</code> to enable diffing.
+        <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>Version Diff</h1>
+        <div className="rounded-xl p-8 text-center" style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)' }}>
+          <p style={{ color: 'var(--text-muted)' }}>
+            No previous version to compare. Make an edit using the AI chat to see diffs here.
           </p>
-        </Card>
+        </div>
       </div>
     )
   }
@@ -45,8 +37,8 @@ export default async function DiffPage() {
   return (
     <div className="pb-32">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Version Diff</h1>
-        <p className="text-base text-muted-foreground">
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>Version Diff</h1>
+        <p className="text-base" style={{ color: 'var(--text-muted)' }}>
           Current v{intentModel.meta.version} vs. previous v{previous.meta.version}
         </p>
       </div>

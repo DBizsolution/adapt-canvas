@@ -56,6 +56,7 @@ export function ChatPanel({
 
   const sectionType = getSectionTypeFromPath(pathname)
   const sectionLabel = sectionType ? SECTION_LABELS[sectionType] ?? sectionType : null
+  const isDiffPage = pathname.includes('/diff')
 
   // Drag resize handler
   useEffect(() => {
@@ -222,6 +223,9 @@ export function ChatPanel({
       setIsReverting(false)
     }
   }, [currentReviewerId, router])
+
+  // Hide chat panel on diff page — full width for side-by-side diff
+  if (isDiffPage) return null
 
   return (
     <div className="flex shrink-0" style={{ width: panelWidth }}>

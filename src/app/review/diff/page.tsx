@@ -1,7 +1,8 @@
 import { getCurrentModel, getVersions, getVersion } from '@/lib/model-store'
-import { computeStructuralDiff } from '@/lib/review-utils'
-import { DiffViewer } from '@/components/review/diff-viewer'
 import type { IntentModel } from '@/domain/intent-model/types'
+import { SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
+import type { SectionType } from '@/domain/intent-model/types'
+import { SideBySideDiff } from '@/components/review/side-by-side-diff'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,20 +10,19 @@ async function getPreviousModel(): Promise<IntentModel | null> {
   const versions = await getVersions()
   if (versions.length < 2) return null
 
-  // Second-to-last version is the "previous"
   const previousMeta = versions[versions.length - 2]
   const previousVersion = await getVersion(previousMeta.id)
   return previousVersion?.model ?? null
 }
 
 export default async function DiffPage() {
-  const intentModel = await getCurrentModel()
-  const previous = await getPreviousModel()
+  const currentModel = await getCurrentModel()
+  const previousModel = await getPreviousModel()
 
-  if (!previous) {
+  if (!previousModel) {
     return (
-      <div className="pb-32">
-        <h1 className="text-3xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>Version Diff</h1>
+      <div>
+        <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--acfs-navy)' }}>Version Diff</h1>
         <div className="rounded-xl p-8 text-center" style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)' }}>
           <p style={{ color: 'var(--text-muted)' }}>
             No previous version to compare. Make an edit using the AI chat to see diffs here.
@@ -32,17 +32,16 @@ export default async function DiffPage() {
     )
   }
 
-  const diffs = computeStructuralDiff(intentModel, previous)
-
   return (
-    <div className="pb-32">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>Version Diff</h1>
-        <p className="text-base" style={{ color: 'var(--text-muted)' }}>
-          Current v{intentModel.meta.version} vs. previous v{previous.meta.version}
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--acfs-navy)' }}>Version Diff</h1>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          v{previousModel.meta.version} → v{currentModel.meta.version}
         </p>
       </div>
-      <DiffViewer diffs={diffs} />
+
+      <SideBySideDiff previous={previousModel} current={currentModel} />
     </div>
   )
 }

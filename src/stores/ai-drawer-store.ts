@@ -15,12 +15,14 @@ type DrawerState = {
   isOpen: boolean
   status: DrawerStatus
   scope: 'section' | 'full'
+  width: number
   currentProposal: Proposal | null
   error: string | null
   lastPrompt: string | null
   open: () => void
   close: () => void
   setScope: (scope: 'section' | 'full') => void
+  setWidth: (width: number) => void
   setStatus: (status: DrawerStatus) => void
   setProposal: (proposal: Proposal | null) => void
   setError: (error: string | null) => void
@@ -33,12 +35,14 @@ export const useDrawerStore = create<DrawerState>((set) => ({
   isOpen: false,
   status: 'idle',
   scope: 'section',
+  width: 400,
   currentProposal: null,
   error: null,
   lastPrompt: null,
   open: () => set({ isOpen: true }),
   close: () => set({ isOpen: false, status: 'idle', currentProposal: null, error: null }),
   setScope: (scope) => set({ scope }),
+  setWidth: (width) => set({ width: Math.max(320, Math.min(700, width)) }),
   setStatus: (status) => set({ status }),
   setProposal: (currentProposal) => set({ currentProposal }),
   setError: (error) => set({ error, status: 'error' }),

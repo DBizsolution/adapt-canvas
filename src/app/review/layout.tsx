@@ -15,10 +15,10 @@ export default async function ReviewLayout({
   const latestVersionId = await getLatestVersionId()
 
   return (
-    <div className="min-h-screen bg-[#F5F6FA]">
+    <div className="flex min-h-screen flex-col bg-[#F5F6FA]">
       <IdentityModal />
       <header className="sticky top-0 z-10" style={{ backgroundColor: '#002C61' }}>
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center gap-4">
+        <div className="mx-auto px-4 py-2.5 flex items-center gap-4">
           <h1 className="text-base font-bold text-white shrink-0">VBS Intent Model</h1>
           <NavLinks />
           <div className="flex items-center gap-2 shrink-0">
@@ -27,10 +27,14 @@ export default async function ReviewLayout({
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 py-8 bg-[#F5F6FA] min-h-screen">
-        {children}
-      </main>
-      <PromptDrawer model={model} latestVersionId={latestVersionId} />
+      <div className="flex flex-1 overflow-hidden">
+        <main className="flex-1 overflow-y-auto px-4 py-8">
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
+        </main>
+        <PromptDrawer model={model} latestVersionId={latestVersionId} />
+      </div>
     </div>
   )
 }

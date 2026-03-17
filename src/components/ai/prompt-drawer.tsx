@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Sparkles, X, Loader2, RefreshCw } from 'lucide-react'
+import { Sparkles, X, Loader2, RefreshCw, GripVertical } from 'lucide-react'
 import { useDrawerStore } from '@/stores/ai-drawer-store'
 import { useReviewerStore } from '@/stores/reviewer-store'
 import { SuggestionChips } from './suggestion-chips'
@@ -17,6 +17,15 @@ type VersionMeta = {
   author: string
   prompt: string
   parentId: string | null
+}
+
+const SECTION_LABELS: Record<string, string> = {
+  actor: 'Actors',
+  entity: 'Entities',
+  journey: 'Journeys',
+  business_rule: 'Rules',
+  constraint: 'Constraints',
+  open_question: 'Open Qs',
 }
 
 function getSectionTypeFromPath(pathname: string): SectionType | null {
@@ -41,8 +50,38 @@ export function PromptDrawer({
   const [versions, setVersions] = useState<VersionMeta[]>([])
   const [isStale, setIsStale] = useState(false)
   const [isReverting, setIsReverting] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
 
   const sectionType = getSectionTypeFromPath(pathname)
+  const sectionLabel = sectionType ? SECTION_LABELS[sectionType] ?? sectionType : null
+
+  // Drag resize handler
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragRef.current) return
+      const delta = dragRef.current.startX - e.clientX
+      store.setWidth(dragRef.current.startWidth + delta)
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      dragRef.current = null
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, store])
 
   // Check staleness on drawer open
   useEffect(() => {
@@ -150,7 +189,6 @@ export function PromptDrawer({
 
       store.setStatus('success')
       setPrompt('')
-      // Refresh version history
       const versionsData = await fetch('/api/model/versions').then(r => r.json())
       setVersions(versionsData.versions ?? [])
       setTimeout(() => {
@@ -185,9 +223,8 @@ export function PromptDrawer({
     }
   }, [currentReviewerId, router])
 
-  return (
-    <>
-      {/* Floating trigger button */}
+  if (!store.isOpen) {
+    return (
       <button
         type="button"
         onClick={store.open}
@@ -196,46 +233,68 @@ export function PromptDrawer({
       >
         <Sparkles size={20} />
       </button>
+    )
+  }
 
-      {/* Backdrop */}
-      {store.isOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm"
-          onClick={store.close}
-        />
-      )}
-
-      {/* Drawer */}
+  return (
+    <div className="flex h-full shrink-0" style={{ width: store.width }}>
+      {/* Drag handle */}
       <div
-        className={`fixed right-0 top-0 z-30 flex h-full w-[400px] flex-col bg-white shadow-xl transition-transform duration-200 ${
-          store.isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className="flex w-2 cursor-col-resize items-center justify-center border-l border-slate-200 bg-slate-50 hover:bg-slate-100 active:bg-blue-100"
+        onMouseDown={(e) => {
+          e.preventDefault()
+          dragRef.current = { startX: e.clientX, startWidth: store.width }
+          setIsDragging(true)
+        }}
       >
+        <GripVertical size={12} className="text-slate-300" />
+      </div>
+
+      {/* Panel */}
+      <div className="flex flex-1 flex-col overflow-hidden bg-white">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
           <div className="flex items-center gap-2">
             <Sparkles size={16} className="text-[#002C61]" />
             <h3 className="text-sm font-semibold text-slate-800">AI Editor</h3>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => store.setScope(store.scope === 'section' ? 'full' : 'section')}
-              className="rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors"
-              style={{
-                borderColor: store.scope === 'section' ? '#002C61' : '#cbd5e1',
-                color: store.scope === 'section' ? '#002C61' : '#64748b',
-                backgroundColor: store.scope === 'section' ? '#002C61' + '10' : 'transparent',
-              }}
-            >
-              {store.scope === 'section' && sectionType
-                ? sectionType.replace('_', ' ')
-                : 'Full model'}
-            </button>
-            <button type="button" onClick={store.close} className="text-slate-400 hover:text-slate-600">
-              <X size={18} />
-            </button>
-          </div>
+          <button type="button" onClick={store.close} className="text-slate-400 hover:text-slate-600">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Scope toggle */}
+        <div className="flex border-b border-slate-100">
+          {sectionLabel ? (
+            <>
+              <button
+                type="button"
+                onClick={() => store.setScope('section')}
+                className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+                  store.scope === 'section'
+                    ? 'border-b-2 border-[#002C61] text-[#002C61] bg-blue-50/50'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {sectionLabel} only
+              </button>
+              <button
+                type="button"
+                onClick={() => store.setScope('full')}
+                className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+                  store.scope === 'full'
+                    ? 'border-b-2 border-[#002C61] text-[#002C61] bg-blue-50/50'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                Full model
+              </button>
+            </>
+          ) : (
+            <div className="flex-1 px-3 py-2 text-xs font-medium text-slate-500">
+              Editing full model
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -342,6 +401,6 @@ export function PromptDrawer({
           />
         </div>
       </div>
-    </>
+    </div>
   )
 }

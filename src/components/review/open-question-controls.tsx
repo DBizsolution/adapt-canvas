@@ -81,7 +81,7 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
         </div>
 
         {/* Guidance */}
-        <div className="text-[11px] text-[#94A3B8] leading-relaxed">
+        <div className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
           <span className="font-semibold">How this works:</span> Resolve provides a decision that the model author will incorporate into model.ts.
           Once updated, this question&apos;s status changes to &quot;resolved&quot; and other reviewers can confirm.
         </div>
@@ -94,20 +94,20 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
   return (
     <div className="space-y-3">
       {/* Format guidance */}
-      <div className={`rounded-lg px-3 py-2.5 text-xs leading-relaxed ${
+      <div className={`rounded-lg px-3 py-2.5 text-sm leading-relaxed ${
         isResolve ? 'bg-[#F0FDFA] border border-[#14B8A6]/20' : 'bg-[#F8FAFC] border border-[#94A3B8]/20'
       }`}>
         <p className={`font-semibold mb-1.5 ${isResolve ? 'text-[#115E59]' : 'text-[#334155]'}`}>
           {isResolve ? 'Write the resolution' : 'Write the deferral reason'}
         </p>
         {isResolve ? (
-          <div className="text-[#64748B] space-y-1">
+          <div className="space-y-1" style={{ color: 'var(--text-secondary)' }}>
             <p><span className="font-semibold">Decision:</span> State the answer clearly — e.g., &quot;Flat rate of $45 per HBL&quot;</p>
             <p><span className="font-semibold">Impact:</span> Note what this changes — e.g., &quot;Update booking entity fee_amount field description&quot;</p>
             <p><span className="font-semibold">Source:</span> Who decided this — e.g., &quot;Confirmed with PO in standup 2026-03-16&quot;</p>
           </div>
         ) : (
-          <div className="text-[#64748B] space-y-1">
+          <div className="space-y-1" style={{ color: 'var(--text-secondary)' }}>
             <p><span className="font-semibold">Reason:</span> Why this can wait — e.g., &quot;Depends on payment gateway selection in Phase 4&quot;</p>
             <p><span className="font-semibold">Revisit:</span> When to come back — e.g., &quot;Before Phase 4 domain typing&quot;</p>
           </div>
@@ -126,7 +126,7 @@ export function OpenQuestionControls({ section, currentReviewerId, questionStatu
       />
 
       {/* What happens next */}
-      <div className="text-[11px] text-[#94A3B8] leading-relaxed bg-[#F5F6FA] rounded px-3 py-2">
+      <div className="text-sm leading-relaxed rounded px-3 py-2" style={{ background: 'var(--bg-card-gray)', color: 'var(--text-muted)' }}>
         <span className="font-semibold">What happens next:</span>
         {isResolve ? (
           <> Your resolution is saved in the review history. The model author reads it in Claude Code and updates model.ts —

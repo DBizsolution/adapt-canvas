@@ -2,10 +2,10 @@ import { Badge } from '@/components/ui/badge'
 import type { EnrichedSectionReview } from '@/lib/review-utils'
 
 const statusConfig = {
-  approved: { label: 'Approved', variant: 'default' as const, className: 'text-[10px] px-2 py-0.5 bg-[#F0FDFA] text-[#115E59] border-[#14B8A6] hover:bg-[#F0FDFA]' },
-  disputed: { label: 'Disputed', variant: 'default' as const, className: 'text-[10px] px-2 py-0.5 bg-white text-[#BE123C] border-[#E11D48] hover:bg-[#FFF1F2]' },
-  pending: { label: 'Pending', variant: 'default' as const, className: 'text-[10px] px-2 py-0.5 bg-[#F8FAFC] text-[#475569] border-[#94A3B8] hover:bg-[#F8FAFC]' },
-  revised: { label: 'Revised', variant: 'default' as const, className: 'text-[10px] px-2 py-0.5 bg-[#EFF6FF] text-[#1E40AF] border-[#3B82F6] hover:bg-[#EFF6FF]' },
+  approved: { label: 'Approved', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#F0FDFA] text-[#115E59] border-[#14B8A6] hover:bg-[#F0FDFA]' },
+  disputed: { label: 'Disputed', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-white text-[#BE123C] border-[#E11D48] hover:bg-[#FFF1F2]' },
+  pending: { label: 'Pending', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#F8FAFC] text-[#475569] border-[#94A3B8] hover:bg-[#F8FAFC]' },
+  revised: { label: 'Revised', variant: 'default' as const, className: 'text-xs px-2 py-0.5 bg-[#EFF6FF] text-[#1E40AF] border-[#3B82F6] hover:bg-[#EFF6FF]' },
 }
 
 export function StatusBadge({ status }: { status: EnrichedSectionReview['effectiveStatus'] }) {
@@ -19,7 +19,7 @@ export function StatusBadge({ status }: { status: EnrichedSectionReview['effecti
 
 export function WarnBadge({ text }: { text: string }) {
   return (
-    <Badge variant="default" className="text-[10px] px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border-[#F59E0B] hover:bg-[#FFFBEB]">
+    <Badge variant="default" className="text-xs px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border-[#F59E0B] hover:bg-[#FFFBEB]">
       {text}
     </Badge>
   )
@@ -27,7 +27,7 @@ export function WarnBadge({ text }: { text: string }) {
 
 export function EdgeBadge({ text }: { text: string }) {
   return (
-    <Badge variant="default" className="text-[10px] px-2 py-0.5 bg-[#FFF1F2] text-[#9F1239] border-[#E11D48] hover:bg-[#FFF1F2]">
+    <Badge variant="default" className="text-xs px-2 py-0.5 bg-[#FFF1F2] text-[#9F1239] border-[#E11D48] hover:bg-[#FFF1F2]">
       {text}
     </Badge>
   )

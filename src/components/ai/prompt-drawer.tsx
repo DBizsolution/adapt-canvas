@@ -112,7 +112,7 @@ export function PromptDrawer({
         body: JSON.stringify({
           prompt: p,
           scope: store.scope === 'section' && sectionType ? 'section' : 'full',
-          sectionType: store.scope === 'section' ? sectionType : undefined,
+          sectionType: store.scope === 'section' && sectionType ? sectionType : undefined,
         }),
       })
 

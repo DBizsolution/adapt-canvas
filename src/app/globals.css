@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -240,6 +241,14 @@
   width: 40%;
   background: var(--accent-blue);
   animation: page-loading 1s ease-in-out infinite;
+}
+
+/* Row borders — last child has no border */
+.row-border {
+  border-bottom: 1px solid var(--border-default);
+}
+.row-border:last-child {
+  border-bottom: none;
 }
 
 /* Abbreviation terms */

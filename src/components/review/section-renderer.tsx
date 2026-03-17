@@ -33,7 +33,7 @@ const sectionTypeExplanations: Record<SectionType, string> = {
 
 function FieldRow({ label, value, warn, edge }: { label: string; value: string; warn?: string; edge?: string }) {
   return (
-    <div className="flex gap-3 py-2 items-start last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+    <div className="row-border flex gap-3 py-2 items-start">
       <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{label.includes(':') ? label.toUpperCase() : label}</span>
       <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
         <AbbrText text={value} />
@@ -96,7 +96,7 @@ function EntityRenderer({ entity }: { entity: Entity }) {
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Fields</p>
         {entity.key_fields.map(f => (
-          <div key={f.name} className="flex gap-3 py-2 items-start last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+          <div key={f.name} className="row-border flex gap-3 py-2 items-start">
             <span className="text-sm font-semibold min-w-[160px] shrink-0" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
             <StateBadge>{f.type}</StateBadge>
             <span className="text-sm leading-relaxed flex-1" style={{ color: 'var(--text-secondary)' }}>
@@ -117,7 +117,7 @@ function EntityRenderer({ entity }: { entity: Entity }) {
           ))}
         </div>
         {entity.lifecycle.transitions.map((t, i) => (
-          <div key={i} className="grid grid-cols-[1fr_30px_1fr_1.5fr_1.5fr] gap-2 py-2 items-center last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+          <div key={i} className="row-border grid grid-cols-[1fr_30px_1fr_1.5fr_1.5fr] gap-2 py-2 items-center">
             <StateBadge>{t.from}</StateBadge>
             <span className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>→</span>
             <StateBadge>{t.to}</StateBadge>
@@ -149,7 +149,7 @@ function JourneyRenderer({ journey }: { journey: Journey }) {
 
       <div>
         {journey.steps.map(s => (
-          <div key={s.order} className="flex gap-3 py-3 last:border-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
+          <div key={s.order} className="row-border flex gap-3 py-3">
             <div
               className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
               style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}

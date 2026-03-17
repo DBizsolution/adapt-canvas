@@ -3,7 +3,11 @@ import type { IntentModel, SectionType } from '@/domain/intent-model/types'
 import { SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
 import { IntentModelSchema, SectionSchemas } from './model-schemas'
 
-const openai = new OpenAI()
+let _openai: OpenAI | null = null
+function getOpenAI() {
+  if (!_openai) _openai = new OpenAI()
+  return _openai
+}
 
 const TYPE_DEFINITIONS = `
 type IntentModel = {
@@ -119,7 +123,7 @@ ${JSON.stringify(req.currentModel, null, 2)}
 ${req.prompt}`
   }
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: 'gpt-4o-mini',
     response_format: { type: 'json_object' },
     messages: [

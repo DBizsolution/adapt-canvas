@@ -233,7 +233,7 @@ export function ChatPanel({
           className="flex h-[56px] shrink-0 items-center gap-3 px-4"
           style={{ background: 'var(--bg-page)' }}
         >
-          <Sparkles size={18} style={{ color: 'var(--accent-blue)' }} />
+          <Sparkles size={18} style={{ color: 'var(--acfs-navy)' }} />
           <span className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
             VBS Chat
           </span>
@@ -409,7 +409,7 @@ export function ChatPanel({
                 onClick={() => handleSubmit()}
                 disabled={!prompt.trim() || store.status === 'loading'}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
-                style={{ background: 'var(--accent-blue)', color: 'var(--text-white)' }}
+                style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
               >
                 <Send size={16} />
               </button>

@@ -26,6 +26,8 @@
     --accent-blue: #0081F2;
     --accent-green: #25BA3B;
     --accent-dark: #1A1A19;
+    --acfs-navy: #002C61;
+    --acfs-navy-light: #003A7D;
 
     --shadow-subtle: 0px 0px 1px 0px rgba(0,0,0,0.05);
     --shadow-float: 0px 12px 32px 0px rgba(0,0,0,0.02);
@@ -101,7 +103,7 @@
 }
 
 @theme inline {
-    --font-sans: -apple-system, "Segoe UI Variable Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-sans: "DM Sans Variable", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -143,16 +145,41 @@
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border-default);
+  }
   * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
   }
   body {
-    @apply text-foreground;
     background: var(--bg-page);
+    color: var(--text-primary);
     font-family: var(--font-sans);
   }
-  html {
-    @apply font-sans;
+  /* Ensure inputs/textareas have visible borders */
+  input,
+  textarea,
+  select {
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    background: var(--bg-white);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 200ms;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(0,129,242,0.12);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted);
   }
 }
 

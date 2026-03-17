@@ -90,7 +90,7 @@ export function DiffPreview({
           onClick={onApprove}
           disabled={isApplying}
           className="flex-1 rounded-[10px] px-3.5 py-2 text-sm font-medium transition-colors duration-200 disabled:opacity-50"
-          style={{ background: 'var(--accent-blue)', color: 'var(--text-white)' }}
+          style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
         >
           {isApplying ? 'Applying...' : 'Approve'}
         </button>

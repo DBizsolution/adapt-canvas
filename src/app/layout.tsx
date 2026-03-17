@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
+import '@fontsource-variable/dm-sans'
 import './globals.css'
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: 'VBS Intent Model Review',
@@ -16,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className="min-h-screen bg-background font-sans antialiased">
+    <html lang="en">
+      <body className="min-h-screen antialiased" style={{ fontFamily: "'DM Sans Variable', sans-serif" }}>
         {children}
       </body>
     </html>

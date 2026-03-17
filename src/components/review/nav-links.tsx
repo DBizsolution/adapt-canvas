@@ -34,7 +34,7 @@ export function NavSidebar() {
       style={{ background: 'var(--bg-nav)', height: '100vh' }}
     >
       {/* Logo mark */}
-      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold" style={{ background: 'var(--accent-blue)', color: 'var(--text-white)' }}>
+      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold" style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}>
         V
       </div>
 

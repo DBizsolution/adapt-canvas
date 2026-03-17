@@ -254,21 +254,19 @@ function renderItem(item: SectionRendererProps['item'], type: SectionType) {
 export function SectionCard({ item, type, review, currentReviewerId }: SectionRendererProps) {
   const displayId = 'name' in item ? (item as { name: string }).name : item.id
   const description = 'description' in item ? (item as { description: string }).description : ''
-  const color = sectionColors[type]
-
   return (
     <div
       id={review.targetId}
-      className="mb-5 bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-      style={{ border: `1px solid ${color.borderHex}22` }}
+      className="mb-5 overflow-hidden rounded-xl transition-shadow hover:shadow-md"
+      style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-subtle)' }}
     >
-      {/* Colored header bar */}
+      {/* Header bar */}
       <div
-        className={`px-4 py-3 ${color.bg} flex items-center justify-between`}
-        style={{ borderBottom: `1px solid ${color.borderHex}33` }}
+        className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--bg-card-gray)' }}
       >
         <div className="flex items-center gap-2">
-          <h3 className={`text-sm font-bold ${color.text} m-0`}>{displayId}</h3>
+          <h3 className="m-0 text-sm font-bold" style={{ color: 'var(--acfs-navy)' }}>{displayId}</h3>
           <HelpTip text={`${sectionTypeExplanations[type]} — ${description || displayId}`} />
         </div>
         <StatusBadge status={review.effectiveStatus} />

@@ -44,6 +44,20 @@ export const intentModel: IntentModel = {
         { id: 'carrier:r4', description: 'Pay booking fee (minimum charge + volumetric).' },
       ],
     },
+    {
+      id: 'acfs',
+      name: 'ACFS Internal',
+      description: 'Internal ACFS warehouse staff who manage operations, configure availability, and oversee bookings and delegations.',
+      auth: 'Internal SSO / admin credentials.',
+      responsibilities: [
+        { id: 'acfs:r1', description: 'Edit HBL details and update statuses manually when corrections are needed.' },
+        { id: 'acfs:r2', description: 'Assign a Freight Forwarder to an HBL on behalf of a WFF.' },
+        { id: 'acfs:r3', description: 'Edit booking details — update driver/truck info, add/remove HBLs, or cancel bookings.' },
+        { id: 'acfs:r4', description: 'Edit pickup details — reassign windows, override slot constraints.' },
+        { id: 'acfs:r5', description: 'Edit delegation — reassign or revoke delegation between parties.' },
+        { id: 'acfs:r6', description: 'Configure pickup slot availability — set capacity per site, time slots, and blackout dates.' },
+      ],
+    },
   ],
   entities: [
     {
@@ -130,7 +144,7 @@ export const intentModel: IntentModel = {
     {
       id: 'BR-003',
       description: 'DO rules follow a 3-level hierarchy: WFF → FF → Carrier/Customer. Each level can upload a DO that applies to the levels below.',
-      applies_to: ['hbl', 'wff', 'ff', 'carrier'],
+      applies_to: ['hbl', 'wff', 'ff', 'carrier', 'acfs'],
       source: 'BRD s4.4',
     },
   ],

@@ -47,7 +47,7 @@ export default async function ReviewLayout({
               border: '1px solid var(--border-default)',
             }}
           >
-            <div className="mx-auto max-w-5xl px-6 py-6">
+            <div className="px-5 py-5">
               {children}
             </div>
           </div>

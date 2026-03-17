@@ -428,9 +428,9 @@ export function ChatPanel({
 
         {/* Input dock — sticky bottom */}
         {(store.status === 'idle' || store.status === 'loading') && (
-          <div className="shrink-0 px-6 pb-4 pt-2" style={{ background: 'var(--bg-page)' }}>
+          <div className="shrink-0 px-4 pb-3 pt-2" style={{ background: 'var(--bg-page)' }}>
             <div
-              className="flex items-end gap-2 rounded-[22px] p-3"
+              className="rounded-[16px] px-3 pb-2 pt-1"
               style={{
                 background: 'var(--bg-white)',
                 border: '1px solid var(--border-dark)',
@@ -442,30 +442,27 @@ export function ChatPanel({
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe the change you want to make..."
                 disabled={store.status === 'loading'}
-                rows={1}
-                className="flex-1 resize-none bg-transparent text-base leading-6 outline-none placeholder:text-[var(--text-muted)] disabled:opacity-50"
-                style={{ color: 'var(--text-primary)', maxHeight: '120px', border: 'none', padding: '4px 0', boxShadow: 'none' }}
+                rows={3}
+                className="block w-full resize-none bg-transparent text-sm leading-5 outline-none placeholder:text-[var(--text-muted)] disabled:opacity-50"
+                style={{ color: 'var(--text-primary)', border: 'none', padding: '8px 0 4px', boxShadow: 'none' }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
                     handleSubmit()
                   }
                 }}
-                onInput={(e) => {
-                  const el = e.currentTarget
-                  el.style.height = 'auto'
-                  el.style.height = Math.min(el.scrollHeight, 120) + 'px'
-                }}
               />
-              <button
-                type="button"
-                onClick={() => handleSubmit()}
-                disabled={!prompt.trim() || store.status === 'loading'}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
-                style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
-              >
-                <Send size={16} />
-              </button>
+              <div className="flex items-center justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleSubmit()}
+                  disabled={!prompt.trim() || store.status === 'loading'}
+                  className="flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
+                  style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
+                >
+                  <Send size={14} />
+                </button>
+              </div>
             </div>
           </div>
         )}

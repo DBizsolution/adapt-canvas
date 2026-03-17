@@ -366,46 +366,6 @@ export function ChatPanel({
               </div>
             )}
 
-            {/* Scope tab */}
-            {sectionLabel ? (
-              <div
-                className="inline-flex rounded-lg p-0.5"
-                style={{ background: 'var(--bg-gray-subtle)', border: '1px solid var(--border-light)' }}
-              >
-                <button
-                  type="button"
-                  onClick={() => store.setScope('section')}
-                  className="rounded-md px-3 py-1 text-xs font-medium transition-all duration-200"
-                  style={{
-                    background: store.scope === 'section' ? 'var(--bg-white)' : 'transparent',
-                    color: store.scope === 'section' ? 'var(--text-primary)' : 'var(--text-muted)',
-                    boxShadow: store.scope === 'section' ? 'var(--shadow-subtle)' : 'none',
-                  }}
-                >
-                  {sectionLabel} only
-                </button>
-                <button
-                  type="button"
-                  onClick={() => store.setScope('full')}
-                  className="rounded-md px-3 py-1 text-xs font-medium transition-all duration-200"
-                  style={{
-                    background: store.scope === 'full' ? 'var(--bg-white)' : 'transparent',
-                    color: store.scope === 'full' ? 'var(--text-primary)' : 'var(--text-muted)',
-                    boxShadow: store.scope === 'full' ? 'var(--shadow-subtle)' : 'none',
-                  }}
-                >
-                  Full model
-                </button>
-              </div>
-            ) : (
-              <div
-                className="inline-flex rounded-lg px-3 py-1.5 text-xs font-medium"
-                style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)', border: '1px solid var(--border-light)' }}
-              >
-                Editing full model
-              </div>
-            )}
-
             {/* Suggestions */}
             <SuggestionChips model={model} onSelect={(s) => setPrompt(s)} />
 
@@ -533,16 +493,55 @@ export function ChatPanel({
                   }
                 }}
               />
-              <div className="flex items-center justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={() => handlePlan()}
-                  disabled={!prompt.trim() || store.status === 'loading'}
-                  className="flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
-                  style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
-                >
-                  <Send size={14} />
-                </button>
+              <div className="flex items-center gap-2 pt-1">
+                {/* Scope tab inside input */}
+                {sectionLabel ? (
+                  <div
+                    className="inline-flex rounded-md p-0.5"
+                    style={{ background: 'var(--bg-gray-subtle)' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => store.setScope('section')}
+                      className="rounded px-2 py-0.5 text-[11px] font-medium transition-all duration-200"
+                      style={{
+                        background: store.scope === 'section' ? 'var(--bg-white)' : 'transparent',
+                        color: store.scope === 'section' ? 'var(--text-primary)' : 'var(--text-muted)',
+                        boxShadow: store.scope === 'section' ? 'var(--shadow-subtle)' : 'none',
+                      }}
+                    >
+                      {sectionLabel}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => store.setScope('full')}
+                      className="rounded px-2 py-0.5 text-[11px] font-medium transition-all duration-200"
+                      style={{
+                        background: store.scope === 'full' ? 'var(--bg-white)' : 'transparent',
+                        color: store.scope === 'full' ? 'var(--text-primary)' : 'var(--text-muted)',
+                        boxShadow: store.scope === 'full' ? 'var(--shadow-subtle)' : 'none',
+                      }}
+                    >
+                      Full model
+                    </button>
+                  </div>
+                ) : (
+                  <span className="rounded-md px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)' }}>
+                    Full model
+                  </span>
+                )}
+
+                <div className="ml-auto">
+                  <button
+                    type="button"
+                    onClick={() => handlePlan()}
+                    disabled={!prompt.trim() || store.status === 'loading'}
+                    className="flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 disabled:opacity-30"
+                    style={{ background: 'var(--acfs-navy)', color: 'var(--text-white)' }}
+                  >
+                    <Send size={14} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

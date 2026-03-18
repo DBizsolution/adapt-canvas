@@ -1,0 +1,113 @@
+'use client'
+
+import { useState } from 'react'
+import { Handle, Position } from '@xyflow/react'
+import type { NodeProps } from '@xyflow/react'
+import type { IANodeData } from './ia-types'
+
+const statusColors = {
+  done: '#25BA3B',
+  partial: '#F59E0B',
+  'not-built': '#D1D5DB',
+} as const
+
+const statusLabels = {
+  done: 'Done',
+  partial: 'Partial',
+  'not-built': 'Not built',
+} as const
+
+export function IANode({ data }: NodeProps) {
+  const nodeData = data as unknown as IANodeData
+  const Icon = nodeData.icon
+  const statusColor = statusColors[nodeData.status]
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <div
+      className="group relative"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div
+        className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 transition-all duration-200"
+        style={{
+          background: 'var(--bg-white)',
+          border: `1px solid ${hovered ? 'var(--accent-blue)' : 'var(--border-default)'}`,
+          boxShadow: hovered ? '0 4px 16px rgba(0,0,0,0.08)' : 'none',
+          minWidth: 160,
+          cursor: 'default',
+        }}
+      >
+        <Handle type="target" position={Position.Left} className="!bg-transparent !border-0 !w-0 !h-0" />
+
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+          style={{ background: 'var(--bg-gray-subtle)' }}
+        >
+          <Icon size={15} style={{ color: 'var(--text-secondary)' }} strokeWidth={1.8} />
+        </div>
+
+        <div className="flex flex-col gap-0.5">
+          <span
+            className="text-[13px] font-medium leading-tight"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {nodeData.label}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: statusColor }}
+            />
+            <span
+              className="text-[10px] font-medium uppercase tracking-wider"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {statusLabels[nodeData.status]}
+            </span>
+          </div>
+        </div>
+
+        <Handle type="source" position={Position.Right} className="!bg-transparent !border-0 !w-0 !h-0" />
+      </div>
+
+      {/* Hover tooltip */}
+      {hovered && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-50 rounded-xl px-4 py-3 pointer-events-none"
+          style={{
+            top: 'calc(100% + 8px)',
+            background: 'var(--bg-white)',
+            border: '1px solid var(--border-default)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+            width: 280,
+          }}
+        >
+          <p
+            className="text-[12px] leading-relaxed m-0"
+            style={{ color: 'var(--text-secondary)', border: 'none', padding: 0 }}
+          >
+            {nodeData.description}
+          </p>
+          {nodeData.refs && nodeData.refs.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {nodeData.refs.map(ref => (
+                <span
+                  key={ref}
+                  className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium"
+                  style={{
+                    background: 'var(--bg-blue-subtle)',
+                    color: 'var(--accent-blue)',
+                  }}
+                >
+                  {ref}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

@@ -78,8 +78,11 @@ export function processAbbrInChildren(children: ReactNode): ReactNode {
     if (typeof child === 'string') {
       return <AbbrText text={child} />
     }
-    if (isValidElement(child) && child.props.children) {
-      return { ...child, props: { ...child.props, children: processAbbrInChildren(child.props.children) } }
+    if (isValidElement(child)) {
+      const props = child.props as Record<string, unknown>
+      if (props.children) {
+        return { ...child, props: { ...props, children: processAbbrInChildren(props.children as ReactNode) } }
+      }
     }
     return child
   })

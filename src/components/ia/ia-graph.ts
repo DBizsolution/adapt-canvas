@@ -103,8 +103,9 @@ export function buildIAGraph(model: IntentModel, positions: IAPositions): IAGrap
     for (const ref of screen.refs) {
       referencedResponsibilities.add(ref)
 
-      // Stale ref: ref not found in any actor's responsibilities
-      if (!responsibilityMap.has(ref)) {
+      // Stale ref: only check responsibility-format refs (contain ':')
+      // Journey IDs, BR-*, OQ-*, C-* are informational tags, not responsibility mappings
+      if (ref.includes(':') && !responsibilityMap.has(ref)) {
         drift.push({
           type: 'stale-ref',
           message: `Screen '${screenId}' references '${ref}' which does not exist in the model`,
@@ -122,7 +123,9 @@ export function buildIAGraph(model: IntentModel, positions: IAPositions): IAGrap
   }
 
   // Unmapped responsibilities: in model but not referenced by any screen
+  // Exclude driver (no portal access)
   for (const actor of model.actors) {
+    if (actor.id === 'driver') continue
     for (const resp of actor.responsibilities) {
       if (!referencedResponsibilities.has(resp.id)) {
         drift.push({

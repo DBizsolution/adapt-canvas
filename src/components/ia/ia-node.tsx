@@ -51,8 +51,11 @@ export function IANode({ data }: NodeProps) {
 
         {/* Status dot — top right corner */}
         <div
-          className="absolute top-2 right-2 h-2 w-2 rounded-full"
-          style={{ background: statusColor }}
+          className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full"
+          style={{
+            background: statusColor,
+            boxShadow: nodeData.status === 'not-built' ? 'inset 0 0 0 1.5px var(--border-dark)' : 'none',
+          }}
         />
 
         <div

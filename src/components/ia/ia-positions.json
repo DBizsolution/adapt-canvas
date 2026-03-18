@@ -51,6 +51,7 @@
       "actor": "lsp",
       "refs": [
         "lsp:r8",
+        "lsp-modifies-booking",
         "BR-015"
       ],
       "status": "partial"

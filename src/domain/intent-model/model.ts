@@ -11,7 +11,7 @@ export const intentModel: IntentModel = {
     {
       id: 'lsp',
       name: 'Logistics Service Provider (LSP)',
-      description: 'Core registered user. Umbrella term covering NVOCC, wholesale Freight Forwarder, Freight Forwarder, Transporter, Farmers, and Customer/Clearing agents. Each LSP sees only shipments allocated to them. Can delegate to another LSP or a one-off P4TC. Replaces the previous WFF/FF/Carrier actor split.',
+      description: 'Core registered user. Umbrella term covering NVOCC, wholesale Freight Forwarder, Freight Forwarder, Transporter, Farmers, and Customer/Clearing agents. Each LSP sees only shipments allocated to them. Can delegate to another LSP or a one-off P4TC. Replaces the previous WFF/FF/Carrier actor split. Note: roles are contextual per HBL — the same organisation can appear at different levels (e.g. top-level party on one HBL, delegatee on another). Visibility and role enforcement must be HBL-scoped, not user-scoped.',
       auth: 'Username + password. Created by ACFS admin in the portal.',
       responsibilities: [
         { id: 'lsp:r1', description: 'View list of assigned HBLs with shipment status, milestone, payment, delegation, and booking info. Data auto-synced on login and on subsequent integration layer calls.' },
@@ -100,7 +100,9 @@ export const intentModel: IntentModel = {
         { name: 'hbl_status', type: "'unassigned' | 'assigned' | 'delegated' | 'booked'", description: 'Delegation/booking status. Separate dimension from milestone. "assigned" means allocated to an LSP. "delegated" means LSP has passed to another party. "booked" means pickup is scheduled.' },
         { name: 'customs_clearance_status', type: 'string', description: 'Customs clearance state including quarantine. Must be fully cleared (not partial) for booking. Shown in HBL table. Sourced from Maximus — update frequency from ICS unclear.' },
         { name: 'under_bond', type: 'boolean', description: 'Flag — NOT a lifecycle state. Manually set by LSP/ACFS in portal. Skips DO requirement. Not synced from Maximus.', warn: 'Full under-bond concept needs deeper clarification (OQ-025).' },
-        { name: 'storage_fee_flag', type: 'boolean', description: 'Visual indicator that storage fees apply. Shown in HBL table as a flag, not an amount.' },
+        { name: 'under_bond_verified', type: 'boolean', description: 'Whether ACFS has verified the under-bond marking. Verification happens outside the portal; portal records the result. Set by ACFS staff only.' },
+        { name: 'storage_fee_flag', type: 'boolean', description: 'Visual indicator that storage fees apply. Derived from last_free_storage_date — auto-calculated, not manually set.' },
+        { name: 'last_free_storage_date', type: 'date', description: 'Last date of free storage. After this date, storage_fee_flag is automatically set to true. Sourced from Maximus or set by ACFS.' },
         { name: 'release_type', type: "'free_release' | string", description: 'Determines DO requirements. Free release removes DO requirement for that tier.', warn: 'Full list of release types pending client confirmation (OQ-022).' },
         { name: 'assigned_lsp', type: 'string', description: 'LSP this HBL is allocated to. Set by ACFS during HBL/WFF assignment or auto-assigned from data.' },
       ],
@@ -194,6 +196,49 @@ export const intentModel: IntentModel = {
         states: ['active'],
         transitions: [],
         warn: 'Static entity — created during booking flow, no state transitions.',
+      },
+    },
+    {
+      id: 'delivery_order',
+      name: 'Delivery Order (DO)',
+      description: 'Document required per HBL for pickup authorization. Uploaded by LSP or P4TC, validated by ACFS. Each tier in the HBL hierarchy uploads independently — no inheritance. Free release removes the DO requirement for that tier. Under-bond HBLs skip DO requirement entirely.',
+      key_fields: [
+        { name: 'do_id', type: 'string', description: 'System-generated unique ID.' },
+        { name: 'hbl_id', type: 'string', description: 'HBL this DO belongs to.' },
+        { name: 'uploaded_by', type: 'string', description: 'LSP or P4TC who uploaded the document.' },
+        { name: 'upload_date', type: 'date', description: 'When the DO was uploaded.' },
+        { name: 'document_url', type: 'string', description: 'Stored document reference/URL.' },
+        { name: 'tier_level', type: 'string', description: 'Which level in the HBL hierarchy this DO covers. Each tier uploads independently.' },
+      ],
+      lifecycle: {
+        states: ['not_provided', 'uploaded', 'pending_validation', 'validated', 'flagged', 'not_required'],
+        transitions: [
+          { from: 'not_provided', to: 'uploaded', trigger: 'LSP or P4TC uploads DO document' },
+          { from: 'not_provided', to: 'not_required', trigger: 'HBL has free_release flag or under_bond flag' },
+          { from: 'uploaded', to: 'pending_validation', trigger: 'ACFS begins DO review' },
+          { from: 'pending_validation', to: 'validated', trigger: 'ACFS confirms DO matches HBL details' },
+          { from: 'pending_validation', to: 'flagged', trigger: 'ACFS flags DO as incorrect — requires correction' },
+          { from: 'flagged', to: 'uploaded', trigger: 'LSP or P4TC re-uploads corrected DO' },
+        ],
+      },
+    },
+    {
+      id: 'delegation',
+      name: 'Delegation',
+      description: 'Records the delegation of one or more HBLs from one party to another. Tracks the chain of custody. Can be revoked by ACFS.',
+      key_fields: [
+        { name: 'delegation_id', type: 'string', description: 'System-generated unique ID.' },
+        { name: 'delegator', type: 'string', description: 'LSP or P4TC who initiated the delegation.' },
+        { name: 'delegatee', type: 'string', description: 'Target party — existing LSP (by ID) or new P4TC (by email).' },
+        { name: 'delegation_method', type: "'existing_lsp' | 'one_off_p4tc'", description: 'Whether delegating to a registered LSP or creating a one-off P4TC.' },
+        { name: 'hbl_ids', type: 'string[]', description: 'HBLs included in this delegation.' },
+        { name: 'created_at', type: 'date', description: 'When the delegation was created.' },
+      ],
+      lifecycle: {
+        states: ['active', 'revoked'],
+        transitions: [
+          { from: 'active', to: 'revoked', trigger: 'ACFS revokes the delegation (acfs:r13)', guard: 'HBLs revert to delegator' },
+        ],
       },
     },
     {
@@ -347,6 +392,23 @@ export const intentModel: IntentModel = {
         { order: 8, title: 'Confirmation', detail: 'Booking confirmation with booking reference sent to the account email. No email sent to driver — booking party forwards details externally.' },
       ],
       success_outcome: 'Booking is confirmed with reference number. HBLs move to hbl_status "booked". Confirmation sent to account email.',
+    },
+    {
+      id: 'lsp-modifies-booking',
+      name: 'LSP Modifies a Booking',
+      primary_actor: 'lsp',
+      preconditions: [
+        'LSP is logged in',
+        'Booking exists in "booked" state',
+      ],
+      steps: [
+        { order: 1, title: 'View booking details', detail: 'LSP opens an existing booking from their bookings list.' },
+        { order: 2, title: 'Choose modification type', detail: 'LSP can: (a) change truck/driver details — allowed anytime until collection, (b) change slot date/time — allowed before change cutoff only, (c) add/remove HBLs — allowed before change cutoff only.' },
+        { order: 3, title: 'System checks cutoff', detail: 'If change cutoff has passed: truck/driver changes proceed, but slot/HBL changes are blocked. Cost-impacting changes after cutoff require ACFS admin override (BR-015).' },
+        { order: 4, title: 'Apply changes', detail: 'For truck/driver: update in-place. For slot: re-validate availability, recalculate fees if HBLs changed. For HBL removal: treated as partial cancellation with offline refund. For HBL addition: additional fee charged.' },
+        { order: 5, title: 'Confirmation', detail: 'Updated booking confirmation sent to account email. Booking reference remains the same.' },
+      ],
+      success_outcome: 'Booking is updated with new details. Confirmation sent. If fee changed, payment difference handled.',
     },
     {
       id: 'p4tc-books-pickup',

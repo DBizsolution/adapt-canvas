@@ -253,6 +253,8 @@ export function buildIAGraph(model: IntentModel, positions: IAPositions): IAGrap
       id: edgeId,
       source: edgeDef.source,
       target: edgeDef.target,
+      sourceHandle: edgeDef.sourceHandle ?? 'right',
+      targetHandle: edgeDef.targetHandle ?? 'left',
       style: edgeStyle,
       markerEnd,
     }

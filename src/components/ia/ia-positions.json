@@ -352,31 +352,43 @@
       "source": "wff-delegate",
       "target": "p4tc-magic",
       "label": "Sends magic link",
-      "cross": true
+      "cross": true,
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     "e-cross-2": {
       "source": "p4tc-delegate",
       "target": "p4tc-magic",
       "label": "Chain delegation",
-      "cross": true
+      "cross": true,
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     "e-cross-3": {
       "source": "wff-book",
-      "target": "sh-payment"
+      "target": "sh-payment",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     "e-cross-5": {
       "source": "acfs-pickup",
       "target": "gh-verify",
       "label": "Booking → processed",
-      "cross": true
+      "cross": true,
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     "e-wff-5a": {
       "source": "wff-dashboard",
-      "target": "sh-bookings"
+      "target": "sh-bookings",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     },
     "e-wff-5b": {
       "source": "wff-dashboard",
-      "target": "sh-notifs"
+      "target": "sh-notifs",
+      "sourceHandle": "bottom",
+      "targetHandle": "top"
     }
   },
   "_lanes": {

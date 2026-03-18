@@ -35,7 +35,7 @@ type IACanvasProps = {
 }
 
 export function IACanvas({ initialNodes, initialEdges, drift, stats }: IACanvasProps) {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes)
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edgesState, , onEdgesChange] = useEdgesState(initialEdges)
   const [showDrift, setShowDrift] = useState(false)
 
@@ -53,6 +53,16 @@ export function IACanvas({ initialNodes, initialEdges, drift, stats }: IACanvasP
     })
   }, [])
 
+  const onNodeMouseEnter = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.type !== 'ia') return
+    setNodes(nds => nds.map(n => n.id === node.id ? { ...n, zIndex: 1000 } : n))
+  }, [setNodes])
+
+  const onNodeMouseLeave = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.type !== 'ia') return
+    setNodes(nds => nds.map(n => n.id === node.id ? { ...n, zIndex: 0 } : n))
+  }, [setNodes])
+
   return (
     <div className="relative h-full w-full" style={{ background: 'var(--bg-page)' }}>
       <ReactFlow
@@ -61,6 +71,8 @@ export function IACanvas({ initialNodes, initialEdges, drift, stats }: IACanvasP
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeDragStop={onNodeDragStop}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.08, maxZoom: 1 }}

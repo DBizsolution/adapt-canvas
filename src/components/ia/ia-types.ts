@@ -15,6 +15,8 @@ export const edgeDefSchema = z.object({
   target: z.string(),
   label: z.string().optional(),
   cross: z.boolean().optional(),
+  sourceHandle: z.string().optional(),
+  targetHandle: z.string().optional(),
 })
 
 export const laneDefSchema = z.object({

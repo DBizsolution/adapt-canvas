@@ -53,7 +53,8 @@ export function IANode({ data }: NodeProps) {
           opacity: isShared ? 0.7 : 1,
         }}
       >
-        <Handle type="target" position={Position.Left} className="!bg-transparent !border-0 !w-0 !h-0" />
+        <Handle type="target" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-0 !h-0" />
+        <Handle type="target" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-0 !h-0" />
 
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
@@ -83,7 +84,8 @@ export function IANode({ data }: NodeProps) {
           </div>
         </div>
 
-        <Handle type="source" position={Position.Right} className="!bg-transparent !border-0 !w-0 !h-0" />
+        <Handle type="source" position={Position.Right} id="right" className="!bg-transparent !border-0 !w-0 !h-0" />
+        <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-transparent !border-0 !w-0 !h-0" />
       </div>
 
       {/* Hover tooltip */}

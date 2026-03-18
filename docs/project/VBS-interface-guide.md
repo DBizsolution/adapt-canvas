@@ -120,9 +120,9 @@ That's it. Everything else is rules around who can do what, when, and what paper
 ## The 5 things that actually happen in the app
 
 ### Thing 1: Shipments appear
-- Data flows in from Maximas via **periodic batch** (once or twice daily, not real-time)
+- Data flows in from Maximus via **periodic batch** (once or twice daily, not real-time)
 - Portal fetches HBL data from custom cargo table starting **7 days before vessel arrival**
-- Maximas talks to ICS (customs integration) to get HBL details
+- Maximus talks to ICS (customs integration) to get HBL details
 - House Bills show up in people's dashboards with milestone status
 - **You don't build the sync** — it's backend. Your UI just displays what's there.
 
@@ -151,7 +151,7 @@ That's it. Everything else is rules around who can do what, when, and what paper
 
 ### Thing 5: Pickup happens
 - Physical pickup happens outside the portal
-- Maximas updates the status to "Collected"
+- Maximus updates the status to "Collected"
 - Portal reflects it on next batch refresh
 - **You don't build this** — status just updates from the backend.
 
@@ -159,7 +159,7 @@ That's it. Everything else is rules around who can do what, when, and what paper
 
 ## HBL Milestones & Status
 
-### Milestones (from Maximas — physical journey)
+### Milestones (from Maximus — physical journey)
 `on_vessel → at_wharf → in_yard → unpacked → collected`
 
 These are separate from the HBL pickup status. "Delegated" and "booked" are NOT milestones.
@@ -219,9 +219,9 @@ If none of these apply and the DO is missing, an **ACFS override** can force-all
 
 | Data | Source | Cadence |
 |------|--------|---------|
-| HBL data, milestones | Maximas → periodic batch | Once or twice daily |
+| HBL data, milestones | Maximus → periodic batch | Once or twice daily |
 | Party registry (FFs, Carriers) | ACFS bulk upload | One-time for Phase 1 |
-| Customs clearance status | Maximas via ICS | Batch (display only) |
+| Customs clearance status | Maximus via ICS | Batch (display only) |
 | Under-bond flag | Manual (WFF/FF/ACFS staff) | On demand |
 
 ---
@@ -241,10 +241,10 @@ If none of these apply and the DO is missing, an **ACFS override** can force-all
 ## What you DON'T need to build
 
 - No customs/ABF integration
-- No replacing Maximas — it stays as the source of truth
+- No replacing Maximus — it stays as the source of truth
 - No warehouse pick/pack tracking
 - No refund processing
-- No real-time data — periodic batch from Maximas
+- No real-time data — periodic batch from Maximus
 - No per-site fee configuration (global only in Phase 1)
 - No self-service rebooking for carriers (Phase 1)
 - No hard capacity enforcement — density indicator only
@@ -272,7 +272,7 @@ If none of these apply and the DO is missing, an **ACFS override** can force-all
 
 All 25 PM questions have been addressed. Key resolutions:
 
-1. **Party data:** One-time ACFS bulk upload, local DB, no Maximas sync
+1. **Party data:** One-time ACFS bulk upload, local DB, no Maximus sync
 2. **Tier-2 FF linking:** Manual assignment by WFF (delegation = assignment)
 3. **Milestones:** on_vessel, at_wharf, in_yard, unpacked, collected (pending client confirmation)
 4. **Fee method:** Per-HBL volumetric (flat vs percentage still undecided)

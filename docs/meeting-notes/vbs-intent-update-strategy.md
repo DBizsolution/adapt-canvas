@@ -20,15 +20,15 @@ These resolve open questions — update the relevant fields and remove the warni
 - **Q1** — `wff:r3/r4`: Delegate OR book per HBL, never both
 - **Q2/Q3** — `ff.auth`, `carrier.auth`: Magic link + OTP, no account creation. Same mechanism for all external parties after WFF.
 - **Q4** — One-off customer: magic link with status visibility, expires on collection, no dashboard
-- **Q5** — Party sourcing: one-time bulk upload from ACFS registry, local DB, no Maximas sync
-- **Q6** — Tier-2 linking: manual assignment by WFF only. Remove any Maximas option.
+- **Q5** — Party sourcing: one-time bulk upload from ACFS registry, local DB, no Maximus sync
+- **Q6** — Tier-2 linking: manual assignment by WFF only. Remove any Maximus option.
 - **Q7** — Data freshness: periodic batch (once/twice daily)
 - **Q10** — `unpacked → booked` is always valid
 - **Q12** — Under-bond flagging: manual by WFF/FF staff, ACFS can also flag
 - **Q14** — DO override: certain ACFS roles, audit trail required, one-time per HBL until collected
 - **Q17** — Payment: Stripe embedded checkout
 - **Q18** — Refunds: portal-agnostic, handled offline
-- **Q20** — ACFS workflow: 7-day lookahead from Maximas, partial processing allowed
+- **Q20** — ACFS workflow: 7-day lookahead from Maximus, partial processing allowed
 - **Q22** — FOC rebooking: ACFS admin only, all fees waived, reason required
 - **Q23** — Single app, role-based routing
 - **Q24** — Auth: WFF=username/password, FF/Carrier/Customer=magic link+OTP, ACFS/Gate=SSO (OAuth/Okta)

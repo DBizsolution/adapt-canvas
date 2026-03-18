@@ -8,7 +8,7 @@ Natural prompts to paste into the AI chat panel. One at a time — review each d
 
 The HBL milestone states are wrong. There's no "created" — it starts at on_vessel. The correct milestones are: on_vessel, at_wharf, in_yard, unpacked, collected. "delegated" and "booked" are not milestones — those are HBL workflow statuses (separate thing). And under_bond is a flag on the HBL, not a lifecycle state.
 
-Also add these fields to HBL: hbl_status (unassigned/delegated/booked), under_bond (boolean flag, set by WFF or FF staff, skips DO requirement), weight_kg, customs_clearance_status (from Maximas, display only), storage_fee_due (boolean derived from last_free_storage_date), and last_free_storage_date.
+Also add these fields to HBL: hbl_status (unassigned/delegated/booked), under_bond (boolean flag, set by WFF or FF staff, skips DO requirement), weight_kg, customs_clearance_status (from Maximus, display only), storage_fee_due (boolean derived from last_free_storage_date), and last_free_storage_date.
 
 ---
 
@@ -62,7 +62,7 @@ Add booking_reference, site, and payment_status fields to Booking.
 
 Update C-001: no hard capacity, just density indicator. Update C-002: cutoffs are date/time not hours, no-show rebooking is ACFS admin only and free for phase 1.
 
-Add new constraints: ACFS can't change booked slots (phase 1), slot config is per-site, refunds are outside the portal entirely, FOC rebooking is ACFS admin only with reason required, Maximas data is periodic batch (once/twice daily, starts 7 days before vessel arrival), and the whole thing is a single app with role-based routing.
+Add new constraints: ACFS can't change booked slots (phase 1), slot config is per-site, refunds are outside the portal entirely, FOC rebooking is ACFS admin only with reason required, Maximus data is periodic batch (once/twice daily, starts 7 days before vessel arrival), and the whole thing is a single app with role-based routing.
 
 ---
 
@@ -70,4 +70,4 @@ Add new constraints: ACFS can't change booked slots (phase 1), slot config is pe
 
 Add business rules: WFF either delegates or books per HBL never both. DO override needs certain ACFS roles + audit trail + reason, one-time per HBL until collected. Each DO must be mapped to specific HBLs (compliance requirement). Storage fee timer starts after unpack, just show a flag not the amount. ACFS can partially process bookings — process the cleared HBLs, hold back the ones stuck in customs.
 
-Resolve OQ-001: party data comes from a one-time ACFS bulk upload, local DB, no Maximas sync. Update OQ-002: per-HBL volumetric confirmed but flat vs percentage still open. Add new open questions: full list of release types needed, auth model might change due to cross-WFF booking, and confirmed milestone list still pending from client.
+Resolve OQ-001: party data comes from a one-time ACFS bulk upload, local DB, no Maximus sync. Update OQ-002: per-HBL volumetric confirmed but flat vs percentage still open. Add new open questions: full list of release types needed, auth model might change due to cross-WFF booking, and confirmed milestone list still pending from client.

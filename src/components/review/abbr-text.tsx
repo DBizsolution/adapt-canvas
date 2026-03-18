@@ -1,9 +1,14 @@
 'use client'
 
+import { Children, type ReactNode, isValidElement } from 'react'
+
 const GLOSSARY: Record<string, string> = {
   HBL: 'House Bill of Lading',
   WFF: 'Wholesale Freight Forwarder',
   FF: 'Freight Forwarder',
+  LSP: 'Logistics Service Provider',
+  P4TC: 'Party to Collect',
+  NVOCC: 'Non-Vessel Operating Common Carrier',
   DO: 'Delivery Order',
   TC: 'Transport Carrier',
   BRD: 'Business Requirements Document',
@@ -13,6 +18,8 @@ const GLOSSARY: Record<string, string> = {
   FOC: 'Free of Charge',
   ACFS: 'Australian Container Freight Services',
   VBS: 'Vehicle Booking System',
+  ECST: 'ECST (pending definition)',
+  ICS: 'Integrated Cargo System',
 }
 
 // Sort by length descending so longer matches take priority (e.g., "ACFS" before "FF")
@@ -64,4 +71,16 @@ export function AbbrText({ text }: { text: string }) {
       })}
     </>
   )
+}
+
+export function processAbbrInChildren(children: ReactNode): ReactNode {
+  return Children.map(children, (child) => {
+    if (typeof child === 'string') {
+      return <AbbrText text={child} />
+    }
+    if (isValidElement(child) && child.props.children) {
+      return { ...child, props: { ...child.props, children: processAbbrInChildren(child.props.children) } }
+    }
+    return child
+  })
 }

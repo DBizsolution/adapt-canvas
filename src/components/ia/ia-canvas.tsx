@@ -63,7 +63,7 @@ export function IACanvas({ initialNodes, initialEdges, drift, stats }: IACanvasP
         onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.15 }}
+        fitViewOptions={{ padding: 0.08, maxZoom: 1 }}
         minZoom={0.3}
         maxZoom={1.5}
         proOptions={{ hideAttribution: true }}

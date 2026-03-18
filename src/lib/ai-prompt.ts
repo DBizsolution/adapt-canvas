@@ -21,7 +21,7 @@ type IntentModel = {
 }
 
 type Actor = {
-  id: string          // short lowercase, e.g. 'wff', 'acfs'
+  id: string          // short lowercase, e.g. 'lsp', 'acfs', 'p4tc'
   name: string
   description: string
   auth: string
@@ -47,6 +47,7 @@ type Journey = {
   preconditions: string[]
   steps: { order: number; title: string; detail: string; precondition?: string; warn?: string; edge?: string }[]
   success_outcome: string
+  warn?: string
 }
 
 type BusinessRule = {
@@ -60,7 +61,7 @@ type BusinessRule = {
 type Constraint = {
   id: string           // pattern: 'C-NNN'
   constraint: string
-  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal'
+  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal' | 'admin'
 }
 
 type OpenQuestion = {
@@ -86,7 +87,7 @@ ${TYPE_DEFINITIONS}
 - ${scopeInstruction}
 - Preserve ALL existing data unless the user's prompt explicitly asks to change it.
 - Preserve all "warn" and "edge" annotations unless the user specifically asks to modify them.
-- Generate sequential IDs following existing patterns (e.g. if actors have wff, ff, carrier, acfs — a new actor gets a short lowercase ID).
+- Generate sequential IDs following existing patterns (e.g. if actors have lsp, p4tc, acfs — a new actor gets a short lowercase ID).
 - Return ONLY valid JSON. No markdown, no explanation, no wrapping.`
 }
 

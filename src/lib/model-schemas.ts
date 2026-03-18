@@ -57,6 +57,7 @@ export const JourneySchema = z.object({
   preconditions: z.array(z.string()),
   steps: z.array(JourneyStepSchema),
   success_outcome: z.string(),
+  warn: z.string().optional(),
 })
 
 export const BusinessRuleSchema = z.object({
@@ -70,7 +71,7 @@ export const BusinessRuleSchema = z.object({
 export const ConstraintSchema = z.object({
   id: z.string(),
   constraint: z.string(),
-  type: z.enum(['capacity', 'pricing', 'access', 'compliance', 'temporal']),
+  type: z.enum(['capacity', 'pricing', 'access', 'compliance', 'temporal', 'admin']),
 })
 
 export const OpenQuestionSchema = z.object({

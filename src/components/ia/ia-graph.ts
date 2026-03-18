@@ -1,5 +1,4 @@
 import dagre from '@dagrejs/dagre'
-import { MarkerType } from '@xyflow/react'
 import type { Node, Edge } from '@xyflow/react'
 import type { IntentModel } from '@/domain/intent-model/types'
 import type { IAPositions, IANodeData, LaneNodeData, DriftWarning } from './ia-types'
@@ -25,14 +24,14 @@ const DASHED_EDGE_STYLE = {
 }
 
 const ARROW_SOLID = {
-  type: MarkerType.ArrowClosed,
+  type: 'arrowclosed' as const,
   width: 12,
   height: 12,
   color: '#858481',
 }
 
 const ARROW_DASHED = {
-  type: MarkerType.ArrowClosed,
+  type: 'arrowclosed' as const,
   width: 10,
   height: 10,
   color: '#858481',

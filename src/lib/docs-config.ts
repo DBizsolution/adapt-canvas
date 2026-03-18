@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { readdirSync } from 'node:fs'
 
-export type DocCategory = 'project' | 'specs' | 'plans' | 'meeting-notes' | 'uploads'
+export type DocCategory = 'project' | 'build-log' | 'uploads'
 
 export type DocEntry = {
   slug: string
@@ -16,23 +16,21 @@ const DOCS = join(ROOT, 'docs')
 const UPLOADS_DIR = join(DOCS, 'uploads')
 
 const staticDocs: DocEntry[] = [
-  // Project docs
+  // Project — team-facing docs
   { slug: 'brd', label: 'BRD (Final) V1.0', path: join(DOCS, 'project', 'VBS_Pickup_BRD(Final)_V1.0.pdf'), category: 'project', type: 'pdf' },
-  { slug: 'how-it-works', label: 'How It Works', path: join(DOCS, 'project', 'how-it-works.md'), category: 'project' },
-  { slug: 'interface-guide', label: 'VBS Interface Guide', path: join(DOCS, 'project', 'VBS-interface-guide.md'), category: 'project' },
-  { slug: 'pm-questions', label: 'PM Questions & Answers', path: join(DOCS, 'project', 'vbs-pm-questions.md'), category: 'project' },
-  { slug: 'miro-review', label: 'Miro Board Review', path: join(DOCS, 'project', 'miro-board-review.md'), category: 'project' },
+  { slug: 'team-guide', label: 'Team Guide — Designers, PMs & Engineers', path: join(DOCS, 'project', 'team-guide.md'), category: 'project' },
+  { slug: 'changelog', label: 'Intent Model Changelog', path: join(DOCS, 'project', 'CHANGELOG.md'), category: 'project' },
 
-  // Specs
-  { slug: 'spec-ai-editor', label: 'AI Model Editor Design', path: join(DOCS, 'superpowers', 'specs', '2026-03-17-ai-model-editor-design.md'), category: 'specs' },
-
-  // Plans
-  { slug: 'plan-ai-editor', label: 'AI Model Editor Plan', path: join(DOCS, 'superpowers', 'plans', '2026-03-17-ai-model-editor.md'), category: 'plans' },
-
-  // Meeting notes
-  { slug: 'intent-update-strategy', label: 'Intent Model Update Strategy', path: join(DOCS, 'meeting-notes', 'vbs-intent-update-strategy.md'), category: 'meeting-notes' },
-  { slug: 'intent-update-payloads', label: 'Intent Model Update Payloads', path: join(DOCS, 'meeting-notes', 'vbs-intent-update-payloads.md'), category: 'meeting-notes' },
-  { slug: 'intent-update-prompts', label: 'Intent Model Update Prompts', path: join(DOCS, 'meeting-notes', 'vbs-intent-update-prompts.md'), category: 'meeting-notes' },
+  // Rahul's Build Log — working docs, superseded notes, build specs
+  { slug: 'how-it-works', label: 'How It Works (superseded by Team Guide)', path: join(DOCS, 'project', 'how-it-works.md'), category: 'build-log' },
+  { slug: 'interface-guide', label: 'VBS Interface Guide', path: join(DOCS, 'project', 'VBS-interface-guide.md'), category: 'build-log' },
+  { slug: 'pm-questions', label: 'PM Questions & Answers', path: join(DOCS, 'project', 'vbs-pm-questions.md'), category: 'build-log' },
+  { slug: 'miro-review', label: 'Miro Board Review', path: join(DOCS, 'project', 'miro-board-review.md'), category: 'build-log' },
+  { slug: 'spec-ai-editor', label: 'AI Model Editor Design', path: join(DOCS, 'superpowers', 'specs', '2026-03-17-ai-model-editor-design.md'), category: 'build-log' },
+  { slug: 'plan-ai-editor', label: 'AI Model Editor Plan', path: join(DOCS, 'superpowers', 'plans', '2026-03-17-ai-model-editor.md'), category: 'build-log' },
+  { slug: 'intent-update-strategy', label: 'Intent Model Update Strategy', path: join(DOCS, 'meeting-notes', 'vbs-intent-update-strategy.md'), category: 'build-log' },
+  { slug: 'intent-update-payloads', label: 'Intent Model Update Payloads', path: join(DOCS, 'meeting-notes', 'vbs-intent-update-payloads.md'), category: 'build-log' },
+  { slug: 'intent-update-prompts', label: 'Intent Model Update Prompts', path: join(DOCS, 'meeting-notes', 'vbs-intent-update-prompts.md'), category: 'build-log' },
 ]
 
 function getUploadedDocs(): DocEntry[] {
@@ -69,9 +67,7 @@ export function getDoc(slug: string): DocEntry | undefined {
 
 export const categories = [
   { key: 'project' as const, label: 'Project' },
-  { key: 'specs' as const, label: 'Specs' },
-  { key: 'plans' as const, label: 'Plans' },
-  { key: 'meeting-notes' as const, label: 'Meeting Notes' },
+  { key: 'build-log' as const, label: "Rahul's Build Log" },
   { key: 'uploads' as const, label: 'Uploads' },
 ]
 

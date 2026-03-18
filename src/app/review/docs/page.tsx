@@ -5,17 +5,16 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { FileText, ChevronRight, Loader2, Link as LinkIcon, Upload, CheckCircle2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { processAbbrInChildren } from '@/components/review/abbr-text'
 
 type DocMeta = { slug: string; label: string; category: string; type: 'md' | 'pdf' }
 
 const categoryLabels: Record<string, string> = {
   project: 'Project',
-  specs: 'Specs',
-  plans: 'Plans',
-  'meeting-notes': 'Meeting Notes',
+  'build-log': "Rahul's Build Log",
 }
 
-const categoryOrder = ['project', 'specs', 'plans', 'meeting-notes']
+const categoryOrder = ['project', 'build-log']
 
 export default function DocsPage() {
   return (
@@ -311,28 +310,34 @@ function DocsPageInner() {
               </button>
             </div>
 
-            <article
-              className="prose max-w-none
-                prose-headings:tracking-tight
-                prose-h1:text-[28px] prose-h1:font-bold prose-h1:leading-tight prose-h1:mb-4
-                prose-h2:text-[22px] prose-h2:font-semibold prose-h2:leading-snug prose-h2:mt-10 prose-h2:mb-3 prose-h2:pb-2 prose-h2:border-b
-                prose-h3:text-[17px] prose-h3:font-semibold prose-h3:mt-8 prose-h3:mb-2
-                prose-h4:text-[15px] prose-h4:font-semibold prose-h4:mt-6 prose-h4:mb-1.5
-                prose-p:text-[15px] prose-p:leading-[1.7] prose-p:mb-4
-                prose-li:text-[15px] prose-li:leading-[1.7]
-                prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
-                prose-strong:font-semibold
-                prose-code:text-[13px] prose-code:font-medium prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
-                prose-pre:bg-slate-50 prose-pre:border prose-pre:border-slate-200 prose-pre:rounded-lg prose-pre:text-[13px]
-                prose-blockquote:border-l-blue-400 prose-blockquote:bg-blue-50/40 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:not-italic prose-blockquote:text-[14px]
-                prose-table:text-[14px]
-                prose-th:text-left prose-th:font-semibold prose-th:pb-2 prose-th:border-b-2
-                prose-td:py-2 prose-td:align-top
-                prose-hr:my-8 prose-hr:border-slate-200
-                prose-img:rounded-lg"
-              style={{ color: 'var(--text-primary)', '--tw-prose-headings': 'var(--text-primary)', '--tw-prose-body': 'var(--text-secondary)', '--tw-prose-bold': 'var(--text-primary)', '--tw-prose-counters': 'var(--text-muted)', '--tw-prose-bullets': 'var(--text-muted)', '--tw-prose-hr': 'var(--border-default)', '--tw-prose-th-borders': 'var(--border-default)', '--tw-prose-td-borders': 'var(--border-default)' } as React.CSSProperties}
-            >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <article className="doc-prose">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  pre({ children }) {
+                    return <pre className="doc-pre">{children}</pre>
+                  },
+                  code({ className, children, ...props }) {
+                    const isBlock = className?.startsWith('language-')
+                    if (isBlock) {
+                      return <code className="doc-code-block" {...props}>{children}</code>
+                    }
+                    return <code className="doc-code-inline" {...props}>{children}</code>
+                  },
+                  p({ children }) {
+                    return <p>{processAbbrInChildren(children)}</p>
+                  },
+                  li({ children }) {
+                    return <li>{processAbbrInChildren(children)}</li>
+                  },
+                  td({ children }) {
+                    return <td>{processAbbrInChildren(children)}</td>
+                  },
+                  th({ children }) {
+                    return <th>{processAbbrInChildren(children)}</th>
+                  },
+                }}
+              >
                 {content}
               </ReactMarkdown>
             </article>

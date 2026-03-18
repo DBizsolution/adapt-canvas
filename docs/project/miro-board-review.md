@@ -23,7 +23,7 @@
 
 | # | Current on Miro | Change to | Reason |
 |---|----------------|-----------|--------|
-| 1 | "Auto WFF Assignment?" (red question box) | Remove question mark — WFF assignment comes from Maximas batch, auto-assigned | Data arrives 7 days before vessel arrival via periodic batch. No manual WFF assignment. |
+| 1 | "Auto WFF Assignment?" (red question box) | Remove question mark — WFF assignment comes from Maximus batch, auto-assigned | Data arrives 7 days before vessel arrival via periodic batch. No manual WFF assignment. |
 | 2 | "Feature Permissions?" (red box, user management) | Clarify: user management is for WFF (username/password) and ACFS internal (SSO) only. FF/Carrier/Customer have no portal accounts. | FF/Carrier/Customer authenticate via magic link + OTP. No accounts to manage. |
 | 3 | Delegation flow shows DO upload without mapping requirement | Add: each DO must be mapped to specific HBLs. Also add: delegation and booking are mutually exclusive per HBL. | Compliance/legal requirement. Either delegate or book per HBL, never both (BR-004). |
 | 4 | No Gatehouse flow on the board | Add a Gatehouse lane: read-only daily roster, search by booking ref or truck rego, no system actions | BRD Section 2.6. Now in the intent model. |
@@ -39,7 +39,7 @@
 | 9 | No storage fee indicator shown in HBL lists | Add a storage fee flag indicator in WFF and FF HBL list views | Flag derived from last_free_storage_date. Shows due/not due, not the amount. |
 | 10 | Pickup verification is all-or-nothing | Add partial processing branch: some HBLs pass, some fail → process passing ones, hold back failing ones for rebooking | ACFS can process 9 out of 10 HBLs if 1 is stuck in customs. |
 | 11 | Cutoff rules not shown in slot configuration detail | Add: cutoffs are absolute date/time per slot (not hour-based). Example: Friday 5pm cutoff for Monday morning slot. | Per-site configuration. |
-| 12 | "What is the FFO Field within Maximas and how is it used?" (yellow note) | Remove or mark as resolved — party registry comes from one-time ACFS bulk upload, not Maximas | FFO field is not relevant for Phase 1. |
+| 12 | "What is the FFO Field within Maximus and how is it used?" (yellow note) | Remove or mark as resolved — party registry comes from one-time ACFS bulk upload, not Maximus | FFO field is not relevant for Phase 1. |
 
 ---
 

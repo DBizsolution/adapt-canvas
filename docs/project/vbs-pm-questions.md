@@ -28,12 +28,12 @@
 ## 2. Data Sourcing
 
 ### Q5. Where does the list of FFs and Carriers come from?
-**ANSWERED** — Global registry maintained by ACFS. One-time bulk upload from AGS portal/party manager into the portal's local DB. No Maximas sync.
+**ANSWERED** — Global registry maintained by ACFS. One-time bulk upload from AGS portal/party manager into the portal's local DB. No Maximus sync.
 
 ### Q6. How is the Tier-2 FF linked to each HBL?
-**ANSWERED** — WFF manually assigns FF per HBL in the portal (delegation = assignment). Maximas has no role here.
+**ANSWERED** — WFF manually assigns FF per HBL in the portal (delegation = assignment). Maximus has no role here.
 
-### Q7. How fresh is the data from Maximas?
+### Q7. How fresh is the data from Maximus?
 **ANSWERED** — Periodic batch. Once or twice daily. No real-time integration.
 
 ---
@@ -43,7 +43,7 @@
 ### Q8. What are the exact milestone labels?
 **PARTIALLY ANSWERED — awaiting confirmed list from client**
 Current understanding: `on_vessel → at_wharf → in_yard → unpacked → collected`
-- No "created" status — data starts at on_vessel from Maximas
+- No "created" status — data starts at on_vessel from Maximus
 - "delegated" and "booked" are HBL statuses, NOT milestones
 - After unpacked, storage fee timer starts. Next milestone is collected.
 
@@ -111,10 +111,10 @@ Each DO must be mapped to its specific HBL — not bulk uploaded. This is a comp
 
 ### Q20. What does the ACFS processing workflow look like step by step?
 **ANSWERED:**
-1. 7 days before vessel arrival → Maximas receives data via slot request
-2. Maximas talks to ICS (customs integration) → HBL details stored in custom cargo table
+1. 7 days before vessel arrival → Maximus receives data via slot request
+2. Maximus talks to ICS (customs integration) → HBL details stored in custom cargo table
 3. Portal fetches all HBL data via periodic batch
-4. Status updates flow from Maximas → portal syncs periodically
+4. Status updates flow from Maximus → portal syncs periodically
 5. "Upcoming bookings" = tracking milestones from on_vessel to unpacked
 6. **Partial processing:** ACFS can process cleared HBLs and hold back those stuck in customs for rebooking.
 

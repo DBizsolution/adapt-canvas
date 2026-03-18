@@ -13,6 +13,7 @@ import {
   GitCompare,
   FileText,
   Settings,
+  Map,
 } from 'lucide-react'
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { label: 'Rules', href: '/review/business-rules', icon: Scale },
   { label: 'Constraints', href: '/review/constraints', icon: Lock },
   { label: 'Open Qs', href: '/review/open-questions', icon: HelpCircle },
+  { label: 'IA Map', href: '/review/ia', icon: Map },
   { label: 'Diff', href: '/review/diff', icon: GitCompare },
   { label: 'Docs', href: '/review/docs', icon: FileText },
 ]

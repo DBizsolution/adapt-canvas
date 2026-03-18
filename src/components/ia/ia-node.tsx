@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
 import type { IANodeData } from './ia-types'
@@ -23,36 +23,49 @@ export function IANode({ data }: NodeProps) {
   const Icon = ICON_MAP[nodeData.iconName] ?? ICON_MAP.HelpCircle
   const statusColor = statusColors[nodeData.status]
   const [hovered, setHovered] = useState(false)
+  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isShared = nodeData.actor === 'shared'
+
+  const showTooltip = useCallback(() => {
+    if (hideTimeout.current) clearTimeout(hideTimeout.current)
+    setHovered(true)
+  }, [])
+
+  const hideTooltip = useCallback(() => {
+    hideTimeout.current = setTimeout(() => setHovered(false), 150)
+  }, [])
 
   return (
     <div
       className="group relative"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      style={{ zIndex: hovered ? 1000 : 'auto' }}
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
     >
       <div
         className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 transition-all duration-200"
         style={{
-          background: 'var(--bg-white)',
-          border: `1px solid ${hovered ? 'var(--accent-blue)' : 'var(--border-default)'}`,
+          background: isShared ? 'transparent' : 'var(--bg-white)',
+          border: `1px ${isShared ? 'dashed' : 'solid'} ${hovered ? 'var(--accent-blue)' : isShared ? 'var(--border-dark)' : 'var(--border-default)'}`,
           boxShadow: hovered ? '0 4px 16px rgba(0,0,0,0.08)' : 'none',
           minWidth: 160,
           cursor: 'default',
+          opacity: isShared ? 0.7 : 1,
         }}
       >
         <Handle type="target" position={Position.Left} className="!bg-transparent !border-0 !w-0 !h-0" />
 
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-          style={{ background: 'var(--bg-gray-subtle)' }}
+          style={{ background: isShared ? 'transparent' : 'var(--bg-gray-subtle)' }}
         >
-          <Icon size={15} style={{ color: 'var(--text-secondary)' }} strokeWidth={1.8} />
+          <Icon size={15} style={{ color: 'var(--text-secondary)' }} strokeWidth={isShared ? 1.4 : 1.8} />
         </div>
 
         <div className="flex flex-col gap-0.5">
           <span
             className="text-[13px] font-medium leading-tight"
-            style={{ color: 'var(--text-primary)' }}
+            style={{ color: isShared ? 'var(--text-secondary)' : 'var(--text-primary)' }}
           >
             {nodeData.label}
           </span>
@@ -76,14 +89,17 @@ export function IANode({ data }: NodeProps) {
       {/* Hover tooltip */}
       {hovered && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 z-50 rounded-xl px-4 py-3 pointer-events-none"
+          className="absolute left-1/2 -translate-x-1/2 rounded-xl px-4 py-3"
           style={{
-            top: 'calc(100% + 8px)',
+            top: 'calc(100% + 4px)',
             background: 'var(--bg-white)',
             border: '1px solid var(--border-default)',
             boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
             width: 280,
+            zIndex: 1000,
           }}
+          onMouseEnter={showTooltip}
+          onMouseLeave={hideTooltip}
         >
           <p
             className="text-[12px] leading-relaxed m-0"

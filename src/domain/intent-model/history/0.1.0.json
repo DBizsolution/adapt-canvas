@@ -1,0 +1,525 @@
+{
+  "meta": {
+    "version": "0.1.0",
+    "project": "ACFS VBS Pickup Portal",
+    "lastUpdated": "2026-03-16",
+    "status": "draft"
+  },
+  "actors": [
+    {
+      "id": "wff",
+      "name": "Wholesale Freight Forwarder",
+      "description": "Top-level party (AGS, DHL, Mondiale) with visibility over all HBLs auto-assigned from Maximas.",
+      "auth": "Username + password. Can self-register.",
+      "responsibilities": [
+        {
+          "id": "wff:r1",
+          "description": "View all HBLs auto-assigned from Maximas with status, payment, delegation, and booking info."
+        },
+        {
+          "id": "wff:r2",
+          "description": "Search by HBL# to find specific shipments."
+        },
+        {
+          "id": "wff:r3",
+          "description": "Delegate booking responsibility to an existing FF or Transport Carrier. Per HBL — if delegated, WFF cannot also book directly on that same HBL."
+        },
+        {
+          "id": "wff:r4",
+          "description": "Book pickup directly without delegating — select slot, pay, add driver/truck details. Per HBL — if booking directly, WFF cannot also delegate that same HBL."
+        },
+        {
+          "id": "wff:r5",
+          "description": "Upload Delivery Order for downstream FF/TC enforcement."
+        }
+      ]
+    },
+    {
+      "id": "ff",
+      "name": "Freight Forwarder",
+      "description": "Downstream/tiered forwarder who receives delegated HBLs and manages DOs.",
+      "auth": "Username + password assumed — not specified in BRD.",
+      "responsibilities": [
+        {
+          "id": "ff:r1",
+          "description": "View assigned HBLs with milestones, status, and release-authority indicators."
+        },
+        {
+          "id": "ff:r2",
+          "description": "Upload or ensure required DOs are available. Required unless free-release or under-bond."
+        },
+        {
+          "id": "ff:r3",
+          "description": "Nominate/select a carrier from the ACFS-maintained party registry. Use search + autocomplete to find parties."
+        }
+      ]
+    },
+    {
+      "id": "carrier",
+      "name": "Transport Carrier",
+      "description": "Books pickup slots, provides driver/truck details, pays fees.",
+      "auth": "Username + password assumed.",
+      "responsibilities": [
+        {
+          "id": "carrier:r1",
+          "description": "View delegated HBLs ready for pickup."
+        },
+        {
+          "id": "carrier:r2",
+          "description": "Select available pickup window and book slot."
+        },
+        {
+          "id": "carrier:r3",
+          "description": "Provide driver name, license, truck rego, and contact details."
+        },
+        {
+          "id": "carrier:r4",
+          "description": "Pay booking fee (minimum charge + volumetric)."
+        }
+      ]
+    },
+    {
+      "id": "acfs",
+      "name": "ACFS Internal",
+      "description": "Internal ACFS warehouse staff who manage operations, configure availability, and oversee bookings and delegations.",
+      "auth": "Internal SSO / admin credentials.",
+      "responsibilities": [
+        {
+          "id": "acfs:r1",
+          "description": "Edit HBL details and update statuses manually when corrections are needed."
+        },
+        {
+          "id": "acfs:r2",
+          "description": "Assign a Freight Forwarder to an HBL on behalf of a WFF."
+        },
+        {
+          "id": "acfs:r3",
+          "description": "Edit booking details — update driver/truck info, add/remove HBLs, or cancel bookings."
+        },
+        {
+          "id": "acfs:r4",
+          "description": "Edit pickup details — reassign windows, override slot constraints."
+        },
+        {
+          "id": "acfs:r5",
+          "description": "Edit delegation — reassign or revoke delegation between parties."
+        },
+        {
+          "id": "acfs:r6",
+          "description": "Configure pickup slot availability — set capacity per site, time slots, and blackout dates."
+        }
+      ]
+    }
+  ],
+  "entities": [
+    {
+      "id": "hbl",
+      "name": "House Bill of Lading (HBL)",
+      "description": "Primary tracking unit for a shipment. Sourced from Maximas.",
+      "key_fields": [
+        {
+          "name": "hbl_number",
+          "type": "string",
+          "description": "Unique identifier from Maximas."
+        },
+        {
+          "name": "consignee",
+          "type": "string",
+          "description": "Party receiving the goods."
+        },
+        {
+          "name": "volume_m3",
+          "type": "number",
+          "description": "Volumetric measurement for fee calculation."
+        },
+        {
+          "name": "release_type",
+          "type": "'free_release' | 'under_bond'",
+          "description": "Determines DO requirements.",
+          "warn": "Exact release types and their rules need confirmation."
+        },
+        {
+          "name": "status",
+          "type": "HblStatus",
+          "description": "Current lifecycle state."
+        }
+      ],
+      "lifecycle": {
+        "states": [
+          "created",
+          "at_wharf",
+          "unpacked",
+          "delegated",
+          "booked",
+          "under_bond",
+          "collected"
+        ],
+        "transitions": [
+          {
+            "from": "created",
+            "to": "at_wharf",
+            "trigger": "Vessel arrives at port",
+            "guard": "Maximas status update"
+          },
+          {
+            "from": "at_wharf",
+            "to": "unpacked",
+            "trigger": "Container unpacked at warehouse"
+          },
+          {
+            "from": "unpacked",
+            "to": "delegated",
+            "trigger": "WFF or FF delegates to downstream party"
+          },
+          {
+            "from": "unpacked",
+            "to": "booked",
+            "trigger": "Direct booking by WFF without delegation (either/or per HBL, confirmed BR-004)"
+          },
+          {
+            "from": "delegated",
+            "to": "booked",
+            "trigger": "Carrier books pickup slot",
+            "guard": "Release conditions met + DO validated (unless under-bond)"
+          },
+          {
+            "from": "booked",
+            "to": "collected",
+            "trigger": "Goods physically picked up from warehouse"
+          }
+        ]
+      }
+    },
+    {
+      "id": "booking",
+      "name": "Booking",
+      "description": "Groups one or more HBLs into a pickup window with driver/truck details.",
+      "key_fields": [
+        {
+          "name": "booking_id",
+          "type": "string",
+          "description": "System-generated unique ID."
+        },
+        {
+          "name": "pickup_window",
+          "type": "PickupWindow",
+          "description": "Selected date/time slot."
+        },
+        {
+          "name": "hbl_ids",
+          "type": "string[]",
+          "description": "HBLs included in this booking."
+        },
+        {
+          "name": "driver_name",
+          "type": "string",
+          "description": "Driver performing pickup."
+        },
+        {
+          "name": "truck_rego",
+          "type": "string",
+          "description": "Vehicle registration."
+        },
+        {
+          "name": "fee_amount",
+          "type": "number",
+          "description": "Calculated per HBL individually (flat minimum + per-HBL volumetric), then summed.",
+          "warn": "Flat rate vs percentage still undecided by client (see OQ-023)."
+        }
+      ],
+      "lifecycle": {
+        "states": [
+          "draft",
+          "booked",
+          "pending_processing",
+          "processed",
+          "collected"
+        ],
+        "transitions": [
+          {
+            "from": "draft",
+            "to": "booked",
+            "trigger": "Carrier confirms and pays",
+            "guard": "All HBLs unpacked + release conditions met"
+          },
+          {
+            "from": "booked",
+            "to": "pending_processing",
+            "trigger": "ACFS staff begins pre-check"
+          },
+          {
+            "from": "pending_processing",
+            "to": "processed",
+            "trigger": "ACFS validates all DOs and marks ready"
+          },
+          {
+            "from": "processed",
+            "to": "collected",
+            "trigger": "Gatehouse confirms vehicle exit"
+          }
+        ]
+      }
+    }
+  ],
+  "journeys": [
+    {
+      "id": "carrier-books-pickup",
+      "name": "Carrier Books a Pickup",
+      "primary_actor": "carrier",
+      "preconditions": [
+        "Carrier has been delegated one or more HBLs",
+        "HBLs are in \"unpacked\" or \"delegated\" status",
+        "Release conditions are met (DO validated or under-bond)"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "title": "View delegated HBLs",
+          "detail": "Carrier logs in and sees list of HBLs delegated to them, filtered by status."
+        },
+        {
+          "order": 2,
+          "title": "Select HBLs for pickup",
+          "detail": "Carrier selects one or more HBLs to group into a single booking. HBLs from different WFFs can be combined (confirmed OQ-011)."
+        },
+        {
+          "order": 3,
+          "title": "Choose pickup window",
+          "detail": "System shows available slots based on site density and cut-off times."
+        },
+        {
+          "order": 4,
+          "title": "Enter driver and truck details",
+          "detail": "Carrier provides driver name, license number, truck rego, and contact phone. Search + autocomplete for existing drivers."
+        },
+        {
+          "order": 5,
+          "title": "Pay booking fee",
+          "detail": "System calculates fee (minimum charge + volumetric per HBL). Carrier pays via Stripe embedded checkout."
+        },
+        {
+          "order": 6,
+          "title": "Receive confirmation",
+          "detail": "Booking moves to \"booked\" status. Carrier receives confirmation with booking reference."
+        }
+      ],
+      "success_outcome": "Booking is confirmed with a scheduled pickup window, and all HBLs are in \"booked\" status."
+    }
+  ],
+  "business_rules": [
+    {
+      "id": "BR-001",
+      "description": "Delegation can happen before unpack; booking cannot. A booking requires all included HBLs to be in \"unpacked\" status or later.",
+      "applies_to": [
+        "hbl",
+        "booking"
+      ],
+      "source": "BRD s4.2"
+    },
+    {
+      "id": "BR-002",
+      "description": "Under-bond HBLs skip the DO requirement. Under-bond is a flag set manually by WFF/FF staff in the portal. ACFS can also set it. Verification happens outside the portal.",
+      "applies_to": [
+        "hbl"
+      ],
+      "source": "BRD s4.3",
+      "warn": "Full under-bond lifecycle needs deeper clarification (see OQ-025)."
+    },
+    {
+      "id": "BR-003",
+      "description": "DO rules follow a 3-level hierarchy: WFF → FF → Carrier/Customer. Each level can upload a DO that applies to the levels below.",
+      "applies_to": [
+        "hbl",
+        "wff",
+        "ff",
+        "carrier",
+        "acfs"
+      ],
+      "source": "BRD s4.4"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "C-001",
+      "constraint": "Pickup windows have finite capacity per site per time slot. Overbooking is not allowed.",
+      "type": "capacity"
+    },
+    {
+      "id": "C-002",
+      "constraint": "Booking changes after cut-off time incur a change fee. No-shows incur a rebooking fee.",
+      "type": "pricing"
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "OQ-001",
+      "question": "How is Tier-2 FF data sourced? Are they registered in Maximas or only in the portal?",
+      "reason": "Delegation flow depends on knowing which FFs exist in the system.",
+      "status": "resolved",
+      "resolution": "Global registry maintained by ACFS. One-time bulk upload from AGS portal/party manager into the portal local DB. No Maximas sync. WFF manually assigns FF per HBL via delegation."
+    },
+    {
+      "id": "OQ-002",
+      "question": "What is the exact fee method — flat rate per HBL or percentage of declared value?",
+      "reason": "Fee calculation logic in the booking flow depends on this decision.",
+      "status": "resolved",
+      "resolution": "Flat minimum + per-HBL volumetric charge. Calculation is per HBL individually (max of weight vs volume), then summed. Flat vs percentage split is pending client decision — build for flat with configurable override."
+    },
+    {
+      "id": "OQ-003",
+      "question": "Can a WFF both delegate and book directly on the same HBL?",
+      "reason": "Determines whether the UI allows both actions or enforces mutual exclusivity per HBL.",
+      "status": "resolved",
+      "resolution": "Either/or per HBL. WFF either delegates or books directly — never both on the same HBL."
+    },
+    {
+      "id": "OQ-004",
+      "question": "How do FF and Transport Carrier authenticate?",
+      "reason": "Auth method determines onboarding flow, UI entry points, and session management.",
+      "status": "resolved",
+      "resolution": "Magic link + OTP for all external parties after WFF. Secure link sent to nominated email on delegation. OTP verification on the same email. No account creation. Portal access scoped to assigned shipments only."
+    },
+    {
+      "id": "OQ-005",
+      "question": "Does the one-off customer get a dashboard or booking history?",
+      "reason": "Affects whether one-off users need persistent state or session-only access.",
+      "status": "resolved",
+      "resolution": "No dashboard. Minimal status page via magic link. Link expires when shipment is collected. No account, no history. Repeat users should be onboarded as a proper party role."
+    },
+    {
+      "id": "OQ-006",
+      "question": "How fresh is the data from Maximas?",
+      "reason": "Determines whether UI needs real-time indicators or can rely on periodic state.",
+      "status": "resolved",
+      "resolution": "Periodic batch — once or twice daily. No real-time integration. Portal fetches from custom cargo table starting 7 days before vessel arrival."
+    },
+    {
+      "id": "OQ-007",
+      "question": "Can an HBL skip delegation and go straight from unpacked to booked?",
+      "reason": "Affects state machine transitions and whether delegation is a required step.",
+      "status": "resolved",
+      "resolution": "Always valid. WFF can book directly without delegating (e.g., DHL delivering to customers themselves). No precondition on delegation."
+    },
+    {
+      "id": "OQ-008",
+      "question": "How does the portal know an HBL is under-bond?",
+      "reason": "Determines whether under-bond status is synced from Maximas or manually flagged.",
+      "status": "resolved",
+      "resolution": "Manual flag set by WFF or FF staff in the portal. ACFS internal staff can also flag it. Not synced from Maximas."
+    },
+    {
+      "id": "OQ-009",
+      "question": "What is the 3-level DO hierarchy — does it cascade or is each level independent?",
+      "reason": "Determines upload UX and validation logic for delivery orders.",
+      "status": "resolved",
+      "resolution": "Each level uploads independently. No inheritance or cascading. 3 tiers = 3 separate DOs. Bottom-most party must have all DOs present. Free release removes the DO requirement for that tier."
+    },
+    {
+      "id": "OQ-010",
+      "question": "What are the ACFS override rules for missing DOs?",
+      "reason": "Determines role restrictions, audit requirements, and override lifecycle.",
+      "status": "resolved",
+      "resolution": "Only certain ACFS roles can override. Audit trail with reason is required. Override is one-time per HBL and lives until the HBL is collected."
+    },
+    {
+      "id": "OQ-011",
+      "question": "Can HBLs from different WFFs be combined in one booking?",
+      "reason": "Affects booking selection UI and potentially the auth model for carriers.",
+      "status": "resolved",
+      "resolution": "Yes. A carrier can combine HBLs from different WFFs into a single booking."
+    },
+    {
+      "id": "OQ-012",
+      "question": "What payment integration is expected for Phase 1?",
+      "reason": "Determines whether to build a custom payment UI or embed a third-party checkout.",
+      "status": "resolved",
+      "resolution": "Stripe embedded checkout. No custom payment UI. Use Stripe interface directly. Storage fees may be added as a line item if data is available."
+    },
+    {
+      "id": "OQ-013",
+      "question": "How are refunds handled?",
+      "reason": "Determines whether the portal needs refund state, UI, or processing.",
+      "status": "resolved",
+      "resolution": "Completely outside the portal. Refund-agnostic. Handled offline by ACFS."
+    },
+    {
+      "id": "OQ-014",
+      "question": "What are the booking and change cut-off rules?",
+      "reason": "Determines slot configuration UI and booking validation logic.",
+      "status": "resolved",
+      "resolution": "Cutoffs are absolute date/time per slot — not hour-based. ACFS sets a specific cutoff date and time for each slot. Per-site configuration. No-show rebooking is ACFS admin only, free of charge for Phase 1."
+    },
+    {
+      "id": "OQ-015",
+      "question": "What does the ACFS processing workflow look like?",
+      "reason": "Determines the ops dashboard layout, queue structure, and validation sequence.",
+      "status": "resolved",
+      "resolution": "Data arrives 7 days before vessel via Maximas batch. Portal tracks milestones from on_vessel to collected. ACFS can partially process bookings — clear HBLs proceed, blocked ones rebook separately."
+    },
+    {
+      "id": "OQ-016",
+      "question": "What slot configuration options does ACFS need?",
+      "reason": "Determines the admin configuration UI for pickup windows.",
+      "status": "resolved",
+      "resolution": "Flexible time slots (2-4/day, overlapping allowed). No hard capacity — density indicator instead (threshold-based, low/moderate/high, non-blocking). Blackout dates via holiday calendar overlay. Per-site config. Cannot change slots with existing bookings in Phase 1."
+    },
+    {
+      "id": "OQ-017",
+      "question": "What does FOC rebooking look like?",
+      "reason": "Determines whether free rebooking needs a separate flow or is an admin override.",
+      "status": "resolved",
+      "resolution": "ACFS admin only. Overrides all fees. Reason/justification required for audit trail."
+    },
+    {
+      "id": "OQ-018",
+      "question": "Single app with role-based routing or separate apps per actor?",
+      "reason": "Determines deployment architecture, routing strategy, and shared component scope.",
+      "status": "resolved",
+      "resolution": "Single app with role-based routing."
+    },
+    {
+      "id": "OQ-019",
+      "question": "What is the auth strategy across all actor types?",
+      "reason": "Determines auth implementation, session management, and middleware design.",
+      "status": "resolved",
+      "resolution": "WFF: username/password. FF, Carrier, one-off customer: magic link + OTP (no account). ACFS and Gatehouse: SSO via OAuth/Okta."
+    },
+    {
+      "id": "OQ-020",
+      "question": "What happens when a WFF requests a missing HBL be added?",
+      "reason": "Determines whether a request flow is needed or just search.",
+      "status": "resolved",
+      "resolution": "No request flow exists. WFF can search by HBL only. Missing HBL requests are not part of the BRD or Phase 1 scope."
+    },
+    {
+      "id": "OQ-021",
+      "question": "What are the confirmed milestone statuses from the client?",
+      "reason": "Current list (on_vessel, at_wharf, in_yard, unpacked, collected) is based on PM knowledge. Client confirmation needed before finalising the state machine.",
+      "status": "open"
+    },
+    {
+      "id": "OQ-022",
+      "question": "What is the full list of release types and their DO rules?",
+      "reason": "Only free_release is confirmed. Need the complete list to build release-authority logic and DO validation.",
+      "status": "open"
+    },
+    {
+      "id": "OQ-023",
+      "question": "Is the fee method flat rate or percentage of declared value?",
+      "reason": "Per-HBL volumetric calculation is confirmed, but the rate structure (flat vs percentage) is pending client business decision.",
+      "status": "open"
+    },
+    {
+      "id": "OQ-024",
+      "question": "Will the auth model for FF/Carrier change from magic links to a persistent login?",
+      "reason": "Cross-WFF booking requires carriers to see HBLs from multiple delegations. Magic links are scoped to a single delegation. A persistent login model may be required.",
+      "status": "open"
+    },
+    {
+      "id": "OQ-025",
+      "question": "What is the exact definition and lifecycle of under-bond shipments?",
+      "reason": "Under-bond is confirmed as a flag (not a lifecycle state) that skips DO requirements. But the full concept — triggers, verification steps, and edge cases — needs deeper clarification for implementation.",
+      "status": "open"
+    }
+  ]
+}

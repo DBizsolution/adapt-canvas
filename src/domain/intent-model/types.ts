@@ -42,6 +42,7 @@ export type Entity = {
   lifecycle: {
     states: string[]
     transitions: Transition[]
+    warn?: string
   }
 }
 
@@ -67,6 +68,7 @@ export type Journey = {
   preconditions: string[]
   steps: JourneyStep[]
   success_outcome: string
+  warn?: string
 }
 
 export type JourneyStep = {
@@ -89,7 +91,7 @@ export type BusinessRule = {
 export type Constraint = {
   id: string
   constraint: string
-  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal'
+  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal' | 'admin'
 }
 
 export type OpenQuestion = {

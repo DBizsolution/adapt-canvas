@@ -362,15 +362,7 @@
     },
     "e-cross-3": {
       "source": "wff-book",
-      "target": "sh-payment",
-      "label": "Payment redirect",
-      "cross": true
-    },
-    "e-cross-4": {
-      "source": "p4tc-book",
-      "target": "sh-payment",
-      "label": "Payment redirect",
-      "cross": true
+      "target": "sh-payment"
     },
     "e-cross-5": {
       "source": "acfs-pickup",
@@ -378,31 +370,20 @@
       "label": "Booking → processed",
       "cross": true
     },
-    "e-cross-6": {
+    "e-wff-5a": {
       "source": "wff-dashboard",
-      "target": "sh-bookings",
-      "label": "View all bookings",
-      "cross": true
+      "target": "sh-bookings"
     },
-    "e-cross-7": {
-      "source": "acfs-bookings",
-      "target": "sh-bookings",
-      "label": "Search bookings",
-      "cross": true
-    },
-    "e-cross-8": {
+    "e-wff-5b": {
       "source": "wff-dashboard",
-      "target": "sh-notifs",
-      "label": "Email alerts",
-      "cross": true
+      "target": "sh-notifs"
     }
   },
   "_lanes": {
-    "lsp": { "y": 20, "height": 240, "color": "#0081F2", "label": "WFF / LSP" },
-    "p4tc": { "y": 300, "height": 200, "color": "#7C3AED", "label": "P4TC" },
-    "acfs": { "y": 580, "height": 340, "color": "#002C61", "label": "ACFS Internal" },
-    "gatehouse": { "y": 980, "height": 140, "color": "#D97706", "label": "Gatehouse" },
-    "shared": { "y": 1200, "height": 140, "color": "#6B7280", "label": "Shared" }
+    "lsp": { "y": 20, "height": 320, "color": "#0081F2", "label": "WFF / LSP" },
+    "p4tc": { "y": 380, "height": 200, "color": "#7C3AED", "label": "P4TC" },
+    "acfs": { "y": 660, "height": 340, "color": "#002C61", "label": "ACFS Internal" },
+    "gatehouse": { "y": 1060, "height": 140, "color": "#D97706", "label": "Gatehouse" }
   },
   "wff-login": { "x": 60, "y": 80 },
   "wff-dashboard": { "x": 280, "y": 80 },
@@ -413,29 +394,29 @@
   "wff-upload-do": { "x": 720, "y": 80 },
   "wff-flag-bond": { "x": 720, "y": 160 },
   "wff-req-docs": { "x": 940, "y": 80 },
-  "p4tc-magic": { "x": 60, "y": 360 },
-  "p4tc-view": { "x": 280, "y": 360 },
-  "p4tc-delegate": { "x": 500, "y": 310 },
-  "p4tc-book": { "x": 500, "y": 410 },
-  "p4tc-upload": { "x": 720, "y": 360 },
-  "acfs-login": { "x": 60, "y": 700 },
-  "acfs-slots": { "x": 280, "y": 580 },
-  "acfs-bookings": { "x": 280, "y": 660 },
-  "acfs-do-val": { "x": 280, "y": 740 },
-  "acfs-pickup": { "x": 280, "y": 820 },
-  "acfs-users": { "x": 500, "y": 580 },
-  "acfs-hbl-assign": { "x": 500, "y": 660 },
-  "acfs-ecst": { "x": 500, "y": 740 },
-  "acfs-override-do": { "x": 720, "y": 580 },
-  "acfs-foc": { "x": 720, "y": 660 },
-  "acfs-partial": { "x": 720, "y": 740 },
-  "acfs-edit-hbl": { "x": 720, "y": 820 },
-  "acfs-edit-deleg": { "x": 940, "y": 580 },
-  "acfs-cancel": { "x": 940, "y": 660 },
-  "gh-login": { "x": 60, "y": 1040 },
-  "gh-verify": { "x": 280, "y": 1040 },
-  "gh-exit": { "x": 500, "y": 1040 },
-  "sh-bookings": { "x": 280, "y": 1260 },
-  "sh-notifs": { "x": 500, "y": 1260 },
-  "sh-payment": { "x": 720, "y": 1260 }
+  "p4tc-magic": { "x": 60, "y": 440 },
+  "p4tc-view": { "x": 280, "y": 440 },
+  "p4tc-delegate": { "x": 500, "y": 390 },
+  "p4tc-book": { "x": 500, "y": 490 },
+  "p4tc-upload": { "x": 720, "y": 440 },
+  "acfs-login": { "x": 60, "y": 780 },
+  "acfs-slots": { "x": 280, "y": 660 },
+  "acfs-bookings": { "x": 280, "y": 740 },
+  "acfs-do-val": { "x": 280, "y": 820 },
+  "acfs-pickup": { "x": 280, "y": 900 },
+  "acfs-users": { "x": 500, "y": 660 },
+  "acfs-hbl-assign": { "x": 500, "y": 740 },
+  "acfs-ecst": { "x": 500, "y": 820 },
+  "acfs-override-do": { "x": 720, "y": 660 },
+  "acfs-foc": { "x": 720, "y": 740 },
+  "acfs-partial": { "x": 720, "y": 820 },
+  "acfs-edit-hbl": { "x": 720, "y": 900 },
+  "acfs-edit-deleg": { "x": 940, "y": 660 },
+  "acfs-cancel": { "x": 940, "y": 740 },
+  "gh-login": { "x": 60, "y": 1120 },
+  "gh-verify": { "x": 280, "y": 1120 },
+  "gh-exit": { "x": 500, "y": 1120 },
+  "sh-bookings": { "x": 60, "y": 240 },
+  "sh-notifs": { "x": 280, "y": 240 },
+  "sh-payment": { "x": 500, "y": 240 }
 }

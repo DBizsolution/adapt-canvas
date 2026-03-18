@@ -21,6 +21,15 @@ const sectionTypeLabels: Record<SectionType, string> = {
   open_question: 'Open Questions',
 }
 
+const sectionTypeDescriptions: Record<SectionType, string> = {
+  actor: 'Users and roles that interact with the system',
+  entity: 'Core data objects and their lifecycles',
+  journey: 'End-to-end user flows and interactions',
+  business_rule: 'Domain logic and validation requirements',
+  constraint: 'System limits, capacity, and pricing rules',
+  open_question: 'Unresolved decisions needing stakeholder input',
+}
+
 export function ConsensusDashboard({ consensus, sections, reviewers }: ConsensusDashboardProps) {
   const sectionTypes = Object.keys(sectionTypeLabels) as SectionType[]
   const pct = consensus.totalSections > 0 ? Math.round((consensus.approved / consensus.totalSections) * 100) : 0
@@ -40,8 +49,8 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
         </div>
       </div>
 
-      {/* Sections — simple list */}
-      <div className="space-y-3">
+      {/* Sections — 3-column grid */}
+      <div className="grid grid-cols-3 gap-3">
         {sectionTypes.map(type => {
           const typeSections = sections.filter(s => s.targetType === type)
           const approved = typeSections.filter(s => s.effectiveStatus === 'approved').length
@@ -53,24 +62,27 @@ export function ConsensusDashboard({ consensus, sections, reviewers }: Consensus
           return (
             <Link key={type} href={`/review/${SECTION_TYPE_TO_URL_PARAM[type]}`}>
               <div
-                className="flex items-center gap-4 rounded-lg px-4 py-3.5 transition-all duration-200 hover:shadow-md"
+                className="rounded-lg px-4 py-3.5 transition-all duration-200 hover:shadow-md"
                 style={{
                   background: 'var(--bg-white)',
                   border: '1px solid var(--border-default)',
                   boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 }}
               >
-                <span className="text-sm font-semibold w-[140px] shrink-0" style={{ color: 'var(--acfs-navy)' }}>
-                  {sectionTypeLabels[type]}
-                </span>
-                <div className="flex-1">
-                  <Progress value={sectionPct} className="h-1" />
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold" style={{ color: 'var(--acfs-navy)' }}>
+                    {sectionTypeLabels[type]}
+                  </span>
+                  <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                    {approved}/{total}
+                  </span>
                 </div>
-                <span className="text-xs font-medium w-[60px] text-right" style={{ color: 'var(--text-muted)' }}>
-                  {approved}/{total}
-                </span>
+                <p className="text-xs mb-2.5" style={{ color: 'var(--text-muted)' }}>
+                  {sectionTypeDescriptions[type]}
+                </p>
+                <Progress value={sectionPct} className="h-1" />
                 {disputed > 0 && (
-                  <span className="text-xs font-medium" style={{ color: '#E11D48' }}>{disputed} disputed</span>
+                  <span className="text-xs font-medium mt-1.5 inline-block" style={{ color: '#E11D48' }}>{disputed} disputed</span>
                 )}
               </div>
             </Link>

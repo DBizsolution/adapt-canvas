@@ -52,9 +52,9 @@ Replace transitions to match corrected milestone states:
 // entities[0].lifecycle.transitions
 // REPLACE ALL WITH:
 [
-  { from: 'on_vessel', to: 'at_wharf', trigger: 'Vessel arrives at port', guard: 'Maximas status update' },
-  { from: 'at_wharf', to: 'in_yard', trigger: 'Shipment moved from wharf to yard', guard: 'Maximas status update' },
-  { from: 'in_yard', to: 'unpacked', trigger: 'Container unpacked at warehouse', guard: 'Maximas status update' },
+  { from: 'on_vessel', to: 'at_wharf', trigger: 'Vessel arrives at port', guard: 'Maximus status update' },
+  { from: 'at_wharf', to: 'in_yard', trigger: 'Shipment moved from wharf to yard', guard: 'Maximus status update' },
+  { from: 'in_yard', to: 'unpacked', trigger: 'Container unpacked at warehouse', guard: 'Maximus status update' },
   { from: 'unpacked', to: 'collected', trigger: 'Goods physically picked up from warehouse', guard: 'Booking processed + all validations complete' },
 ]
 ```
@@ -186,7 +186,7 @@ Note: `delegated → booked` and `unpacked → booked` transitions are HBL statu
   description: 'Under-bond HBLs skip the DO requirement. Verification happens outside the portal by ACFS.',
   applies_to: ['hbl'],
   source: 'BRD s4.3',
-  warn: 'How does the portal know an HBL is under-bond? Maximas field?',
+  warn: 'How does the portal know an HBL is under-bond? Maximus field?',
 }
 
 // AFTER:
@@ -233,7 +233,7 @@ Already handled in Batch 1.2 (transitions rewrite). The `warn` on `unpacked → 
 ```typescript
 // entities[0].key_fields — ADD these:
 { name: 'weight_kg', type: 'number', description: 'Weight in kilograms. Used alongside volume for fee calculation and load display.' },
-{ name: 'customs_clearance_status', type: 'string', description: 'Latest clearance status from Maximas. Display only — no portal-side ABF record.' },
+{ name: 'customs_clearance_status', type: 'string', description: 'Latest clearance status from Maximus. Display only — no portal-side ABF record.' },
 { name: 'storage_fee_due', type: 'boolean', description: 'Flag indicating outstanding storage cost. Derived from last_free_storage_date. Not the amount — just a visual indicator.' },
 { name: 'last_free_storage_date', type: 'date | null', description: 'Last date before storage fees apply. Used to calculate storage_fee_due flag.' },
 ```
@@ -340,7 +340,7 @@ Already handled in Batch 1.2 (transitions rewrite). The `warn` on `unpacked → 
 { id: 'C-004', constraint: 'Slot configuration is per-site, not global. Includes time windows, density indicator, cutoffs, and blackout/holiday calendar.', type: 'access' },
 { id: 'C-005', constraint: 'Refunds are handled entirely outside the portal. The portal is refund-agnostic.', type: 'pricing' },
 { id: 'C-006', constraint: 'FOC (free of charge) rebooking is ACFS admin only. Overrides all fees. Reason/justification required for audit trail.', type: 'pricing' },
-{ id: 'C-007', constraint: 'Data from Maximas is periodic batch (once or twice daily). Not real-time. Portal fetches HBL data from custom cargo table starting 7 days before vessel arrival.', type: 'temporal' },
+{ id: 'C-007', constraint: 'Data from Maximus is periodic batch (once or twice daily). Not real-time. Portal fetches HBL data from custom cargo table starting 7 days before vessel arrival.', type: 'temporal' },
 { id: 'C-008', constraint: 'Single app with role-based routing. WFF uses username/password. FF, Carrier, and one-off customers use magic link + OTP (no account). ACFS and Gatehouse use SSO via OAuth/Okta.', type: 'access' },
 ```
 
@@ -356,7 +356,7 @@ Already handled in Batch 1.2 (transitions rewrite). The `warn` on `unpacked → 
 { id: 'OQ-001', question: 'How is Tier-2 FF data sourced?...', reason: '...', status: 'open' }
 
 // AFTER:
-{ id: 'OQ-001', question: 'How is Tier-2 FF data sourced? Are they registered in Maximas or only in the portal?', reason: 'Delegation flow depends on knowing which FFs exist in the system.', status: 'resolved', resolution: 'Global registry maintained by ACFS. One-time bulk upload from AGS portal/party manager into the portal local DB. No Maximas sync. Manual assignment by WFF only.' }
+{ id: 'OQ-001', question: 'How is Tier-2 FF data sourced? Are they registered in Maximus or only in the portal?', reason: 'Delegation flow depends on knowing which FFs exist in the system.', status: 'resolved', resolution: 'Global registry maintained by ACFS. One-time bulk upload from AGS portal/party manager into the portal local DB. No Maximus sync. Manual assignment by WFF only.' }
 ```
 
 ### 5.2 — Update OQ-002 (partially resolved)

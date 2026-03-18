@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { Sparkles, Loader2, RefreshCw, GripVertical, Send } from 'lucide-react'
+import { Cog, Loader2, RefreshCw, GripVertical, Send } from 'lucide-react'
 import { useDrawerStore } from '@/stores/ai-drawer-store'
 import { useReviewerStore } from '@/stores/reviewer-store'
 import { SuggestionChips } from './suggestion-chips'
@@ -294,9 +294,9 @@ export function ChatPanel({
           className="flex h-[56px] shrink-0 items-center gap-3 px-4"
           style={{ background: 'var(--bg-page)' }}
         >
-          <Sparkles size={18} style={{ color: 'var(--acfs-navy)' }} />
+          <Cog size={18} style={{ color: 'var(--acfs-navy)' }} />
           <span className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
-            VBS Chat
+            Intent Model Editor
           </span>
           <span
             className="rounded-full px-2 py-0.5 text-xs"

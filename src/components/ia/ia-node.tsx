@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
 import type { IANodeData } from './ia-types'
+import { ICON_MAP } from './ia-icons'
 
 const statusColors = {
   done: '#25BA3B',
@@ -19,7 +20,7 @@ const statusLabels = {
 
 export function IANode({ data }: NodeProps) {
   const nodeData = data as unknown as IANodeData
-  const Icon = nodeData.icon
+  const Icon = ICON_MAP[nodeData.iconName] ?? ICON_MAP.HelpCircle
   const statusColor = statusColors[nodeData.status]
   const [hovered, setHovered] = useState(false)
 

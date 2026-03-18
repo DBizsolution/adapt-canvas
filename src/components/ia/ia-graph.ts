@@ -1,11 +1,8 @@
 import dagre from '@dagrejs/dagre'
 import { MarkerType } from '@xyflow/react'
 import type { Node, Edge } from '@xyflow/react'
-import { HelpCircle } from 'lucide-react'
-
 import type { IntentModel } from '@/domain/intent-model/types'
 import type { IAPositions, IANodeData, LaneNodeData, DriftWarning } from './ia-types'
-import { ICON_MAP } from './ia-icons'
 
 // --- Layout constants ---
 
@@ -219,8 +216,8 @@ export function buildIAGraph(model: IntentModel, positions: IAPositions): IAGrap
       }
     }
 
-    // Resolve icon
-    const icon = ICON_MAP[screen.icon] ?? HelpCircle
+    // Icon name passed as string — resolved client-side
+    const iconName = screen.icon
 
     // Resolve position
     const override = positionOverrides[screenId]
@@ -230,11 +227,11 @@ export function buildIAGraph(model: IntentModel, positions: IAPositions): IAGrap
 
     return {
       id: screenId,
-      type: 'screen',
+      type: 'ia',
       position,
       data: {
         label: screen.label,
-        icon,
+        iconName,
         status: screen.status,
         actor: screen.actor,
         description,

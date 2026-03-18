@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { LucideIcon } from 'lucide-react'
 
 // --- JSON file schemas (ia-positions.json) ---
 
@@ -45,7 +44,7 @@ export type IAPositions = z.infer<typeof iaPositionsSchema>
 
 export type IANodeData = {
   label: string
-  icon: LucideIcon
+  iconName: string
   status: 'done' | 'partial' | 'not-built'
   actor: string
   description: string

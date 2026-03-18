@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
 import type { IANodeData } from './ia-types'
@@ -23,17 +23,10 @@ export function IANode({ data }: NodeProps) {
   const Icon = ICON_MAP[nodeData.iconName] ?? ICON_MAP.HelpCircle
   const statusColor = statusColors[nodeData.status]
   const [hovered, setHovered] = useState(false)
-  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isShared = nodeData.actor === 'shared'
 
-  const showTooltip = useCallback(() => {
-    if (hideTimeout.current) clearTimeout(hideTimeout.current)
-    setHovered(true)
-  }, [])
-
-  const hideTooltip = useCallback(() => {
-    hideTimeout.current = setTimeout(() => setHovered(false), 150)
-  }, [])
+  const showTooltip = useCallback(() => setHovered(true), [])
+  const hideTooltip = useCallback(() => setHovered(false), [])
 
   return (
     <div
@@ -100,8 +93,6 @@ export function IANode({ data }: NodeProps) {
             width: 280,
             zIndex: 1000,
           }}
-          onMouseEnter={showTooltip}
-          onMouseLeave={hideTooltip}
         >
           <p
             className="text-[12px] leading-relaxed m-0"

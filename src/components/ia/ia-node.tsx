@@ -51,11 +51,8 @@ export function IANode({ data }: NodeProps) {
 
         {/* Status dot — top right corner */}
         <div
-          className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full"
-          style={{
-            background: statusColor,
-            border: '2px solid var(--bg-page)',
-          }}
+          className="absolute top-2 right-2 h-2 w-2 rounded-full"
+          style={{ background: statusColor }}
         />
 
         <div

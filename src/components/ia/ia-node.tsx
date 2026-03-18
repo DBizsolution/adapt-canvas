@@ -36,7 +36,7 @@ export function IANode({ data }: NodeProps) {
       onMouseLeave={hideTooltip}
     >
       <div
-        className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 transition-all duration-200"
+        className="relative flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 transition-all duration-200"
         style={{
           background: isShared ? 'transparent' : 'var(--bg-white)',
           border: `1px ${isShared ? 'dashed' : 'solid'} ${hovered ? 'var(--accent-blue)' : isShared ? 'var(--border-dark)' : 'var(--border-default)'}`,
@@ -49,6 +49,15 @@ export function IANode({ data }: NodeProps) {
         <Handle type="target" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-0 !h-0" />
         <Handle type="target" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-0 !h-0" />
 
+        {/* Status dot — top right corner */}
+        <div
+          className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full"
+          style={{
+            background: statusColor,
+            border: '2px solid var(--bg-page)',
+          }}
+        />
+
         <div
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
           style={{ background: isShared ? 'transparent' : 'var(--bg-gray-subtle)' }}
@@ -56,66 +65,93 @@ export function IANode({ data }: NodeProps) {
           <Icon size={15} style={{ color: 'var(--text-secondary)' }} strokeWidth={isShared ? 1.4 : 1.8} />
         </div>
 
-        <div className="flex flex-col gap-0.5">
-          <span
-            className="text-[13px] font-medium leading-tight"
-            style={{ color: isShared ? 'var(--text-secondary)' : 'var(--text-primary)' }}
-          >
-            {nodeData.label}
-          </span>
-          <div className="flex items-center gap-1.5">
-            <div
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ background: statusColor }}
-            />
-            <span
-              className="text-[10px] font-medium uppercase tracking-wider"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              {statusLabels[nodeData.status]}
-            </span>
-          </div>
-        </div>
+        <span
+          className="text-[13px] font-medium leading-tight"
+          style={{ color: isShared ? 'var(--text-secondary)' : 'var(--text-primary)' }}
+        >
+          {nodeData.label}
+        </span>
 
         <Handle type="source" position={Position.Right} id="right" className="!bg-transparent !border-0 !w-0 !h-0" />
         <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-transparent !border-0 !w-0 !h-0" />
       </div>
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip with arrow */}
       {hovered && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 rounded-xl px-4 py-3"
+          className="absolute left-1/2 -translate-x-1/2"
           style={{
-            top: 'calc(100% + 4px)',
-            background: 'var(--bg-white)',
-            border: '1px solid var(--border-default)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
-            width: 280,
+            top: 'calc(100% + 8px)',
             zIndex: 1000,
           }}
         >
-          <p
-            className="text-[12px] leading-relaxed m-0"
-            style={{ color: 'var(--text-secondary)', border: 'none', padding: 0 }}
+          {/* Arrow */}
+          <div
+            className="absolute left-1/2 -translate-x-1/2"
+            style={{
+              top: -6,
+              width: 12,
+              height: 6,
+              overflow: 'hidden',
+            }}
           >
-            {nodeData.description}
-          </p>
-          {nodeData.refs && nodeData.refs.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {nodeData.refs.map(ref => (
-                <span
-                  key={ref}
-                  className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium"
-                  style={{
-                    background: 'var(--bg-blue-subtle)',
-                    color: 'var(--accent-blue)',
-                  }}
-                >
-                  {ref}
-                </span>
-              ))}
+            <div
+              style={{
+                width: 10,
+                height: 10,
+                background: 'var(--bg-white)',
+                border: '1px solid var(--border-default)',
+                transform: 'rotate(45deg) translate(1px, 1px)',
+                transformOrigin: 'center',
+              }}
+            />
+          </div>
+          {/* Card */}
+          <div
+            className="rounded-xl px-4 py-3"
+            style={{
+              background: 'var(--bg-white)',
+              border: '1px solid var(--border-default)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+              width: 280,
+            }}
+          >
+            {/* Status label in tooltip */}
+            <div className="flex items-center gap-1.5 mb-2">
+              <div
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: statusColor }}
+              />
+              <span
+                className="text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: statusColor }}
+              >
+                {statusLabels[nodeData.status]}
+              </span>
             </div>
-          )}
+            <p
+              className="text-[12px] leading-relaxed m-0"
+              style={{ color: 'var(--text-secondary)', border: 'none', padding: 0 }}
+            >
+              {nodeData.description}
+            </p>
+            {nodeData.refs && nodeData.refs.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {nodeData.refs.map(ref => (
+                  <span
+                    key={ref}
+                    className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium"
+                    style={{
+                      background: 'var(--bg-blue-subtle)',
+                      color: 'var(--accent-blue)',
+                    }}
+                  >
+                    {ref}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

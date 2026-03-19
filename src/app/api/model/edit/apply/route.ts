@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getProposal, addVersion, getLatestVersionId } from '@/lib/model-store'
+import { writeBRD } from '@/lib/brd-generator'
 import type { ModelVersion } from '@/lib/model-store'
 import { computeModelStatus } from '@/lib/model-validation'
 
@@ -40,6 +41,11 @@ export async function POST(request: Request) {
     }
 
     await addVersion(version)
+
+    // Auto-generate BRD (local dev only — no persistent FS on Vercel)
+    if (!process.env.KV_REST_API_URL) {
+      await writeBRD(version.model)
+    }
 
     return NextResponse.json({ version })
   } catch (error) {

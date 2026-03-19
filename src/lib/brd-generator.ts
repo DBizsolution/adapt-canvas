@@ -88,7 +88,9 @@ export function generateBRD(model: IntentModel): string {
   // --- 1. Purpose & Scope ---
   push('## 1. Purpose & Scope')
   blank()
-  push(`The ${model.meta.project} is a web-based system for managing container pickup bookings at ACFS facilities. It enables logistics service providers to view shipments, delegate pickup authority, book pickup slots, manage documentation, and make payments — with ACFS staff overseeing operations, slot configuration, and verification.`)
+  push(`The ${model.meta.project} is a web-based system for managing container pickup bookings at ACFS facilities.`)
+  blank()
+  push('It enables logistics service providers to view shipments, delegate pickup authority, book pickup slots, manage documentation, and make payments — with ACFS staff overseeing operations, slot configuration, and verification.')
   blank()
 
   // --- 2. Actors ---
@@ -107,8 +109,8 @@ export function generateBRD(model: IntentModel): string {
       push(`- **${r.id}:** ${r.description}`)
       renderWarn(r.warn)
       renderEdge(r.edge)
+      blank()
     }
-    blank()
     const actorDecisions = decisionsFor('actor', actor.id)
     for (const d of actorDecisions) { push(d); blank() }
   }
@@ -196,8 +198,8 @@ export function generateBRD(model: IntentModel): string {
         push(`${step.order}. **${step.title}** — ${step.detail}${pre}`)
         renderWarn(step.warn)
         renderEdge(step.edge)
+        blank()
       }
-      blank()
 
       push(`**Success Outcome:** ${journey.success_outcome}`)
       blank()
@@ -212,6 +214,7 @@ export function generateBRD(model: IntentModel): string {
   blank()
   for (const rule of model.business_rules) {
     push(`**${rule.id}:** ${rule.description}`)
+    blank()
     push(`- *Applies to:* ${rule.applies_to.join(', ')}`)
     push(`- *Source:* ${rule.source}`)
     renderWarn(rule.warn)
@@ -233,8 +236,8 @@ export function generateBRD(model: IntentModel): string {
     blank()
     for (const c of constraints) {
       push(`- **${c.id}:** ${c.constraint}`)
+      blank()
     }
-    blank()
   }
 
   // --- 7. Open Questions & Decision Log ---

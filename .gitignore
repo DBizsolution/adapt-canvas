@@ -6,3 +6,4 @@ node_modules/
 model-history.json
 .playwright-mcp/
 docs/uploads/
+docs/generated/

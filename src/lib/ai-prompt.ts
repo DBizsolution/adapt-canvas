@@ -108,8 +108,19 @@ export async function callOpenAI(req: EditRequest): Promise<EditResponse> {
   let userContent: string
   if (req.scope === 'section' && req.sectionType) {
     const modelKey = SECTION_TYPE_TO_MODEL_KEY[req.sectionType]
-    // Only send the section being edited — not the full model
-    userContent = `## Section to edit: ${modelKey}
+    // Compact ID index for cross-referencing without sending full model
+    const idIndex = {
+      actors: req.currentModel.actors.map(a => a.id),
+      entities: req.currentModel.entities.map(e => e.id),
+      journeys: req.currentModel.journeys.map(j => j.id),
+      business_rules: req.currentModel.business_rules.map(r => r.id),
+      constraints: req.currentModel.constraints.map(c => c.id),
+      open_questions: req.currentModel.open_questions.map(q => q.id),
+    }
+    userContent = `## Available IDs in other sections (for cross-references)
+${JSON.stringify(idIndex)}
+
+## Section to edit: ${modelKey}
 ${JSON.stringify(req.currentModel[modelKey], null, 2)}
 
 ## Edit instruction

@@ -108,10 +108,8 @@ export async function callOpenAI(req: EditRequest): Promise<EditResponse> {
   let userContent: string
   if (req.scope === 'section' && req.sectionType) {
     const modelKey = SECTION_TYPE_TO_MODEL_KEY[req.sectionType]
-    userContent = `## Current full model (read-only context)
-${JSON.stringify(req.currentModel, null, 2)}
-
-## Section to edit: ${modelKey}
+    // Only send the section being edited — not the full model
+    userContent = `## Section to edit: ${modelKey}
 ${JSON.stringify(req.currentModel[modelKey], null, 2)}
 
 ## Edit instruction
@@ -132,6 +130,7 @@ ${req.prompt}`
       { role: 'user', content: userContent },
     ],
     temperature: 0.2,
+    max_tokens: req.scope === 'section' ? 8000 : 16000,
   })
 
   const content = response.choices[0]?.message?.content

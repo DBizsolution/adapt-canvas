@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getReviewState } from '@/lib/review-store'
 import { getCurrentModel, getLatestVersionId } from '@/lib/model-store'
 import { ReviewerSelector } from '@/components/review/reviewer-selector'

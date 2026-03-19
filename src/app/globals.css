@@ -459,3 +459,17 @@
 .custom-scroll:hover::-webkit-scrollbar-thumb {
   opacity: 1;
 }
+
+@media print {
+  .nav-sidebar {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+}

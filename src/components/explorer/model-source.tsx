@@ -158,10 +158,14 @@ export function ModelSource({ source }: { source: string }) {
           style={{ fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Monaco, monospace" }}
         >
           {tokenizedLines.map((tokens, lineNum) => {
-            // Count leading spaces for hanging indent on wrapped lines
+            // Hanging indent: wrap aligns after first `: ` (property value lines)
+            // or falls back to leading whitespace
             const lineText = tokens.map(t => t.text).join('')
-            const leadingSpaces = lineText.match(/^ */)?.[0].length ?? 0
-            const indentPx = leadingSpaces * 7.8 // ~1ch at 13px mono
+            const colonMatch = lineText.match(/^(\s*\w+:\s)/)
+            const hangChars = colonMatch
+              ? colonMatch[1].length
+              : (lineText.match(/^ */)?.[0].length ?? 0)
+            const indentPx = hangChars * 7.8 // ~1ch at 13px mono
 
             return (
               <div key={lineNum} className="flex hover:bg-[#2C313A] transition-colors duration-100">

@@ -91,7 +91,7 @@ export type BusinessRule = {
 export type Constraint = {
   id: string
   constraint: string
-  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal' | 'admin'
+  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal' | 'admin' | 'platform' | 'notification'
 }
 
 export type OpenQuestion = {
@@ -108,39 +108,19 @@ export type SectionType = 'actor' | 'entity' | 'journey' | 'business_rule' | 'co
 
 export type ReviewState = {
   modelVersion: string
-  reviewers: Reviewer[]
   sections: SectionReview[]
 }
 
-export type Reviewer = {
-  id: string
-  name: string
-  role: 'designer' | 'product_owner' | 'tech_lead' | 'engineer' | 'qa'
-  focus: string[]
+export type Comment = {
+  text: string
+  timestamp: string
 }
 
 export type SectionReview = {
   targetId: string
   targetType: SectionType
   status: 'pending' | 'approved' | 'disputed'
-  contentHash: string
-  reviews: Review[]
-}
-
-export type Review = {
-  reviewerId: string
-  status: 'approved' | 'disputed'
-  comment?: string
-  timestamp: string
-}
-
-export type ConsensusStatus = {
-  totalSections: number
-  approved: number
-  disputed: number
-  pending: number
-  revised: number
-  ready: boolean
+  comments: Comment[]
 }
 
 // --- Mapping utilities ---

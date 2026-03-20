@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "next dev -p 4444",
     "build": "next build",
     "start": "next start",
     "lint": "eslint src/",
-    "intent:snapshot": "bash scripts/snapshot.sh"
+    "intent:snapshot": "bash scripts/snapshot.sh",
+    "export:contract": "tsx scripts/export-contract.ts"
   },
   "keywords": [],
   "author": "",

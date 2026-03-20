@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Cog, Loader2, RefreshCw, GripVertical, Send } from 'lucide-react'
 import { useDrawerStore } from '@/stores/ai-drawer-store'
-import { useReviewerStore } from '@/stores/reviewer-store'
 import { SuggestionChips } from './suggestion-chips'
 import { DiffPreview } from './diff-preview'
 import { VersionHistory } from './version-history'
@@ -44,7 +43,7 @@ export function ChatPanel({
   const router = useRouter()
   const pathname = usePathname()
   const store = useDrawerStore()
-  const { currentReviewerId } = useReviewerStore()
+  const currentReviewerId = 'anonymous'
 
   const [prompt, setPrompt] = useState('')
   const [versions, setVersions] = useState<VersionMeta[]>([])

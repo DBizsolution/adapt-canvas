@@ -54,7 +54,7 @@
         "lsp-modifies-booking",
         "BR-015"
       ],
-      "status": "partial"
+      "status": "done"
     },
     "wff-cancel": {
       "label": "Cancel Booking",
@@ -76,7 +76,7 @@
         "BR-003",
         "BR-021"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "wff-flag-bond": {
       "label": "Flag Under-bond",
@@ -108,7 +108,7 @@
         "OQ-004",
         "C-005"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "p4tc-view": {
       "label": "View Delegated HBLs",
@@ -118,7 +118,7 @@
         "p4tc:r2",
         "OQ-005"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "p4tc-delegate": {
       "label": "Delegate Further",
@@ -128,7 +128,7 @@
         "p4tc:r3",
         "BR-013"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "p4tc-book": {
       "label": "Book Pickup",
@@ -139,7 +139,7 @@
         "p4tc-books-pickup",
         "C-005"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "p4tc-upload": {
       "label": "Upload DO / Contact ACFS",
@@ -148,7 +148,7 @@
       "refs": [
         "p4tc:r5"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-login": {
       "label": "SSO Login",
@@ -170,7 +170,7 @@
         "BR-026",
         "C-002"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-bookings": {
       "label": "Manage Bookings",
@@ -180,7 +180,7 @@
         "acfs:r4",
         "BR-015"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-do-val": {
       "label": "DO Validation",
@@ -191,7 +191,7 @@
         "acfs-validates-dos",
         "BR-018"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-pickup": {
       "label": "Pickup Verification",
@@ -214,7 +214,7 @@
         "BR-024",
         "BR-025"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-hbl-assign": {
       "label": "Manual HBL Assignment",
@@ -224,7 +224,7 @@
         "acfs:r1",
         "acfs-assigns-hbls"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-ecst": {
       "label": "ECST Assignment",
@@ -254,7 +254,7 @@
         "acfs:r9",
         "BR-006"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-partial": {
       "label": "Partial Processing",
@@ -273,7 +273,7 @@
       "refs": [
         "acfs:r12"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "acfs-edit-deleg": {
       "label": "Edit / Revoke Delegation",
@@ -293,7 +293,7 @@
         "BR-022",
         "C-003"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "gh-login": {
       "label": "SSO Login",
@@ -311,7 +311,7 @@
       "refs": [
         "gatehouse:r1"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "gh-exit": {
       "label": "Confirm Exit",
@@ -320,14 +320,14 @@
       "refs": [
         "gatehouse:r2"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "sh-bookings": {
       "label": "Bookings List",
       "icon": "ListOrdered",
       "actor": "shared",
       "refs": [],
-      "status": "not-built"
+      "status": "done"
     },
     "sh-notifs": {
       "label": "Notifications",
@@ -485,7 +485,7 @@
     "e-cross-5": {
       "source": "acfs-pickup",
       "target": "gh-verify",
-      "label": "Booking → processed",
+      "label": "Booking \u2192 processed",
       "cross": true,
       "sourceHandle": "bottom",
       "targetHandle": "top"

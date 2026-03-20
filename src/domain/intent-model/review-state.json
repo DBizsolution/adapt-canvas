@@ -1,24 +1,1193 @@
 {
-  "modelVersion": "0.3.0",
-  "reviewers": [
+  "modelVersion": "0.6.0",
+  "sections": [
     {
-      "id": "rahul",
-      "name": "Rahul",
-      "role": "designer",
-      "focus": ["actors", "entities", "journeys", "business_rules", "constraints", "open_questions"]
+      "targetId": "actor:lsp",
+      "targetType": "actor",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Confirmed across discussion between Rahul, Roni, and Matt on 2026-03-17, 32 and Roni/Matt session on 2026-03-18. Replaces WFF/FF/Carrier split.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
     },
     {
-      "id": "roni",
-      "name": "Roni",
-      "role": "product_owner",
-      "focus": ["actors", "journeys", "business_rules", "open_questions"]
+      "targetId": "actor:p4tc",
+      "targetType": "actor",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Magic link + OTP auth confirmed. No account, no history.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
     },
     {
-      "id": "kavya",
-      "name": "Kavya",
-      "role": "tech_lead",
-      "focus": ["entities", "constraints"]
+      "targetId": "actor:driver",
+      "targetType": "actor",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "No portal access, no system emails.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "actor:acfs",
+      "targetType": "actor",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Updated v0.6.0 with inline edit, searchable LSP assign/reassign, fee-free HBL modifications.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "actor:gatehouse",
+      "targetType": "actor",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "SSO via OAuth/Okta. Verify booking ref + driver identity, confirm exit.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:hbl",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Updated v0.6.0 \u2014 full audit trail lives here. Milestones, HBL status, customs, under-bond confirmed.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:booking",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Updated v0.6.0 \u2014 slim audit trail. Collected status derived from HBL milestones.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:slot",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Flexible overlapping slots, relative cutoffs, density indicator, holiday calendar.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:site",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "DB-seeded, no admin CRUD for Phase 1.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:driver_record",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Account-scoped, built organically. Search + autocomplete UX confirmed.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:delivery_order",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Updated v0.6.0 \u2014 one-to-many per HBL (one DO per delegation tier).",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:delegation",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Records chain of custody. Can be revoked by ACFS.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:integration_maximus",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Periodic batch sync, once/twice daily.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:integration_ags",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Provides HBL hierarchy and FF party data. Exact format TBD (OQ-034).",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:integration_payment",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Stripe for Phase 1, abstracted for swap to Compay later.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:integration_email",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Updated v0.6.0 \u2014 added DO flag-for-correction trigger. Email-first.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "entity:integration_lsp_registry",
+      "targetType": "entity",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "One-time bulk upload from AGS. No ongoing sync.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-assigns-hbls",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Remedial/optional. Searchable dropdown for LSP assign/reassign.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-configures-slots",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Site, days, times, cutoffs, heat map, holidays. Confirmed 2026-03-18.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:lsp-delegates-shipments",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Select HBLs, choose LSP or create P4TC, system sends email.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:lsp-books-pickup",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Full flow validated: readiness, pricing, slot, driver, T&Cs, payment, confirmation.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:lsp-modifies-booking",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Truck/driver anytime, slot/HBLs before cutoff. My Bookings reuses admin UI.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:p4tc-books-pickup",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Same as LSP minus saved drivers. OTP is security gate.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-validates-dos",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "HBL-centric. Multiple DOs per HBL. Browse and validate each.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-verifies-pickup",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Search, review, process or reject. Field requirements defined by current UI.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:lsp-cancels-booking",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "LSP cancels own booking. Refund outside system. HBLs revert.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-cancels-booking",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "ACFS cancels with reason. Email notification. Refund offline.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:p4tc-manages-booking",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Contact ACFS for any modifications. No self-service.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-creates-user",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Admin creates account, welcome email, user sets password.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-updates-user",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Search and update user details.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "journey:acfs-removes-user",
+      "targetType": "journey",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Soft-delete (archive). Access disabled.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-001",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Delegation at any milestone, booking requires unpacked + customs cleared.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-002",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Under-bond skips DO. Manual flag. Verification outside portal.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-003",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Multi-level DO hierarchy. Each tier independent.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-004",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Either delegate or book per HBL. Mutual exclusivity.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-005",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Relative cutoffs. Booking and change cutoffs separate. Per-site.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-006",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Updated v0.6.0: FOC rebook = admin edits slot/driver. Fee-free.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-007",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Partial processing supported.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-009",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "LSP visibility scoped to allocated shipments.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-010",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Data auto-synced on login.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-011",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Missing doc = hard stop on booking.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-012",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Confirmation to account email only.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-013",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "P4TC chain delegation supported.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-014",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "ACFS manages user lifecycle.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-015",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Truck/driver anytime. Slot/HBL before cutoff. ACFS overrides.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-016",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Drivers scoped per LSP account.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-017",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Two acceptance docs: T&Cs + site induction.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-018",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "DO validation is HBL-centric. Separate from pickup verification.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-019",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Fee = chargeable_weight x rate + minimum. Backend-derived.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-020",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Email notification on ACFS booking changes.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-021",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Either DO or free release per HBL.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-022",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Cancellation by LSP or ACFS. Email notification. Refund offline.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-023",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "P4TC cannot self-service modify bookings.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-024",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "User removal is soft-delete.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-025",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Welcome email link expires 72 hours.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-026",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Slots with active bookings cannot be removed.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-027",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: Admin HBL add/remove fee-free.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-028",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: Booking collected derived from HBL milestones.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-029",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: Slim audit on booking, full on HBL.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-030",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: LSP My Bookings reuses admin UI.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "business_rule:BR-031",
+      "targetType": "business_rule",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: Multiple DOs per HBL.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-001",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "No hard capacity limits. Density indicator only.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-002",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Slots with bookings cannot be modified in Phase 1.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-003",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Refunds outside portal.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-004",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Driver has no portal access.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-005",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "P4TC: magic link + OTP only.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-006",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Sites DB-seeded. No admin CRUD for Phase 1.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-007",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: Desktop/laptop only.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "constraint:C-008",
+      "targetType": "constraint",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "New v0.6.0: Email-first notifications.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-001",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Global LSP registry from AGS bulk upload.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-002",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Chargeable weight x flat rate + minimum charge.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-003",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Either delegate or book per HBL.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-004",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Magic link + OTP for P4TC.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-005",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: No dashboard, no history for P4TC.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-006",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Periodic batch, once/twice daily.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-007",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: LSP can book directly without delegating.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-008",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Manual flag by LSP/ACFS.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-009",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Each tier uploads independently.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-010",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Admin only. Audit trail required.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-011",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Cross-LSP HBL combination allowed.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-012",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Stripe embedded checkout.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-013",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Refunds outside portal.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-014",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Relative day + time cutoffs.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-015",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Search, details, validate/reject, processed.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-016",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Full slot config flow confirmed.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-017",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved v0.6.0: No separate FOC rebook. Admin inline edit.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-018",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Single app, role-based routing.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-019",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: LSP=password, P4TC=magic link, ACFS=SSO.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-020",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: No request flow. Search by HBL only.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-021",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Milestones confirmed \u2014 on_vessel, at_wharf, in_yard, unpacked, collected.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-022",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Two release types \u2014 DO required and free release.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-023",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Rate and minimum are backend-derived, configurable.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-024",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: LSPs persistent login. Only P4TC uses magic link.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-025",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Under-bond = customs bond flag. Bypasses DO. ACFS verifies.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-026",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Admin-initiated only. No self-registration.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-027",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: OTP verification IS the security validation.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-028",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Booking ref, slot, HBLs, fee, site address.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-029",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Not applicable \u2014 truck type removed for Phase 1.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-030",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Search + autocomplete for saved drivers.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-031",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: ECTS parked for Phase 1.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-032",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Auto-assignment out of scope for Phase 1 frontend.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-033",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: SSO for ACFS. Confirmed Roni/Matt session on 2026-03-18.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-034",
+      "targetType": "open_question",
+      "status": "disputed",
+      "comments": [
+        {
+          "text": "STILL OPEN: HBL hierarchy data source pending Matt/William. Single biggest technical risk.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-035",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Stripe for Phase 1. Abstracted for Compay swap.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-036",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Simplified density indicator without exact counts.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-037",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Field requirements defined by current ACFS UI designs.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-038",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved: Frontend displays from API. Staleness is backend concern.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
+    },
+    {
+      "targetId": "open_question:OQ-039",
+      "targetType": "open_question",
+      "status": "approved",
+      "comments": [
+        {
+          "text": "Resolved v0.6.0: LSP My Bookings reuses admin UI.",
+          "timestamp": "2026-03-21T01:04:29.461052Z"
+        }
+      ]
     }
-  ],
-  "sections": []
+  ]
 }

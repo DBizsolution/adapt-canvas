@@ -1,6 +1,6 @@
 import { getReviewState } from '@/lib/review-store'
 import { getCurrentModel } from '@/lib/model-store'
-import { enrichSectionReviews, computeConsensus } from '@/lib/review-utils'
+import { getAllModelItems, buildTargetId, getReviewForTarget } from '@/lib/review-utils'
 import { ConsensusDashboard } from '@/components/review/consensus-dashboard'
 
 export const dynamic = 'force-dynamic'
@@ -9,8 +9,11 @@ export default async function ReviewDashboard() {
   const intentModel = await getCurrentModel()
   const reviewState = await getReviewState()
 
-  const enrichedSections = await enrichSectionReviews(intentModel, reviewState)
-  const consensus = computeConsensus(enrichedSections, reviewState.reviewers)
+  const modelItems = getAllModelItems(intentModel)
+  const sections = modelItems.map(({ item, type }) => {
+    const targetId = buildTargetId(type, item.id)
+    return getReviewForTarget(reviewState.sections, targetId)
+  })
 
   return (
     <div className="pb-16">
@@ -22,11 +25,7 @@ export default async function ReviewDashboard() {
           v{intentModel.meta.version} — {intentModel.meta.status}
         </p>
       </div>
-      <ConsensusDashboard
-        consensus={consensus}
-        sections={enrichedSections}
-        reviewers={reviewState.reviewers}
-      />
+      <ConsensusDashboard sections={sections} />
     </div>
   )
 }

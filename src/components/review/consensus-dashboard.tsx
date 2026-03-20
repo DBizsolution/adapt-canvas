@@ -1,15 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Progress } from '@/components/ui/progress'
-import type { ConsensusStatus, Reviewer, SectionType } from '@/domain/intent-model/types'
-import type { EnrichedSectionReview } from '@/lib/review-utils'
-import { SECTION_TYPE_TO_MODEL_KEY, SECTION_TYPE_TO_URL_PARAM } from '@/domain/intent-model/types'
+import type { SectionReview, SectionType } from '@/domain/intent-model/types'
+import { SECTION_TYPE_TO_URL_PARAM } from '@/domain/intent-model/types'
 
-type ConsensusDashboardProps = {
-  consensus: ConsensusStatus
-  sections: EnrichedSectionReview[]
-  reviewers: Reviewer[]
+type DashboardProps = {
+  sections: SectionReview[]
 }
 
 const sectionTypeLabels: Record<SectionType, string> = {
@@ -21,95 +17,50 @@ const sectionTypeLabels: Record<SectionType, string> = {
   open_question: 'Open Questions',
 }
 
-const sectionTypeDescriptions: Record<SectionType, string> = {
-  actor: 'Users and roles that interact with the system',
-  entity: 'Core data objects and their lifecycles',
-  journey: 'End-to-end user flows and interactions',
-  business_rule: 'Domain logic and validation requirements',
-  constraint: 'System limits, capacity, and pricing rules',
-  open_question: 'Unresolved decisions needing stakeholder input',
-}
+const sectionTypeOrder: SectionType[] = [
+  'actor', 'entity', 'journey', 'business_rule', 'constraint', 'open_question',
+]
 
-export function ConsensusDashboard({ consensus, sections, reviewers }: ConsensusDashboardProps) {
-  const sectionTypes = Object.keys(sectionTypeLabels) as SectionType[]
-  const pct = consensus.totalSections > 0 ? Math.round((consensus.approved / consensus.totalSections) * 100) : 0
-
+export function ConsensusDashboard({ sections }: DashboardProps) {
   return (
-    <div className="space-y-5">
-      {/* Progress summary — one line */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
-          <Progress value={pct} className="h-1.5" />
-        </div>
-        <div className="flex items-center gap-3 text-xs font-medium shrink-0">
-          <span style={{ color: 'var(--accent-green)' }}>{consensus.approved} approved</span>
-          {consensus.disputed > 0 && <span style={{ color: '#E11D48' }}>{consensus.disputed} disputed</span>}
-          {consensus.revised > 0 && <span style={{ color: 'var(--accent-blue)' }}>{consensus.revised} revised</span>}
-          <span style={{ color: 'var(--text-muted)' }}>{consensus.pending} pending</span>
-        </div>
-      </div>
+    <div className="space-y-2">
+      {sectionTypeOrder.map(type => {
+        const typeSections = sections.filter(s => s.targetType === type)
+        if (typeSections.length === 0) return null
 
-      {/* Sections — 3-column grid */}
-      <div className="grid grid-cols-3 gap-3">
-        {sectionTypes.map(type => {
-          const typeSections = sections.filter(s => s.targetType === type)
-          const approved = typeSections.filter(s => s.effectiveStatus === 'approved').length
-          const disputed = typeSections.filter(s => s.effectiveStatus === 'disputed').length
-          const total = typeSections.length
-          if (total === 0) return null
-          const sectionPct = total > 0 ? Math.round((approved / total) * 100) : 0
+        const approved = typeSections.filter(s => s.status === 'approved').length
+        const disputed = typeSections.filter(s => s.status === 'disputed').length
+        const totalComments = typeSections.reduce((sum, s) => sum + (s.comments?.length ?? 0), 0)
 
-          return (
-            <Link key={type} href={`/review/${SECTION_TYPE_TO_URL_PARAM[type]}`}>
-              <div
-                className="rounded-lg px-4 py-3.5 transition-all duration-200 hover:shadow-md"
-                style={{
-                  background: 'var(--bg-white)',
-                  border: '1px solid var(--border-default)',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-1">
+        return (
+          <Link key={type} href={`/review/${SECTION_TYPE_TO_URL_PARAM[type]}`}>
+            <div
+              className="rounded-xl px-5 py-4 transition-all duration-200 hover:shadow-md mb-1"
+              style={{
+                background: 'var(--bg-white)',
+                border: '1px solid var(--border-default)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
                   <span className="text-sm font-semibold" style={{ color: 'var(--acfs-navy)' }}>
                     {sectionTypeLabels[type]}
                   </span>
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                    {approved}/{total}
+                  <span className="text-xs ml-2" style={{ color: 'var(--text-muted)' }}>
+                    {typeSections.length} items
                   </span>
                 </div>
-                <p className="text-xs mb-2.5" style={{ color: 'var(--text-muted)' }}>
-                  {sectionTypeDescriptions[type]}
-                </p>
-                <Progress value={sectionPct} className="h-1" />
-                {disputed > 0 && (
-                  <span className="text-xs font-medium mt-1.5 inline-block" style={{ color: '#E11D48' }}>{disputed} disputed</span>
-                )}
+                <div className="flex items-center gap-3 text-xs font-medium">
+                  {approved > 0 && <span style={{ color: 'var(--accent-green)' }}>{approved} approved</span>}
+                  {disputed > 0 && <span style={{ color: '#E11D48' }}>{disputed} disputed</span>}
+                  {totalComments > 0 && <span style={{ color: 'var(--text-muted)' }}>{totalComments} comments</span>}
+                </div>
               </div>
-            </Link>
-          )
-        })}
-      </div>
-
-      {/* Reviewers — compact */}
-      <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2" style={{ borderTop: '1px solid var(--border-default)' }}>
-        {reviewers.map(r => {
-          const relevantSections = sections.filter(s => {
-            const modelKey = SECTION_TYPE_TO_MODEL_KEY[s.targetType] as string
-            return r.focus.includes(modelKey)
-          })
-          const reviewed = relevantSections.filter(s =>
-            s.reviews.some(rev => rev.reviewerId === r.id)
-          ).length
-          const total = relevantSections.length
-
-          return (
-            <span key={r.id} className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{r.name}</span>
-              {' '}{reviewed}/{total}
-            </span>
-          )
-        })}
-      </div>
+            </div>
+          </Link>
+        )
+      })}
     </div>
   )
 }

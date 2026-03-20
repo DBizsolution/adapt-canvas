@@ -4,20 +4,18 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { StatusBadge, WarnIndicator, EdgeIndicator } from './status-badge'
 import { ReviewControls } from './review-controls'
-import { OpenQuestionControls } from './open-question-controls'
 import { HelpTip } from './help-tip'
 import { AbbrText } from './abbr-text'
-import type { EnrichedSectionReview } from '@/lib/review-utils'
+import type { SectionReview } from '@/domain/intent-model/types'
 import type {
-  Actor, Entity, Journey, BusinessRule, Constraint, OpenQuestion, SectionType, Review
+  Actor, Entity, Journey, BusinessRule, Constraint, OpenQuestion, SectionType
 } from '@/domain/intent-model/types'
 
 
 type SectionRendererProps = {
   item: Actor | Entity | Journey | BusinessRule | Constraint | OpenQuestion
   type: SectionType
-  review: EnrichedSectionReview
-  currentReviewerId: string | null
+  review: SectionReview
 }
 
 const sectionTypeExplanations: Record<SectionType, string> = {
@@ -52,27 +50,6 @@ function StateBadge({ children }: { children: React.ReactNode; variant?: string 
     >
       {children}
     </span>
-  )
-}
-
-function ReviewHistory({ reviews }: { reviews: Review[] }) {
-  if (reviews.length === 0) return null
-  return (
-    <div className="mt-4 space-y-2 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
-      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Review history</p>
-      {reviews.map((r, i) => (
-        <div key={i} className="text-sm flex gap-2 items-start">
-          <span style={{ color: r.status === 'approved' ? 'var(--accent-green)' : '#E11D48' }}>
-            {r.status === 'approved' ? '✓' : '✗'}
-          </span>
-          <div>
-            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{r.reviewerId}</span>
-            <span style={{ color: 'var(--text-muted)' }}> — {new Date(r.timestamp).toLocaleDateString()}</span>
-            {r.comment && <p className="mt-0.5" style={{ color: 'var(--text-secondary)' }}>{r.comment}</p>}
-          </div>
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -277,7 +254,7 @@ function renderItem(item: SectionRendererProps['item'], type: SectionType) {
   }
 }
 
-export function SectionCard({ item, type, review, currentReviewerId }: SectionRendererProps) {
+export function SectionCard({ item, type, review }: SectionRendererProps) {
   const [isOpen, setIsOpen] = useState(false)
   const displayId = 'name' in item ? (item as { name: string }).name : item.id
   const description = 'description' in item ? (item as { description: string }).description : ''
@@ -287,7 +264,6 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
       className="mb-3 overflow-hidden rounded-xl transition-shadow"
       style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-subtle)' }}
     >
-      {/* Clickable header */}
       <div
         role="button"
         tabIndex={0}
@@ -300,28 +276,21 @@ export function SectionCard({ item, type, review, currentReviewerId }: SectionRe
           {isOpen ? <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} /> : <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />}
           <h3 className="m-0 text-sm font-bold" style={{ color: 'var(--acfs-navy)' }}>{displayId}</h3>
           <HelpTip text={`${sectionTypeExplanations[type]} — ${description || displayId}`} />
+          {(review.comments?.length ?? 0) > 0 && (
+            <span className="text-xs rounded-full px-1.5 py-0.5" style={{ background: 'var(--bg-card-gray)', color: 'var(--text-muted)' }}>
+              {review.comments?.length}
+            </span>
+          )}
         </div>
-        <StatusBadge status={review.effectiveStatus} />
+        <StatusBadge status={review.status} />
       </div>
 
-      {/* Collapsible body */}
       {isOpen && (
         <div className="p-4">
           {renderItem(item, type)}
-          <ReviewHistory reviews={review.reviews} />
-          {currentReviewerId && (
-            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
-              {type === 'open_question' ? (
-                <OpenQuestionControls
-                  section={review}
-                  currentReviewerId={currentReviewerId}
-                  questionStatus={(item as OpenQuestion).status}
-                />
-              ) : (
-                <ReviewControls section={review} currentReviewerId={currentReviewerId} />
-              )}
-            </div>
-          )}
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
+            <ReviewControls section={review} />
+          </div>
         </div>
       )}
     </div>

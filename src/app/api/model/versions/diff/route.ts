@@ -32,5 +32,6 @@ export async function GET(request: Request) {
     from: { id: fromVersion.id, version: fromVersion.model.meta.version, author: fromVersion.author, timestamp: fromVersion.timestamp },
     to: { id: toVersion.id, version: toVersion.model.meta.version, author: toVersion.author, timestamp: toVersion.timestamp },
     diff,
+    models: { previous: fromVersion.model, current: toVersion.model },
   })
 }

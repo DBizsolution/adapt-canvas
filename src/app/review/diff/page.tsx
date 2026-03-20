@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { GitCommit, Loader2, ChevronRight } from 'lucide-react'
-import { DiffViewer } from '@/components/review/diff-viewer'
+import { SideBySideDiff } from '@/components/review/side-by-side-diff'
 import type { ModelDiff } from '@/lib/model-diff'
-import type { DiffItem } from '@/lib/review-utils'
-import type { SectionType } from '@/domain/intent-model/types'
+import type { IntentModel } from '@/domain/intent-model/types'
 
 type VersionMeta = {
   id: string
@@ -19,6 +18,7 @@ type DiffData = {
   from: { id: string; version: string; author: string; timestamp: string }
   to: { id: string; version: string; author: string; timestamp: string }
   diff: ModelDiff
+  models: { previous: IntentModel; current: IntentModel }
 }
 
 function timeAgo(timestamp: string): string {
@@ -32,38 +32,6 @@ function timeAgo(timestamp: string): string {
   return `${days}d ago`
 }
 
-function diffToDiffItems(diff: ModelDiff): DiffItem[] {
-  const items: DiffItem[] = []
-
-  for (const section of diff.sections) {
-    for (const change of section.changes) {
-      const item: DiffItem = {
-        targetId: `${section.sectionType}:${change.itemId}`,
-        targetType: section.sectionType as SectionType,
-        change: change.type,
-      }
-
-      if (change.type === 'modified' && change.fields) {
-        const current: Record<string, unknown> = { id: change.itemId, name: change.itemName }
-        const previous: Record<string, unknown> = { id: change.itemId, name: change.itemName }
-        for (const f of change.fields) {
-          current[f.field] = f.new
-          previous[f.field] = f.old
-        }
-        item.current = current as DiffItem['current']
-        item.previous = previous as DiffItem['previous']
-      } else if (change.type === 'added') {
-        item.current = { id: change.itemId, name: change.itemName } as DiffItem['current']
-      } else if (change.type === 'removed') {
-        item.previous = { id: change.itemId, name: change.itemName } as DiffItem['previous']
-      }
-
-      items.push(item)
-    }
-  }
-
-  return items
-}
 
 export default function DiffPage() {
   const [versions, setVersions] = useState<VersionMeta[]>([])
@@ -214,7 +182,7 @@ export default function DiffPage() {
                 No changes in this version.
               </div>
             ) : (
-              <DiffViewer diffs={diffToDiffItems(diffData.diff)} />
+              <SideBySideDiff previous={diffData.models.previous} current={diffData.models.current} />
             )}
           </div>
         )}

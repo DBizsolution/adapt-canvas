@@ -1,31 +1,9 @@
 import type {
   IntentModel,
-  ReviewState,
   SectionReview,
   SectionType,
-  ConsensusStatus,
 } from '@/domain/intent-model/types'
-import { MODEL_KEY_TO_SECTION_TYPE, SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
-
-// --- Hashing ---
-
-function sortedStringify(obj: unknown): string {
-  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj)
-  if (Array.isArray(obj)) return '[' + obj.map(sortedStringify).join(',') + ']'
-  const sorted = Object.keys(obj as Record<string, unknown>).sort()
-  return '{' + sorted.map(k => JSON.stringify(k) + ':' + sortedStringify((obj as Record<string, unknown>)[k])).join(',') + '}'
-}
-
-export async function hashItem(item: unknown): Promise<string> {
-  const json = sortedStringify(item)
-  const encoder = new TextEncoder()
-  const data = encoder.encode(json)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-// --- Model item extraction ---
+import { MODEL_KEY_TO_SECTION_TYPE } from '@/domain/intent-model/types'
 
 type ModelItem = { id: string; [key: string]: unknown }
 
@@ -48,85 +26,16 @@ export function buildTargetId(type: SectionType, id: string): string {
   return `${type}:${id}`
 }
 
-// --- Staleness detection ---
-
-export type EnrichedSectionReview = SectionReview & {
-  isRevised: boolean
-  effectiveStatus: 'pending' | 'approved' | 'disputed' | 'revised'
-}
-
-export async function enrichSectionReviews(
-  model: IntentModel,
-  reviewState: ReviewState
-): Promise<EnrichedSectionReview[]> {
-  const modelItems = getAllModelItems(model)
-  const enriched: EnrichedSectionReview[] = []
-
-  for (const { item, type } of modelItems) {
-    const targetId = buildTargetId(type, item.id)
-    const existing = reviewState.sections.find(s => s.targetId === targetId)
-    const currentHash = await hashItem(item)
-
-    if (existing) {
-      const isRevised = existing.contentHash !== currentHash
-      enriched.push({
-        ...existing,
-        isRevised,
-        effectiveStatus: isRevised ? 'revised' : existing.status,
-      })
-    } else {
-      enriched.push({
-        targetId,
-        targetType: type,
-        status: 'pending',
-        contentHash: currentHash,
-        reviews: [],
-        isRevised: false,
-        effectiveStatus: 'pending',
-      })
-    }
+export function getReviewForTarget(sections: SectionReview[], targetId: string): SectionReview {
+  return sections.find(s => s.targetId === targetId) ?? {
+    targetId,
+    targetType: targetId.split(':')[0] as SectionType,
+    status: 'pending',
+    comments: [],
   }
-
-  return enriched
 }
 
-// --- Consensus computation ---
-
-export function computeConsensus(
-  enrichedSections: EnrichedSectionReview[],
-  reviewers: ReviewState['reviewers']
-): ConsensusStatus {
-  let approved = 0
-  let disputed = 0
-  let pending = 0
-  let revised = 0
-
-  for (const section of enrichedSections) {
-    switch (section.effectiveStatus) {
-      case 'approved': approved++; break
-      case 'disputed': disputed++; break
-      case 'revised': revised++; break
-      case 'pending': pending++; break
-    }
-  }
-
-  const totalSections = enrichedSections.length
-
-  const ready = enrichedSections.every(section => {
-    if (section.effectiveStatus !== 'approved') return false
-    const relevantReviewers = reviewers.filter(r => {
-      const modelKey = SECTION_TYPE_TO_MODEL_KEY[section.targetType]
-      return r.focus.includes(modelKey as string)
-    })
-    return relevantReviewers.every(r =>
-      section.reviews.some(rev => rev.reviewerId === r.id && rev.status === 'approved')
-    )
-  })
-
-  return { totalSections, approved, disputed, pending, revised, ready }
-}
-
-// --- Structural diff ---
+// --- Structural diff (kept for diff page) ---
 
 export type DiffItem = {
   targetId: string

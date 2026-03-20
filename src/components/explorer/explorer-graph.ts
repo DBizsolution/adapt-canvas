@@ -1,19 +1,14 @@
 import dagre from '@dagrejs/dagre'
 import type { Node, Edge } from '@xyflow/react'
 import type { IntentModel, Entity } from '@/domain/intent-model/types'
-import type {
-  ExplorerGraphData, ExplorerNodeData, EntityRelationships, SatelliteNodeData,
-} from './explorer-types'
-import { ENTITY_COLOR, SATELLITE_COLORS } from './explorer-types'
+import type { ExplorerGraphData, ExplorerNodeData, EntityRelationships } from './explorer-types'
+import { ENTITY_COLOR } from './explorer-types'
+import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 // --- Layout constants ---
 
 const NODE_WIDTH = 200
 const NODE_HEIGHT = 70
-const MIN_SATELLITE_RADIUS = 250
-const MAX_SATELLITE_RADIUS = 450
-const RADIUS_PER_ITEM = 5
-
 // --- Handle selection ---
 // Pick source (right|bottom) and target (left|top) handles based on relative position
 
@@ -221,113 +216,11 @@ function layoutEntities(
   return positions
 }
 
-// --- buildSatelliteNodes ---
-// Generates satellite nodes in a radial layout around an entity node.
-
-export function buildSatelliteNodes(
-  entityId: string,
-  entityPosition: { x: number; y: number },
-  relationships: EntityRelationships,
-): { nodes: Node<SatelliteNodeData>[]; edges: Edge[] } {
-  type SatelliteGroup = {
-    type: SatelliteNodeData['itemType']
-    items: { id: string; label: string; item: SatelliteNodeData['item'] }[]
-  }
-
-  const allGroups: SatelliteGroup[] = [
-    {
-      type: 'business_rule' as const,
-      items: relationships.rules.map((r) => ({ id: r.id, label: r.id, item: r })),
-    },
-    {
-      type: 'journey' as const,
-      items: relationships.journeys.map((j) => ({ id: j.id, label: j.name, item: j })),
-    },
-    {
-      type: 'actor' as const,
-      items: relationships.actors.map((a) => ({ id: a.id, label: a.name, item: a })),
-    },
-    {
-      type: 'constraint' as const,
-      items: relationships.constraints.map((c) => ({ id: c.id, label: c.id, item: c })),
-    },
-    {
-      type: 'open_question' as const,
-      items: relationships.openQuestions.map((oq) => ({ id: oq.id, label: oq.id, item: oq })),
-    },
-  ]
-  const groups = allGroups.filter((g) => g.items.length > 0)
-
-  // Total satellites for angle distribution
-  const totalItems = groups.reduce((sum, g) => sum + g.items.length, 0)
-  if (totalItems === 0) return { nodes: [], edges: [] }
-
-  const nodes: Node<SatelliteNodeData>[] = []
-  const edges: Edge[] = []
-
-  // Center of the entity node
-  const cx = entityPosition.x + NODE_WIDTH / 2
-  const cy = entityPosition.y + NODE_HEIGHT / 2
-
-  const radius = Math.min(MAX_SATELLITE_RADIUS, MIN_SATELLITE_RADIUS + totalItems * RADIUS_PER_ITEM)
-  let globalIndex = 0
-
-  for (const group of groups) {
-    const color = SATELLITE_COLORS[group.type]
-
-    for (const item of group.items) {
-      const angle = (2 * Math.PI * globalIndex) / totalItems - Math.PI / 2
-      const sx = cx + radius * Math.cos(angle)
-      const sy = cy + radius * Math.sin(angle)
-
-      const nodeId = `satellite-${entityId}-${item.id}`
-
-      nodes.push({
-        id: nodeId,
-        type: 'satellite',
-        position: { x: sx - 80, y: sy - 16 },
-        data: {
-          itemType: group.type,
-          itemId: item.id,
-          label: item.label,
-          item: item.item,
-        },
-      })
-
-      const satHandles = pickHandles(cx, cy, sx, sy)
-
-      edges.push({
-        id: `satellite-edge-${entityId}-${item.id}`,
-        source: entityId,
-        target: nodeId,
-        sourceHandle: satHandles.sourceHandle,
-        targetHandle: satHandles.targetHandle,
-        style: {
-          stroke: color,
-          strokeWidth: 1.2,
-          strokeDasharray: '5 4',
-          opacity: 0.6,
-        },
-        markerEnd: {
-          type: 'arrowclosed' as const,
-          width: 8,
-          height: 8,
-          color,
-        },
-      })
-
-      globalIndex++
-    }
-  }
-
-  return { nodes, edges }
-}
-
 // --- buildExplorerGraph ---
 // Main export. Returns dagre-positioned entity nodes, deduplicated edges,
 // and a relationship map for each entity.
 
-export function buildExplorerGraph(model: IntentModel): ExplorerGraphData {
+export function buildExplorerGraph(model: IntentModel, savedPositions?: ExplorerPositions): ExplorerGraphData {
   const { entities } = model
 
   // Step 1: compute cross-reference edges per entity
@@ -344,11 +237,11 @@ export function buildExplorerGraph(model: IntentModel): ExplorerGraphData {
   // Step 3: dagre layout
   const positions = layoutEntities(entities, entityEdgesPerEntity)
 
-  // Step 4: build entity nodes
+  // Step 4: build entity nodes (saved positions override dagre)
   const entityNodes: Node<ExplorerNodeData>[] = entities.map((entity) => ({
     id: entity.id,
     type: 'explorer',
-    position: positions.get(entity.id) ?? { x: 0, y: 0 },
+    position: savedPositions?.[entity.id] ?? positions.get(entity.id) ?? { x: 0, y: 0 },
     data: {
       entityId: entity.id,
       name: entity.name,

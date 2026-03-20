@@ -2,11 +2,9 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import type {
-  Actor, Entity, Journey, BusinessRule, Constraint, OpenQuestion,
-} from '@/domain/intent-model/types'
-import type { SatelliteNodeData, EntityRelationships } from './explorer-types'
-import { SATELLITE_COLORS, SATELLITE_LABELS, ENTITY_COLOR } from './explorer-types'
+import type { Entity } from '@/domain/intent-model/types'
+import type { EntityRelationships } from './explorer-types'
+import { ENTITY_COLOR } from './explorer-types'
 
 // --- Shared sub-components ---
 
@@ -42,10 +40,9 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 
 // --- Item renderers ---
 
-function EntityDetail({ entity, relationships, onHighlightGroup }: {
+function EntityDetail({ entity, relationships }: {
   entity: Entity
   relationships?: EntityRelationships
-  onHighlightGroup?: (type: SatelliteNodeData['itemType']) => void
 }) {
   const [showTransitions, setShowTransitions] = useState(false)
 
@@ -136,125 +133,32 @@ function EntityDetail({ entity, relationships, onHighlightGroup }: {
           <FieldLabel>Related</FieldLabel>
           <div className="flex flex-wrap gap-2">
             {relationships.rules.length > 0 && (
-              <button type="button" onClick={() => onHighlightGroup?.('business_rule')} className="text-xs font-medium px-2 py-1 rounded-md transition-colors duration-200 hover:opacity-80" style={{ background: '#F59E0B18', color: '#F59E0B' }}>
+              <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: '#F59E0B18', color: '#F59E0B' }}>
                 {relationships.rules.length} rules
-              </button>
+              </span>
             )}
             {relationships.journeys.length > 0 && (
-              <button type="button" onClick={() => onHighlightGroup?.('journey')} className="text-xs font-medium px-2 py-1 rounded-md transition-colors duration-200 hover:opacity-80" style={{ background: '#10B98118', color: '#10B981' }}>
+              <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: '#10B98118', color: '#10B981' }}>
                 {relationships.journeys.length} journeys
-              </button>
+              </span>
             )}
             {relationships.actors.length > 0 && (
-              <button type="button" onClick={() => onHighlightGroup?.('actor')} className="text-xs font-medium px-2 py-1 rounded-md transition-colors duration-200 hover:opacity-80" style={{ background: '#8B5CF618', color: '#8B5CF6' }}>
+              <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: '#8B5CF618', color: '#8B5CF6' }}>
                 {relationships.actors.length} actors
-              </button>
+              </span>
             )}
             {relationships.constraints.length > 0 && (
-              <button type="button" onClick={() => onHighlightGroup?.('constraint')} className="text-xs font-medium px-2 py-1 rounded-md transition-colors duration-200 hover:opacity-80" style={{ background: '#EF444418', color: '#EF4444' }}>
+              <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: '#EF444418', color: '#EF4444' }}>
                 {relationships.constraints.length} constraints
-              </button>
+              </span>
             )}
             {relationships.openQuestions.length > 0 && (
-              <button type="button" onClick={() => onHighlightGroup?.('open_question')} className="text-xs font-medium px-2 py-1 rounded-md transition-colors duration-200 hover:opacity-80" style={{ background: '#EC489918', color: '#EC4899' }}>
+              <span className="text-xs font-medium px-2 py-1 rounded-md" style={{ background: '#EC489918', color: '#EC4899' }}>
                 {relationships.openQuestions.length} questions
-              </button>
+              </span>
             )}
           </div>
         </div>
-      )}
-    </div>
-  )
-}
-
-function ActorDetail({ actor }: { actor: Actor }) {
-  return (
-    <div className="space-y-3">
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{actor.description}</p>
-      <div className="text-sm"><span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Auth:</span> <span style={{ color: 'var(--text-secondary)' }}>{actor.auth}</span></div>
-      <div>
-        <FieldLabel>Responsibilities ({actor.responsibilities.length})</FieldLabel>
-        {actor.responsibilities.map(r => (
-          <div key={r.id} className="py-2 text-sm" style={{ borderBottom: '1px solid var(--border-default)' }}>
-            <span className="font-mono text-xs font-medium" style={{ color: 'var(--accent-blue)' }}>{r.id}</span>
-            <p className="mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{r.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function JourneyDetail({ journey }: { journey: Journey }) {
-  return (
-    <div className="space-y-3">
-      <div className="text-sm"><span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Actor:</span> <span style={{ color: 'var(--text-secondary)' }}>{journey.primary_actor}</span></div>
-      {journey.preconditions.length > 0 && (
-        <div className="text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(245,158,11,0.06)', color: '#92400E', border: '1px solid rgba(245,158,11,0.15)' }}>
-          <span className="font-semibold">Preconditions: </span>{journey.preconditions.join(' · ')}
-        </div>
-      )}
-      <div>
-        {journey.steps.map(s => (
-          <div key={s.order} className="flex gap-3 py-2.5" style={{ borderBottom: '1px solid var(--border-default)' }}>
-            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0" style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}>
-              {s.order}
-            </div>
-            <div className="flex-1">
-              <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{s.title}</span>
-              <p className="text-xs leading-relaxed mt-0.5" style={{ color: 'var(--text-secondary)' }}>{s.detail}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="text-sm"><span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Outcome:</span> <span style={{ color: 'var(--text-secondary)' }}>{journey.success_outcome}</span></div>
-    </div>
-  )
-}
-
-function RuleDetail({ rule }: { rule: BusinessRule }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <StateBadge>{rule.id}</StateBadge>
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{rule.source}</span>
-      </div>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{rule.description}</p>
-      {rule.applies_to.length > 0 && (
-        <div>
-          <FieldLabel>Applies to</FieldLabel>
-          <div className="flex flex-wrap gap-1">
-            {rule.applies_to.map(ref => (
-              <span key={ref} className="inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium" style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-secondary)' }}>
-                {ref}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function ConstraintDetail({ constraint }: { constraint: Constraint }) {
-  return (
-    <div className="space-y-3">
-      <StateBadge>{constraint.type}</StateBadge>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>{constraint.constraint}</p>
-    </div>
-  )
-}
-
-function OpenQuestionDetail({ question }: { question: OpenQuestion }) {
-  return (
-    <div className="space-y-3">
-      <StateBadge>{question.status}</StateBadge>
-      <p className="text-sm font-semibold leading-relaxed" style={{ color: 'var(--text-primary)' }}>{question.question}</p>
-      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{question.reason}</p>
-      {question.resolution && (
-        <p className="text-sm px-2 py-1 rounded inline-block" style={{ background: 'rgba(37,186,59,0.08)', color: '#166534' }}>
-          Resolution: {question.resolution}
-        </p>
       )}
     </div>
   )
@@ -262,23 +166,19 @@ function OpenQuestionDetail({ question }: { question: OpenQuestion }) {
 
 // --- Main panel component ---
 
-type DetailPanelItem =
-  | { type: 'entity'; entity: Entity; relationships?: EntityRelationships }
-  | { type: 'satellite'; data: SatelliteNodeData }
+type DetailPanelItem = {
+  type: 'entity'
+  entity: Entity
+  relationships?: EntityRelationships
+}
 
 type DetailPanelProps = {
   item: DetailPanelItem | null
   onClose: () => void
-  onHighlightGroup?: (type: SatelliteNodeData['itemType']) => void
 }
 
-export function DetailPanel({ item, onClose, onHighlightGroup }: DetailPanelProps) {
+export function DetailPanel({ item, onClose }: DetailPanelProps) {
   if (!item) return null
-
-  const isEntity = item.type === 'entity'
-  const color = isEntity ? ENTITY_COLOR : SATELLITE_COLORS[item.data.itemType]
-  const typeLabel = isEntity ? 'Entity' : SATELLITE_LABELS[item.data.itemType]
-  const name = isEntity ? item.entity.name : item.data.label
 
   return (
     <div
@@ -294,8 +194,8 @@ export function DetailPanel({ item, onClose, onHighlightGroup }: DetailPanelProp
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 shrink-0" style={{ borderBottom: '1px solid var(--border-default)' }}>
         <div className="flex items-center gap-2 min-w-0">
-          <TypeBadge label={typeLabel} color={color} />
-          <h3 className="text-sm font-semibold truncate m-0" style={{ color: 'var(--text-primary)' }}>{name}</h3>
+          <TypeBadge label="Entity" color={ENTITY_COLOR} />
+          <h3 className="text-sm font-semibold truncate m-0" style={{ color: 'var(--text-primary)' }}>{item.entity.name}</h3>
         </div>
         <button
           type="button"
@@ -308,20 +208,7 @@ export function DetailPanel({ item, onClose, onHighlightGroup }: DetailPanelProp
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-4 custom-scroll">
-        {isEntity ? (
-          <EntityDetail entity={item.entity} relationships={item.relationships} onHighlightGroup={onHighlightGroup} />
-        ) : (
-          (() => {
-            const d = item.data
-            switch (d.itemType) {
-              case 'actor': return <ActorDetail actor={d.item as Actor} />
-              case 'journey': return <JourneyDetail journey={d.item as Journey} />
-              case 'business_rule': return <RuleDetail rule={d.item as BusinessRule} />
-              case 'constraint': return <ConstraintDetail constraint={d.item as Constraint} />
-              case 'open_question': return <OpenQuestionDetail question={d.item as OpenQuestion} />
-            }
-          })()
-        )}
+        <EntityDetail entity={item.entity} relationships={item.relationships} />
       </div>
     </div>
   )

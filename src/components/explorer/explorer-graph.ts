@@ -131,9 +131,9 @@ export function findRelationships(entity: Entity, model: IntentModel): EntityRel
   // Constraints: check constraint text
   const constraints = model.constraints.filter((c) => matchesAny(c.constraint))
 
-  // Open questions: check question text and reason
+  // Open questions: only show unresolved ones (resolved = already incorporated into the model)
   const openQuestions = model.open_questions.filter(
-    (oq) => matchesAny(oq.question) || matchesAny(oq.reason),
+    (oq) => oq.status !== 'resolved' && (matchesAny(oq.question) || matchesAny(oq.reason)),
   )
 
   // Entity edges are computed separately — return empty here

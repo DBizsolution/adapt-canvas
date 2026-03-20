@@ -2,6 +2,7 @@ import OpenAI from 'openai'
 import type { IntentModel, SectionType } from '@/domain/intent-model/types'
 import { SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
 import { IntentModelSchema, SectionSchemas } from './model-schemas'
+import { projectConfig } from '@/lib/project-config'
 
 let _openai: OpenAI | null = null
 function getOpenAI() {
@@ -21,7 +22,7 @@ type IntentModel = {
 }
 
 type Actor = {
-  id: string          // short lowercase, e.g. 'lsp', 'acfs', 'p4tc'
+  id: string          // ${projectConfig.ai.idExamples}
   name: string
   description: string
   auth: string
@@ -41,7 +42,7 @@ type Entity = {
 }
 
 type Journey = {
-  id: string           // kebab-case, e.g. 'carrier-books-pickup'
+  id: string           // ${projectConfig.ai.journeyIdExamples}
   name: string
   primary_actor: string  // must reference an existing actor ID
   preconditions: string[]
@@ -87,7 +88,7 @@ ${TYPE_DEFINITIONS}
 - ${scopeInstruction}
 - Preserve ALL existing data unless the user's prompt explicitly asks to change it.
 - Preserve all "warn" and "edge" annotations unless the user specifically asks to modify them.
-- Generate sequential IDs following existing patterns (e.g. if actors have lsp, p4tc, acfs — a new actor gets a short lowercase ID).
+- Generate sequential IDs following existing patterns (e.g. ${projectConfig.ai.idPatternHint}).
 - Return ONLY valid JSON. No markdown, no explanation, no wrapping.`
 }
 

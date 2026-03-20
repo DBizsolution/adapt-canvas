@@ -15,9 +15,11 @@ import {
   Settings,
   Map,
   ClipboardList,
+  Network,
 } from 'lucide-react'
 
 const navItems = [
+  { label: 'Explorer', href: '/', icon: Network },
   { label: 'Dashboard', href: '/review', icon: LayoutDashboard },
   { label: 'Actors', href: '/review/actors', icon: Users },
   { label: 'Entities', href: '/review/entities', icon: Database },
@@ -37,7 +39,7 @@ export function NavSidebar() {
   return (
     <nav className="nav-sidebar flex w-[200px] shrink-0 flex-col py-3 px-2">
       {/* Logo — links home */}
-      <Link href="/review" className="mb-4 flex items-center gap-2.5 px-2 no-underline">
+      <Link href="/" className="mb-4 flex items-center gap-2.5 px-2 no-underline">
         <div className="nav-logo flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold">
           V
         </div>
@@ -50,9 +52,11 @@ export function NavSidebar() {
       <div className="flex flex-1 flex-col gap-0.5">
         {navItems.map(item => {
           const Icon = item.icon
-          const isActive = item.href === '/review'
-            ? pathname === '/review'
-            : pathname.startsWith(item.href)
+          const isActive = item.href === '/'
+            ? pathname === '/'
+            : item.href === '/review'
+              ? pathname === '/review'
+              : pathname.startsWith(item.href)
 
           return (
             <Link

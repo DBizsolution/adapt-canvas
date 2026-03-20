@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { projectConfig } from '@/lib/project-config'
 import {
   LayoutDashboard,
   Users,
@@ -41,10 +42,10 @@ export function NavSidebar() {
       {/* Logo — links home */}
       <Link href="/" className="mb-4 flex items-center gap-2.5 px-2 no-underline">
         <div className="nav-logo flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold">
-          V
+          {projectConfig.iconLetter}
         </div>
         <span className="nav-title text-sm font-semibold">
-          VBS Intent
+          {projectConfig.shortName}
         </span>
       </Link>
 

@@ -158,13 +158,22 @@ export function ModelSource({ source }: { source: string }) {
           style={{ fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Monaco, monospace" }}
         >
           {tokenizedLines.map((tokens, lineNum) => {
-            // Hanging indent: wrap aligns after first `: ` (property value lines)
-            // or falls back to leading whitespace
+            // Hanging indent: wrap aligns after the last `key: '` pattern
+            // Handles both `description: 'text'` and `{ id: 'x', description: 'text' }`
             const lineText = tokens.map(t => t.text).join('')
-            const colonMatch = lineText.match(/^(\s*\w+:\s)/)
-            const hangChars = colonMatch
-              ? colonMatch[1].length
-              : (lineText.match(/^ */)?.[0].length ?? 0)
+            let hangChars = lineText.match(/^ */)?.[0].length ?? 0
+
+            // Find the last `word: '` or `word: "` pattern — that's where the long string starts
+            const allColonMatches = [...lineText.matchAll(/\w+:\s+'/g)]
+            if (allColonMatches.length > 0) {
+              const lastMatch = allColonMatches[allColonMatches.length - 1]
+              hangChars = (lastMatch.index ?? 0) + lastMatch[0].length
+            } else {
+              // Try `word: value` without quotes (e.g. `applies_to: ['hbl',`)
+              const simpleColon = lineText.match(/^(\s*\w+:\s)/)
+              if (simpleColon) hangChars = simpleColon[1].length
+            }
+
             const indentPx = hangChars * 7.8 // ~1ch at 13px mono
 
             return (

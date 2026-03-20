@@ -1,20 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { Network, BookOpen } from 'lucide-react'
+import { Network, BookOpen, Code2 } from 'lucide-react'
 import type { IntentModel } from '@/domain/intent-model/types'
 import { ExplorerCanvas } from './explorer-canvas'
 import { ModelReader } from './model-reader'
+import { ModelSource } from './model-source'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
   { id: 'graph', label: 'Graph', icon: Network },
   { id: 'model', label: 'Model', icon: BookOpen },
+  { id: 'source', label: 'Source', icon: Code2 },
 ] as const
 
 type TabId = (typeof tabs)[number]['id']
 
-export function ExplorerTabs({ model, savedPositions }: { model: IntentModel; savedPositions: ExplorerPositions }) {
+export function ExplorerTabs({ model, savedPositions, modelSource }: { model: IntentModel; savedPositions: ExplorerPositions; modelSource: string }) {
   const [activeTab, setActiveTab] = useState<TabId>('graph')
 
   return (
@@ -56,6 +58,9 @@ export function ExplorerTabs({ model, savedPositions }: { model: IntentModel; sa
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />
+        )}
+        {activeTab === 'source' && (
+          <ModelSource source={modelSource} />
         )}
       </div>
     </div>

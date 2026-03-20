@@ -268,8 +268,6 @@ export function buildSatelliteNodes(
           label: item.label,
           item: item.item,
         },
-        draggable: false,
-        selectable: false,
       })
 
       edges.push({

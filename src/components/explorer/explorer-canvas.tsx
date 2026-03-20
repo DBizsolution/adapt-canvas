@@ -113,6 +113,15 @@ export function ExplorerCanvas({ model }: { model: IntentModel }) {
     clearSelection()
   }, [clearSelection])
 
+  // Elevate hovered node so tooltip renders above siblings
+  const onNodeMouseEnter = useCallback((_: React.MouseEvent, node: Node) => {
+    setNodes(nds => nds.map(n => n.id === node.id ? { ...n, zIndex: 9999 } : n))
+  }, [setNodes])
+
+  const onNodeMouseLeave = useCallback((_: React.MouseEvent, node: Node) => {
+    setNodes(nds => nds.map(n => n.id === node.id ? { ...n, zIndex: 0 } : n))
+  }, [setNodes])
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -146,13 +155,15 @@ export function ExplorerCanvas({ model }: { model: IntentModel }) {
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
         minZoom={0.3}
         maxZoom={1.5}
         proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}
+        nodesDraggable
         nodesConnectable={false}
         elementsSelectable={true}
         panOnScroll

@@ -19,17 +19,6 @@ function TypeBadge({ label, color }: { label: string; color: string }) {
   )
 }
 
-function StateBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="inline-block whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold"
-      style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)', border: '1px solid rgba(0,129,242,0.15)' }}
-    >
-      {children}
-    </span>
-  )
-}
-
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>
@@ -55,24 +44,17 @@ function EntityDetail({ entity, relationships }: {
       {/* Fields table */}
       <div>
         <FieldLabel>Fields ({entity.key_fields.length})</FieldLabel>
-        <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
-              <th className="py-1.5 pr-3 text-left font-medium" style={{ color: 'var(--text-muted)', width: '120px' }}>Name</th>
-              <th className="py-1.5 pr-3 text-left font-medium" style={{ color: 'var(--text-muted)', width: '90px' }}>Type</th>
-              <th className="py-1.5 text-left font-medium" style={{ color: 'var(--text-muted)' }}>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {entity.key_fields.map((f, i) => (
-              <tr key={f.name} style={{ borderBottom: i < entity.key_fields.length - 1 ? '1px solid var(--border-default)' : 'none' }}>
-                <td className="py-2 pr-3 align-top font-mono text-xs" style={{ color: 'var(--text-primary)' }}>{f.name}</td>
-                <td className="py-2 pr-3 align-top"><StateBadge>{f.type}</StateBadge></td>
-                <td className="py-2 align-top text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{f.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="space-y-2">
+          {entity.key_fields.map((f) => (
+            <div key={f.name} className="py-2" style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}>{f.type}</span>
+              </div>
+              <p className="text-xs leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>{f.description}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Lifecycle */}
@@ -182,9 +164,10 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
 
   return (
     <div
-      className="absolute top-0 right-0 bottom-0 z-10 flex flex-col overflow-hidden"
+      className="absolute top-0 right-0 bottom-0 z-10 flex flex-col"
       style={{
-        width: 400,
+        width: 420,
+        minWidth: 420,
         background: 'var(--bg-white)',
         borderLeft: '1px solid var(--border-default)',
         boxShadow: '-4px 0 24px rgba(0,0,0,0.06)',
@@ -207,7 +190,7 @@ export function DetailPanel({ item, onClose }: DetailPanelProps) {
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 custom-scroll">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 custom-scroll">
         <EntityDetail entity={item.entity} relationships={item.relationships} />
       </div>
     </div>

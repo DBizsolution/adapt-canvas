@@ -179,7 +179,7 @@ export function ExplorerCanvas({ model, savedPositions }: { model: IntentModel; 
           background: 'var(--bg-white)',
           border: '1px solid var(--border-default)',
           boxShadow: 'var(--shadow-float)',
-          ...(detailItem ? { right: 416 } : {}),
+          ...(detailItem ? { right: 436 } : {}),
         }}
       >
         <span className="text-[11px] font-semibold" style={{ color: 'var(--accent-blue)' }}>

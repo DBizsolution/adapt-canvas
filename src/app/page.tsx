@@ -1,7 +1,7 @@
 import { getCurrentModel } from '@/lib/model-store'
 import { getExplorerPositions } from '@/lib/explorer-positions-store'
 import { NavSidebar } from '@/components/review/nav-links'
-import { ExplorerCanvas } from '@/components/explorer/explorer-canvas'
+import { ExplorerTabs } from '@/components/explorer/explorer-tabs'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +15,7 @@ export default async function ExplorerPage() {
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
       <NavSidebar />
       <div className="flex-1 overflow-hidden">
-        <ExplorerCanvas model={model} savedPositions={savedPositions} />
+        <ExplorerTabs model={model} savedPositions={savedPositions} />
       </div>
     </div>
   )

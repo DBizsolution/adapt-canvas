@@ -154,7 +154,7 @@ export function ModelSource({ source }: { source: string }) {
 
         {/* Code */}
         <pre
-          className="m-0 px-0 py-4 text-[13px] leading-[1.7]"
+          className="m-0 px-0 py-4 text-[13px] leading-[1.7] whitespace-pre-wrap break-words"
           style={{ fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Monaco, monospace" }}
         >
           {tokenizedLines.map((tokens, lineNum) => (
@@ -165,7 +165,7 @@ export function ModelSource({ source }: { source: string }) {
               >
                 {lineNum + 1}
               </span>
-              <code className="flex-1 pr-6">
+              <code className="flex-1 pr-6 min-w-0">
                 <HighlightedLine tokens={tokens} />
               </code>
             </div>

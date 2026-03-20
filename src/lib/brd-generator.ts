@@ -2,6 +2,7 @@ import type { IntentModel, OpenQuestion } from '@/domain/intent-model/types'
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { BRD_OUTPUT_PATH } from './paths'
+import { projectConfig } from '@/lib/project-config'
 
 export type DecisionMatch = {
   question: OpenQuestion
@@ -88,9 +89,9 @@ export function generateBRD(model: IntentModel): string {
   // --- 1. Purpose & Scope ---
   push('## 1. Purpose & Scope')
   blank()
-  push(`The ${model.meta.project} is a web-based system for managing container pickup bookings at ACFS facilities.`)
+  push(projectConfig.brd.introText.replace('{project}', model.meta.project))
   blank()
-  push('It enables logistics service providers to view shipments, delegate pickup authority, book pickup slots, manage documentation, and make payments — with ACFS staff overseeing operations, slot configuration, and verification.')
+  push(projectConfig.brd.scopeText)
   blank()
 
   // --- 2. Actors ---

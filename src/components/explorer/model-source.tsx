@@ -157,42 +157,19 @@ export function ModelSource({ source }: { source: string }) {
           className="m-0 px-0 py-4 text-[13px] leading-[1.7] whitespace-pre-wrap break-words"
           style={{ fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', Menlo, Monaco, monospace" }}
         >
-          {tokenizedLines.map((tokens, lineNum) => {
-            // Hanging indent: wrap aligns after the last `key: '` pattern
-            // Handles both `description: 'text'` and `{ id: 'x', description: 'text' }`
-            const lineText = tokens.map(t => t.text).join('')
-            let hangChars = lineText.match(/^ */)?.[0].length ?? 0
-
-            // Find the last `word: '` or `word: "` pattern — that's where the long string starts
-            const allColonMatches = [...lineText.matchAll(/\w+:\s+'/g)]
-            if (allColonMatches.length > 0) {
-              const lastMatch = allColonMatches[allColonMatches.length - 1]
-              hangChars = (lastMatch.index ?? 0) + lastMatch[0].length
-            } else {
-              // Try `word: value` without quotes (e.g. `applies_to: ['hbl',`)
-              const simpleColon = lineText.match(/^(\s*\w+:\s)/)
-              if (simpleColon) hangChars = simpleColon[1].length
-            }
-
-            const indentPx = hangChars * 7.8 // ~1ch at 13px mono
-
-            return (
-              <div key={lineNum} className="flex hover:bg-[#2C313A] transition-colors duration-100">
-                <span
-                  className="shrink-0 text-right select-none px-4"
-                  style={{ width: 56, color: '#4B5263', fontSize: 12 }}
-                >
-                  {lineNum + 1}
-                </span>
-                <code
-                  className="flex-1 pr-6 min-w-0"
-                  style={{ paddingLeft: indentPx, textIndent: -indentPx }}
-                >
-                  <HighlightedLine tokens={tokens} />
-                </code>
-              </div>
-            )
-          })}
+          {tokenizedLines.map((tokens, lineNum) => (
+            <div key={lineNum} className="flex hover:bg-[#2C313A] transition-colors duration-100">
+              <span
+                className="shrink-0 text-right select-none px-4"
+                style={{ width: 56, color: '#4B5263', fontSize: 12 }}
+              >
+                {lineNum + 1}
+              </span>
+              <code className="flex-1 pr-6 min-w-0">
+                <HighlightedLine tokens={tokens} />
+              </code>
+            </div>
+          ))}
         </pre>
       </div>
     </div>

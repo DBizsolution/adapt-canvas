@@ -9,11 +9,19 @@ export const dynamic = 'force-dynamic'
 
 const MODEL_SOURCE_PATH = resolve(process.cwd(), 'src/domain/intent-model/model.ts')
 
+async function readModelSource(): Promise<string> {
+  try {
+    return await readFile(MODEL_SOURCE_PATH, 'utf-8')
+  } catch {
+    return '// Source file not available in this environment'
+  }
+}
+
 export default async function ExplorerPage() {
   const [model, savedPositions, modelSource] = await Promise.all([
     getCurrentModel(),
     getExplorerPositions(),
-    readFile(MODEL_SOURCE_PATH, 'utf-8'),
+    readModelSource(),
   ])
 
   return (

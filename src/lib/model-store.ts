@@ -53,7 +53,11 @@ async function readLocalHistory(): Promise<ModelHistory> {
   } catch {
     const seed = createSeedVersion()
     const history: ModelHistory = { versions: [seed] }
-    await writeFile(MODEL_HISTORY_PATH, JSON.stringify(history, null, 2))
+    try {
+      await writeFile(MODEL_HISTORY_PATH, JSON.stringify(history, null, 2))
+    } catch {
+      // Read-only filesystem (Vercel) — skip file write
+    }
     return history
   }
 }

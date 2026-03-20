@@ -10,7 +10,8 @@ import { ENTITY_COLOR, SATELLITE_COLORS } from './explorer-types'
 
 const NODE_WIDTH = 200
 const NODE_HEIGHT = 70
-const SATELLITE_RADIUS = 250
+const BASE_SATELLITE_RADIUS = 300
+const RADIUS_PER_ITEM = 12 // grow radius with more satellites to avoid crowding
 
 // --- Edge style constants ---
 
@@ -243,6 +244,7 @@ export function buildSatelliteNodes(
   const cx = entityPosition.x + NODE_WIDTH / 2
   const cy = entityPosition.y + NODE_HEIGHT / 2
 
+  const radius = BASE_SATELLITE_RADIUS + totalItems * RADIUS_PER_ITEM
   let globalIndex = 0
 
   for (const group of groups) {
@@ -250,8 +252,8 @@ export function buildSatelliteNodes(
 
     for (const item of group.items) {
       const angle = (2 * Math.PI * globalIndex) / totalItems - Math.PI / 2
-      const sx = cx + SATELLITE_RADIUS * Math.cos(angle)
-      const sy = cy + SATELLITE_RADIUS * Math.sin(angle)
+      const sx = cx + radius * Math.cos(angle)
+      const sy = cy + radius * Math.sin(angle)
 
       const nodeId = `satellite-${entityId}-${item.id}`
 

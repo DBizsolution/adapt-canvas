@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useCallback } from 'react'
+import { memo, useState, useCallback, useRef } from 'react'
 import { Handle, Position } from '@xyflow/react'
 import type { NodeProps } from '@xyflow/react'
 import { Database } from 'lucide-react'
@@ -10,15 +10,23 @@ import { ENTITY_COLOR } from './explorer-types'
 export const ExplorerNode = memo(function ExplorerNode({ data, selected }: NodeProps) {
   const nodeData = data as unknown as ExplorerNodeData
   const [hovered, setHovered] = useState(false)
+  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const showTooltip = useCallback(() => setHovered(true), [])
-  const hideTooltip = useCallback(() => setHovered(false), [])
+  const showTooltip = useCallback(() => {
+    if (hideTimeout.current) clearTimeout(hideTimeout.current)
+    setHovered(true)
+  }, [])
+
+  const hideTooltip = useCallback(() => {
+    hideTimeout.current = setTimeout(() => setHovered(false), 300)
+  }, [])
 
   const isHighlighted = hovered || selected
 
   return (
     <div
       className="group relative"
+      style={{ zIndex: hovered ? 9999 : 'auto' }}
       onMouseEnter={showTooltip}
       onMouseLeave={hideTooltip}
     >
@@ -67,15 +75,15 @@ export const ExplorerNode = memo(function ExplorerNode({ data, selected }: NodeP
       {/* Hover tooltip */}
       {hovered && !selected && (
         <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{ top: 'calc(100% + 8px)', zIndex: 1000 }}
+          className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+          style={{ top: 'calc(100% + 8px)', zIndex: 99999 }}
         >
           <div
             className="rounded-xl px-4 py-3"
             style={{
               background: 'var(--bg-white)',
               border: '1px solid var(--border-default)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
               width: 280,
             }}
           >

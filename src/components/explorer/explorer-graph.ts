@@ -14,6 +14,30 @@ const MIN_SATELLITE_RADIUS = 250
 const MAX_SATELLITE_RADIUS = 450
 const RADIUS_PER_ITEM = 5
 
+// --- Handle selection ---
+// Pick source (right|bottom) and target (left|top) handles based on relative position
+
+function pickHandles(
+  srcX: number, srcY: number,
+  tgtX: number, tgtY: number,
+): { sourceHandle: string; targetHandle: string } {
+  const dx = tgtX - srcX
+  const dy = tgtY - srcY
+
+  // If target is more below than beside, use bottom→top
+  if (Math.abs(dy) > Math.abs(dx) && dy > 0) {
+    return { sourceHandle: 'bottom', targetHandle: 'top' }
+  }
+  // If target is more above than beside, use top→bottom (source top, target bottom)
+  // But spec says source can only be right|bottom, target can only be left|top
+  // So for "above" targets, use right→top
+  if (Math.abs(dy) > Math.abs(dx) && dy < 0) {
+    return { sourceHandle: 'right', targetHandle: 'top' }
+  }
+  // Default: horizontal — right→left
+  return { sourceHandle: 'right', targetHandle: 'left' }
+}
+
 // --- Edge style constants ---
 
 const ENTITY_EDGE_STYLE = {
@@ -270,12 +294,14 @@ export function buildSatelliteNodes(
         },
       })
 
+      const satHandles = pickHandles(cx, cy, sx, sy)
+
       edges.push({
         id: `satellite-edge-${entityId}-${item.id}`,
         source: entityId,
         target: nodeId,
-        sourceHandle: 'right',
-        targetHandle: 'left',
+        sourceHandle: satHandles.sourceHandle,
+        targetHandle: satHandles.targetHandle,
         style: {
           stroke: color,
           strokeWidth: 1.2,
@@ -344,12 +370,16 @@ export function buildExplorerGraph(model: IntentModel): ExplorerGraphData {
       if (seenEdgeKeys.has(key)) continue
       seenEdgeKeys.add(key)
 
+      const srcPos = positions.get(entity.id) ?? { x: 0, y: 0 }
+      const tgtPos = positions.get(edge.targetEntityId) ?? { x: 0, y: 0 }
+      const handles = pickHandles(srcPos.x, srcPos.y, tgtPos.x, tgtPos.y)
+
       entityEdges.push({
         id: `entity-edge-${key}`,
         source: entity.id,
         target: edge.targetEntityId,
-        sourceHandle: 'right',
-        targetHandle: 'left',
+        sourceHandle: handles.sourceHandle,
+        targetHandle: handles.targetHandle,
         style: ENTITY_EDGE_STYLE,
         markerEnd: ENTITY_ARROW,
         label: edge.reason.length > 40 ? edge.reason.slice(0, 40) + '…' : edge.reason,

@@ -3,6 +3,7 @@ import { matchDecisionsToSections } from '@/lib/brd-generator'
 import type { DecisionMatch } from '@/lib/brd-generator'
 import type { OpenQuestion } from '@/domain/intent-model/types'
 import { BRDExportButtons } from './brd-export-buttons'
+import { projectConfig } from '@/lib/project-config'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,9 +109,8 @@ export default async function BRDPage() {
               1. Purpose & Scope
             </h2>
             <p className="text-[15px] leading-7" style={{ color: 'var(--text-secondary)' }}>
-              The {model.meta.project} is a web-based system for managing container pickup bookings at ACFS facilities.
-              It enables logistics service providers to view shipments, delegate pickup authority, book pickup slots,
-              manage documentation, and make payments — with ACFS staff overseeing operations, slot configuration, and verification.
+              {projectConfig.brd.introText.replace('{project}', model.meta.project)}{' '}
+              {projectConfig.brd.scopeText}
             </p>
           </section>
 

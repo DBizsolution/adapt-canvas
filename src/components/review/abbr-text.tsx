@@ -1,26 +1,9 @@
 'use client'
 
 import { Children, type ReactNode, isValidElement } from 'react'
+import { projectConfig } from '@/lib/project-config'
 
-const GLOSSARY: Record<string, string> = {
-  HBL: 'House Bill of Lading',
-  WFF: 'Wholesale Freight Forwarder',
-  FF: 'Freight Forwarder',
-  LSP: 'Logistics Service Provider',
-  P4TC: 'Party to Collect',
-  NVOCC: 'Non-Vessel Operating Common Carrier',
-  DO: 'Delivery Order',
-  TC: 'Transport Carrier',
-  BRD: 'Business Requirements Document',
-  OTP: 'One-Time Password',
-  SSO: 'Single Sign-On',
-  ABF: 'Australian Border Force',
-  FOC: 'Free of Charge',
-  ACFS: 'Australian Container Freight Services',
-  VBS: 'Vehicle Booking System',
-  ECST: 'ECST (pending definition)',
-  ICS: 'Integrated Cargo System',
-}
+const GLOSSARY: Record<string, string> = projectConfig.abbreviations
 
 // Sort by length descending so longer matches take priority (e.g., "ACFS" before "FF")
 // Allow optional trailing "s" for plurals (HBLs, DOs, FFs, etc.)

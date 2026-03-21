@@ -362,11 +362,10 @@ export function Graph3D({ model }: { model: IntentModel }) {
       const center = graph.d3Force('center')
       if (center?.strength) center.strength(2)
 
-      // Settle quickly — high friction, fast cooldown, pre-compute layout
-      graph.d3VelocityDecay(0.6)
-      graph.d3AlphaDecay(0.05)
-      graph.cooldownTime(3000)
-      graph.warmupTicks(100)
+      // Pre-compute entire layout before first render — no live animation
+      graph.warmupTicks(300)
+      graph.cooldownTicks(0)
+      graph.d3VelocityDecay(0.8)
 
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)

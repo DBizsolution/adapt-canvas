@@ -372,57 +372,26 @@ export function Graph3D({ model }: { model: IntentModel }) {
         .onNodeClick((node: GraphNode) => {
           handleNodeClick(node)
 
-          // Cascade particles: 1 particle per edge, multiplies at branch nodes
+          // Send 1 particle per direct edge from the clicked node only
+          // No cascading — particles show only the clicked node's connections
           const graphData = graph.graphData()
           const allLinks = graphData.links
 
           const getNodeId = (n: unknown) =>
             typeof n === 'string' ? n : (n as GraphNode)?.id ?? ''
 
-          // Build adjacency: nodeId → links connected to it
-          const adjacency = new Map<string, typeof allLinks>()
-          for (const link of allLinks) {
+          // Find all links connected to this node
+          const directLinks = allLinks.filter((link: any) => {
             const src = getNodeId(link.source)
             const tgt = getNodeId(link.target)
-            if (!adjacency.has(src)) adjacency.set(src, [])
-            if (!adjacency.has(tgt)) adjacency.set(tgt, [])
-            adjacency.get(src)!.push(link)
-            adjacency.get(tgt)!.push(link)
-          }
+            return src === node.id || tgt === node.id
+          })
 
-          // BFS: each edge gets exactly 1 particle
-          // When particle arrives at a node with N unvisited neighbors,
-          // it "splits" — 1 particle sent down each of those N edges
-          const visited = new Set<string>()
-          const queue: { nodeId: string; delay: number }[] = [{ nodeId: node.id, delay: 0 }]
-          visited.add(node.id)
-
-          while (queue.length > 0) {
-            const { nodeId, delay } = queue.shift()!
-            const connectedLinks = adjacency.get(nodeId) ?? []
-
-            // Find unvisited neighbors
-            const unvisitedEdges: { link: unknown; neighborId: string }[] = []
-            for (const link of connectedLinks) {
-              const src = getNodeId(link.source)
-              const tgt = getNodeId(link.target)
-              const neighborId = src === nodeId ? tgt : src
-              if (!visited.has(neighborId)) {
-                unvisitedEdges.push({ link, neighborId })
-              }
-            }
-
-            // Emit 1 particle per outgoing edge, staggered slightly at branches
-            for (let i = 0; i < unvisitedEdges.length; i++) {
-              const { link, neighborId } = unvisitedEdges[i]
-              visited.add(neighborId)
-
-              setTimeout(() => {
-                graph.emitParticle(link)
-              }, delay + i * 60)
-
-              queue.push({ nodeId: neighborId, delay: delay + 400 })
-            }
+          // Emit 1 particle per direct connection, staggered
+          for (let i = 0; i < directLinks.length; i++) {
+            setTimeout(() => {
+              graph.emitParticle(directLinks[i])
+            }, i * 80)
           }
         })
         .onNodeHover((node: GraphNode | null) => setHoveredNode(node))

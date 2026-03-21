@@ -730,13 +730,13 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
 
           if (node.type === 'actor') {
             // Person icon: head sphere + solid body (squashed ellipsoid)
-            const personMat = new THREE.MeshPhongMaterial({ color, shininess: 40, side: THREE.DoubleSide })
+            const personMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
             // Head
-            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 24, 24), personMat)
+            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 12, 12), personMat)
             head.position.set(0, 4, 0)
             group.add(head)
             // Body — full sphere, squashed vertically and widened
-            const bodyGeo = new THREE.SphereGeometry(3.2, 24, 24)
+            const bodyGeo = new THREE.SphereGeometry(3.2, 12, 12)
             bodyGeo.scale(1, 0.6, 0.8)
             const body = new THREE.Mesh(bodyGeo, personMat)
             body.position.set(0, 1, 0)
@@ -749,7 +749,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
 
           } else if (node.type === 'journey') {
             // Cursor/pointer arrow — extruded 2D arrow shape with depth
-            const cursorMat = new THREE.MeshPhongMaterial({ color, shininess: 50, side: THREE.DoubleSide })
+            const cursorMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
             const shape = new THREE.Shape()
             // Classic cursor arrow outline (scaled to ~6 units tall)
             shape.moveTo(0, 6)      // tip
@@ -776,24 +776,21 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
             topY = 5
 
           } else if (node.type === 'rule') {
-            // Transparent cool gray sphere
-            const ruleMat = new THREE.MeshPhongMaterial({ color: '#9CA3AF', shininess: 60, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
-            group.add(new THREE.Mesh(new THREE.SphereGeometry(3, 24, 24), ruleMat))
-            // Inner core for visibility
-            const coreMat = new THREE.MeshPhongMaterial({ color: '#6B7280', shininess: 40 })
-            group.add(new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), coreMat))
+            // Solid cool gray sphere
+            const ruleMat = new THREE.MeshPhongMaterial({ color: '#9CA3AF', shininess: 40 })
+            group.add(new THREE.Mesh(new THREE.SphereGeometry(3, 12, 12), ruleMat))
             topY = 4.5
 
           } else if (node.type === 'constraint') {
             // Octahedron (stop sign shape)
-            const constMat = new THREE.MeshPhongMaterial({ color, shininess: 40, side: THREE.DoubleSide })
+            const constMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
             group.add(new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), constMat))
             topY = 5
 
           } else {
             // Entity / default: sphere
             const radius = Math.max(3, 2 + Math.min(node.val, 15) * 0.2)
-            const mat = new THREE.MeshPhongMaterial({ color, shininess: 30, side: THREE.DoubleSide })
+            const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
             group.add(new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 12), mat))
             topY = radius + 2
           }

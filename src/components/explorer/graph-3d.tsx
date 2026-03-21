@@ -372,7 +372,7 @@ export function Graph3D({ model }: { model: IntentModel }) {
         .onNodeClick((node: GraphNode) => {
           handleNodeClick(node)
 
-          // Cascade particles from clicked node through the graph (BFS)
+          // Cascade particles: 1 particle per edge, multiplies at branch nodes
           const graphData = graph.graphData()
           const allLinks = graphData.links
 
@@ -390,7 +390,9 @@ export function Graph3D({ model }: { model: IntentModel }) {
             adjacency.get(tgt)!.push(link)
           }
 
-          // BFS from clicked node — emit particles with increasing delay
+          // BFS: each edge gets exactly 1 particle
+          // When particle arrives at a node with N unvisited neighbors,
+          // it "splits" — 1 particle sent down each of those N edges
           const visited = new Set<string>()
           const queue: { nodeId: string; delay: number }[] = [{ nodeId: node.id, delay: 0 }]
           visited.add(node.id)
@@ -399,28 +401,27 @@ export function Graph3D({ model }: { model: IntentModel }) {
             const { nodeId, delay } = queue.shift()!
             const connectedLinks = adjacency.get(nodeId) ?? []
 
-            // Count outgoing links for this node
-            const outCount = connectedLinks.filter((l: any) => !visited.has(
-              getNodeId(l.source) === nodeId ? getNodeId(l.target) : getNodeId(l.source)
-            )).length
-
+            // Find unvisited neighbors
+            const unvisitedEdges: { link: unknown; neighborId: string }[] = []
             for (const link of connectedLinks) {
               const src = getNodeId(link.source)
               const tgt = getNodeId(link.target)
               const neighborId = src === nodeId ? tgt : src
+              if (!visited.has(neighborId)) {
+                unvisitedEdges.push({ link, neighborId })
+              }
+            }
 
-              if (visited.has(neighborId)) continue
+            // Emit 1 particle per outgoing edge, staggered slightly at branches
+            for (let i = 0; i < unvisitedEdges.length; i++) {
+              const { link, neighborId } = unvisitedEdges[i]
               visited.add(neighborId)
 
-              // Emit particles on this link — more particles at branch points
-              const particleCount = Math.max(1, Math.min(outCount, 3))
               setTimeout(() => {
-                for (let p = 0; p < particleCount; p++) {
-                  setTimeout(() => graph.emitParticle(link), p * 80)
-                }
-              }, delay)
+                graph.emitParticle(link)
+              }, delay + i * 60)
 
-              queue.push({ nodeId: neighborId, delay: delay + 300 })
+              queue.push({ nodeId: neighborId, delay: delay + 400 })
             }
           }
         })

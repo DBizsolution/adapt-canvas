@@ -495,7 +495,10 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       fy: Math.sin(angle) * r,
       fz: Math.cos(angle) * r,
     })
+    // Connect to actor AND nearest milestone
     links.push({ source: `journey:${journey.id}`, target: `actor:${journey.primary_actor}`, type: 'activates' })
+    const jMilestoneIdx = Math.max(0, Math.min(states.length - 1, Math.round(xIdx)))
+    links.push({ source: `journey:${journey.id}`, target: `milestone:${states[jMilestoneIdx]}`, type: 'activates' })
     journeyIdx++
   }
 
@@ -515,12 +518,15 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       fy: Math.sin(angle) * r,
       fz: Math.cos(angle) * r,
     })
+    // Connect to applies_to AND nearest milestone
     for (const ref of rule.applies_to) {
       if (nodes.some(n => n.id === `entity:${ref}`))
         links.push({ source: `rule:${rule.id}`, target: `entity:${ref}`, type: 'governs' })
       else if (nodes.some(n => n.id === `actor:${ref}`))
         links.push({ source: `rule:${rule.id}`, target: `actor:${ref}`, type: 'governs' })
     }
+    const rMilestoneIdx = Math.max(0, Math.min(states.length - 1, Math.round(xIdx)))
+    links.push({ source: `rule:${rule.id}`, target: `milestone:${states[rMilestoneIdx]}`, type: 'activates' })
     ruleIdx++
   }
 
@@ -560,7 +566,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       // Extend slightly beyond first/last milestone
       if (spinePoints.length >= 2) {
         spinePoints.unshift(new THREE.Vector3(-15, 0, 0))
-        spinePoints.push(new THREE.Vector3((states.length - 1) * SPINE_SPACING + 15, 0, 0))
+        spinePoints.push(new THREE.Vector3((states.length - 1) * SPINE_SPACING + 8, 0, 0))
 
         const curve = new THREE.CatmullRomCurve3(spinePoints)
         const tubeGeo = new THREE.TubeGeometry(curve, 64, 1.5, 8, false)
@@ -583,7 +589,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         const animateArrow = () => {
           if (destroyed) return
           arrowT += 0.0015
-          if (arrowT > 1) arrowT = 0
+          if (arrowT > 0.92) arrowT = 0
           const pos = curve.getPointAt(arrowT)
           const tangent = curve.getTangentAt(arrowT)
           arrow.position.copy(pos)
@@ -635,11 +641,72 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         .nodeThreeObject((node: LifecycleNode) => {
           const color = LIFECYCLE_COLORS[node.type]
           const group = new THREE.Group()
+          let topY = 4 // default label offset
 
-          const radius = Math.max(3, 2 + Math.min(node.val, 15) * 0.2)
-          const geo = new THREE.SphereGeometry(radius, 16, 12)
-          const mat = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.85 })
-          group.add(new THREE.Mesh(geo, mat))
+          if (node.type === 'actor') {
+            // Person icon: head sphere + body (half-sphere torso)
+            const personMat = new THREE.MeshPhongMaterial({ color, shininess: 40 })
+            // Head
+            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), personMat)
+            head.position.set(0, 3.5, 0)
+            group.add(head)
+            // Body (wide sphere, clipped by position)
+            const body = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), personMat)
+            body.rotation.x = Math.PI
+            body.position.set(0, 1, 0)
+            group.add(body)
+            // Shoulders
+            const shoulder = new THREE.Mesh(new THREE.SphereGeometry(3.2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 4), personMat)
+            shoulder.rotation.x = Math.PI
+            shoulder.position.set(0, 1.2, 0)
+            group.add(shoulder)
+            topY = 7
+
+          } else if (node.type === 'journey') {
+            // Spring: tube along helix curve
+            const springMat = new THREE.MeshPhongMaterial({ color, shininess: 50 })
+            const helixPoints: import('three').Vector3[] = []
+            const coils = 3
+            const springR = 2.5
+            const springH = 6
+            for (let t = 0; t <= coils * Math.PI * 2; t += 0.15) {
+              helixPoints.push(new THREE.Vector3(
+                Math.cos(t) * springR,
+                (t / (coils * Math.PI * 2)) * springH - springH / 2,
+                Math.sin(t) * springR,
+              ))
+            }
+            const helixCurve = new THREE.CatmullRomCurve3(helixPoints)
+            const springGeo = new THREE.TubeGeometry(helixCurve, 80, 0.5, 8, false)
+            group.add(new THREE.Mesh(springGeo, springMat))
+            topY = 5
+
+          } else if (node.type === 'rule') {
+            // Cube with beveled edges
+            const ruleMat = new THREE.MeshPhongMaterial({ color, shininess: 30 })
+            const cube = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4, 2, 2, 2), ruleMat)
+            group.add(cube)
+            // Edge wireframe
+            const edges = new THREE.LineSegments(
+              new THREE.EdgesGeometry(new THREE.BoxGeometry(4, 4, 4)),
+              new THREE.LineBasicMaterial({ color: '#CC8800' }),
+            )
+            group.add(edges)
+            topY = 4
+
+          } else if (node.type === 'constraint') {
+            // Octahedron (stop sign shape)
+            const constMat = new THREE.MeshPhongMaterial({ color, shininess: 40 })
+            group.add(new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), constMat))
+            topY = 5
+
+          } else {
+            // Entity / default: sphere
+            const radius = Math.max(3, 2 + Math.min(node.val, 15) * 0.2)
+            const mat = new THREE.MeshPhongMaterial({ color, shininess: 30, transparent: true, opacity: 0.85 })
+            group.add(new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 12), mat))
+            topY = radius + 2
+          }
 
           // Label
           const canvasW = 1024
@@ -656,12 +723,12 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
           ctx.fillText(name, canvasW / 2, canvasH / 2)
 
           const texture = new THREE.CanvasTexture(canvas)
-          const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
-          const sprite = new THREE.Sprite(spriteMat)
+          const labelMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+          const label = new THREE.Sprite(labelMat)
           const spriteW = 22
-          sprite.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
-          sprite.position.set(0, radius + 2.5, 0)
-          group.add(sprite)
+          label.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
+          label.position.set(0, topY + 1.5, 0)
+          group.add(label)
 
           return group
         })

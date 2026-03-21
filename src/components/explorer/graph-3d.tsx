@@ -364,6 +364,11 @@ export function Graph3D({ model }: { model: IntentModel }) {
       const center = graph.d3Force('center')
       if (center?.strength) center.strength(2)
 
+      // Stop vibration — high friction + fast cooldown
+      graph.d3VelocityDecay(0.6)
+      graph.d3AlphaDecay(0.05)
+      graph.cooldownTime(3000)
+
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)
 

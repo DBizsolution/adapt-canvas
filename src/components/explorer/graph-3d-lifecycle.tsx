@@ -644,27 +644,27 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
           let topY = 4 // default label offset
 
           if (node.type === 'actor') {
-            // Person icon: head sphere + body (half-sphere torso)
-            const personMat = new THREE.MeshPhongMaterial({ color, shininess: 40 })
+            // Person icon: head sphere + solid body (squashed ellipsoid)
+            const personMat = new THREE.MeshPhongMaterial({ color, shininess: 40, side: THREE.DoubleSide })
             // Head
-            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), personMat)
-            head.position.set(0, 3.5, 0)
+            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 24, 24), personMat)
+            head.position.set(0, 4, 0)
             group.add(head)
-            // Body (wide sphere, clipped by position)
-            const body = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), personMat)
-            body.rotation.x = Math.PI
+            // Body — full sphere, squashed vertically and widened
+            const bodyGeo = new THREE.SphereGeometry(3.2, 24, 24)
+            bodyGeo.scale(1, 0.6, 0.8)
+            const body = new THREE.Mesh(bodyGeo, personMat)
             body.position.set(0, 1, 0)
             group.add(body)
-            // Shoulders
-            const shoulder = new THREE.Mesh(new THREE.SphereGeometry(3.2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 4), personMat)
-            shoulder.rotation.x = Math.PI
-            shoulder.position.set(0, 1.2, 0)
-            group.add(shoulder)
-            topY = 7
+            // Neck
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 1, 16), personMat)
+            neck.position.set(0, 2.5, 0)
+            group.add(neck)
+            topY = 7.5
 
           } else if (node.type === 'journey') {
             // Cursor/pointer arrow — extruded 2D arrow shape with depth
-            const cursorMat = new THREE.MeshPhongMaterial({ color, shininess: 50 })
+            const cursorMat = new THREE.MeshPhongMaterial({ color, shininess: 50, side: THREE.DoubleSide })
             const shape = new THREE.Shape()
             // Classic cursor arrow outline (scaled to ~6 units tall)
             shape.moveTo(0, 6)      // tip
@@ -692,7 +692,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
 
           } else if (node.type === 'rule') {
             // Cube with beveled edges
-            const ruleMat = new THREE.MeshPhongMaterial({ color, shininess: 30 })
+            const ruleMat = new THREE.MeshPhongMaterial({ color, shininess: 30, side: THREE.DoubleSide })
             const cube = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4, 2, 2, 2), ruleMat)
             group.add(cube)
             // Edge wireframe
@@ -705,14 +705,14 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
 
           } else if (node.type === 'constraint') {
             // Octahedron (stop sign shape)
-            const constMat = new THREE.MeshPhongMaterial({ color, shininess: 40 })
+            const constMat = new THREE.MeshPhongMaterial({ color, shininess: 40, side: THREE.DoubleSide })
             group.add(new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), constMat))
             topY = 5
 
           } else {
             // Entity / default: sphere
             const radius = Math.max(3, 2 + Math.min(node.val, 15) * 0.2)
-            const mat = new THREE.MeshPhongMaterial({ color, shininess: 30, transparent: true, opacity: 0.85 })
+            const mat = new THREE.MeshPhongMaterial({ color, shininess: 30, side: THREE.DoubleSide })
             group.add(new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 12), mat))
             topY = radius + 2
           }

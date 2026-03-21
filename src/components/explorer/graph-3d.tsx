@@ -1,0 +1,325 @@
+'use client'
+
+import { useRef, useEffect, useCallback, useState } from 'react'
+import type { IntentModel, SectionType } from '@/domain/intent-model/types'
+import { ENTITY_COLOR } from './explorer-types'
+
+// 3d-force-graph is a browser-only library — dynamic import
+type ForceGraph3DInstance = {
+  graphData: (data: { nodes: GraphNode[]; links: GraphLink[] }) => ForceGraph3DInstance
+  nodeColor: (fn: (node: GraphNode) => string) => ForceGraph3DInstance
+  nodeLabel: (fn: (node: GraphNode) => string) => ForceGraph3DInstance
+  nodeVal: (fn: (node: GraphNode) => number) => ForceGraph3DInstance
+  nodeThreeObject?: (fn: (node: GraphNode) => unknown) => ForceGraph3DInstance
+  linkColor: (fn: (link: GraphLink) => string) => ForceGraph3DInstance
+  linkWidth: (fn: (link: GraphLink) => number) => ForceGraph3DInstance
+  linkOpacity: (val: number) => ForceGraph3DInstance
+  linkDirectionalParticles: (val: number) => ForceGraph3DInstance
+  linkDirectionalParticleSpeed: (val: number) => ForceGraph3DInstance
+  backgroundColor: (val: string) => ForceGraph3DInstance
+  width: (val: number) => ForceGraph3DInstance
+  height: (val: number) => ForceGraph3DInstance
+  onNodeClick: (fn: (node: GraphNode) => void) => ForceGraph3DInstance
+  onNodeHover: (fn: (node: GraphNode | null) => void) => ForceGraph3DInstance
+  d3Force: (name: string, force?: unknown) => unknown
+  _destructor?: () => void
+}
+
+type GraphNode = {
+  id: string
+  name: string
+  type: SectionType | 'entity'
+  description: string
+  group: string
+  val: number
+  x?: number
+  y?: number
+  z?: number
+}
+
+type GraphLink = {
+  source: string
+  target: string
+  type: 'entity-entity' | 'rule-entity' | 'journey-actor' | 'actor-entity' | 'constraint-entity' | 'question-entity'
+}
+
+const TYPE_COLORS: Record<string, string> = {
+  entity: ENTITY_COLOR,
+  actor: '#8B5CF6',
+  journey: '#10B981',
+  business_rule: '#F59E0B',
+  constraint: '#EF4444',
+  open_question: '#EC4899',
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  entity: 'Entity',
+  actor: 'Actor',
+  journey: 'Journey',
+  business_rule: 'Rule',
+  constraint: 'Constraint',
+  open_question: 'Question',
+}
+
+function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphLink[] } {
+  const nodes: GraphNode[] = []
+  const links: GraphLink[] = []
+
+  // Entities
+  for (const e of model.entities) {
+    nodes.push({
+      id: `entity:${e.id}`,
+      name: e.name,
+      type: 'entity',
+      description: e.description.slice(0, 150),
+      group: 'entity',
+      val: 8 + e.key_fields.length,
+    })
+  }
+
+  // Actors
+  for (const a of model.actors) {
+    nodes.push({
+      id: `actor:${a.id}`,
+      name: a.name,
+      type: 'actor',
+      description: a.description.slice(0, 150),
+      group: 'actor',
+      val: 6 + a.responsibilities.length,
+    })
+  }
+
+  // Journeys
+  for (const j of model.journeys) {
+    nodes.push({
+      id: `journey:${j.id}`,
+      name: j.name,
+      type: 'journey',
+      description: `${j.steps.length} steps — ${j.success_outcome.slice(0, 100)}`,
+      group: 'journey',
+      val: 4 + j.steps.length,
+    })
+
+    // Journey → primary actor
+    const actorNodeId = `actor:${j.primary_actor}`
+    if (nodes.some(n => n.id === actorNodeId)) {
+      links.push({ source: `journey:${j.id}`, target: actorNodeId, type: 'journey-actor' })
+    }
+  }
+
+  // Business rules
+  for (const r of model.business_rules) {
+    nodes.push({
+      id: `rule:${r.id}`,
+      name: r.id,
+      type: 'business_rule',
+      description: r.description.slice(0, 150),
+      group: 'business_rule',
+      val: 3,
+    })
+
+    // Rule → applies_to entities/actors
+    for (const ref of r.applies_to) {
+      const entityId = `entity:${ref}`
+      const actorId = `actor:${ref}`
+      if (nodes.some(n => n.id === entityId)) {
+        links.push({ source: `rule:${r.id}`, target: entityId, type: 'rule-entity' })
+      } else if (nodes.some(n => n.id === actorId)) {
+        links.push({ source: `rule:${r.id}`, target: actorId, type: 'rule-entity' })
+      }
+    }
+  }
+
+  // Constraints
+  for (const c of model.constraints) {
+    nodes.push({
+      id: `constraint:${c.id}`,
+      name: c.id,
+      type: 'constraint',
+      description: c.constraint.slice(0, 150),
+      group: 'constraint',
+      val: 3,
+    })
+  }
+
+  // Open questions
+  for (const q of model.open_questions) {
+    nodes.push({
+      id: `question:${q.id}`,
+      name: q.id,
+      type: 'open_question',
+      description: q.question.slice(0, 150),
+      group: 'open_question',
+      val: 3,
+    })
+  }
+
+  // Entity-to-entity edges (from field references)
+  for (const entity of model.entities) {
+    for (const other of model.entities) {
+      if (entity.id === other.id) continue
+      const otherNames = [other.id, other.name.toLowerCase()]
+      const abbr = other.name.match(/\(([A-Z][A-Z0-9]+)\)/)
+      if (abbr) otherNames.push(abbr[1].toLowerCase())
+
+      const hasRef = entity.key_fields.some(f => {
+        const text = `${f.type} ${f.description}`.toLowerCase()
+        return otherNames.some(n => text.includes(n))
+      })
+
+      if (hasRef) {
+        const key = [entity.id, other.id].sort().join('--')
+        if (!links.some(l => {
+          const src = typeof l.source === 'string' ? l.source : ''
+          const tgt = typeof l.target === 'string' ? l.target : ''
+          return [src.replace('entity:', ''), tgt.replace('entity:', '')].sort().join('--') === key
+        })) {
+          links.push({ source: `entity:${entity.id}`, target: `entity:${other.id}`, type: 'entity-entity' })
+        }
+      }
+    }
+  }
+
+  return { nodes, links }
+}
+
+export function Graph3D({ model }: { model: IntentModel }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const graphRef = useRef<ForceGraph3DInstance | null>(null)
+  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null)
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
+
+  const handleNodeClick = useCallback((node: GraphNode) => {
+    setSelectedNode(prev => prev?.id === node.id ? null : node)
+  }, [])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    let destroyed = false
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    import('3d-force-graph').then((mod: any) => {
+      if (destroyed || !containerRef.current) return
+
+      const ForceGraph3D = mod.default || mod
+      const { nodes, links } = buildGraphData(model)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const graph: any = ForceGraph3D()(containerRef.current)
+      graph.graphData({ nodes, links })
+        .backgroundColor('#F8F8F7')
+        .nodeColor((node: GraphNode) => TYPE_COLORS[node.type] ?? '#888')
+        .nodeLabel((node: GraphNode) => `
+          <div style="background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.6;margin-bottom:2px">${TYPE_LABELS[node.type] ?? node.type}</div>
+            <div style="font-weight:600;margin-bottom:4px">${node.name}</div>
+            <div style="opacity:0.8">${node.description}</div>
+          </div>
+        `)
+        .nodeVal((node: GraphNode) => node.val)
+        .linkColor((link: GraphLink) => {
+          if (link.type === 'entity-entity') return '#9CA3AF'
+          if (link.type === 'rule-entity') return '#F59E0B66'
+          if (link.type === 'journey-actor') return '#10B98166'
+          return '#85848144'
+        })
+        .linkWidth((link: GraphLink) => link.type === 'entity-entity' ? 2 : 1)
+        .linkOpacity(0.4)
+        .linkDirectionalParticles(1)
+        .linkDirectionalParticleSpeed(0.005)
+        .onNodeClick(handleNodeClick)
+        .onNodeHover((node: GraphNode | null) => setHoveredNode(node))
+
+      // Adjust forces
+      const charge = graph.d3Force('charge')
+      if (charge?.strength) charge.strength(-200)
+
+      const rect = containerRef.current.getBoundingClientRect()
+      graph.width(rect.width).height(rect.height)
+
+      graphRef.current = graph
+
+      // Handle resize
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          graph.width(entry.contentRect.width).height(entry.contentRect.height)
+        }
+      })
+      resizeObserver.observe(containerRef.current)
+
+      return () => {
+        resizeObserver.disconnect()
+      }
+    })
+
+    return () => {
+      destroyed = true
+      if (graphRef.current?._destructor) {
+        graphRef.current._destructor()
+      }
+      graphRef.current = null
+    }
+  }, [model, handleNodeClick])
+
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+
+      {/* Legend */}
+      <div
+        className="absolute bottom-4 left-4 flex items-center gap-4 rounded-xl px-4 py-2.5"
+        style={{
+          background: 'var(--bg-white)',
+          border: '1px solid var(--border-default)',
+          boxShadow: 'var(--shadow-float)',
+        }}
+      >
+        {Object.entries(TYPE_COLORS).map(([type, color]) => (
+          <div key={type} className="flex items-center gap-1.5">
+            <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+            <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+              {TYPE_LABELS[type] ?? type}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Selected node detail */}
+      {selectedNode && (
+        <div
+          className="absolute top-4 right-4 rounded-xl p-4"
+          style={{
+            width: 340,
+            background: 'var(--bg-white)',
+            border: '1px solid var(--border-default)',
+            boxShadow: 'var(--shadow-overlay)',
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md"
+              style={{ background: `${TYPE_COLORS[selectedNode.type]}18`, color: TYPE_COLORS[selectedNode.type] }}
+            >
+              {TYPE_LABELS[selectedNode.type]}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedNode(null)}
+              className="ml-auto text-xs"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              ✕
+            </button>
+          </div>
+          <h3 className="text-sm font-semibold m-0 mb-1" style={{ color: 'var(--text-primary)' }}>
+            {selectedNode.name}
+          </h3>
+          <p className="text-xs leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>
+            {selectedNode.description}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}

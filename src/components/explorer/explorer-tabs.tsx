@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Network, BookOpen, Code2 } from 'lucide-react'
+import { Network, BookOpen, Code2, Box } from 'lucide-react'
 import type { IntentModel } from '@/domain/intent-model/types'
 import { ExplorerCanvas } from './explorer-canvas'
 import { ModelReader } from './model-reader'
 import { ModelSource } from './model-source'
+import { Graph3D } from './graph-3d'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
   { id: 'graph', label: 'Graph', icon: Network },
+  { id: '3d', label: '3D', icon: Box },
   { id: 'model', label: 'Model', icon: BookOpen },
   { id: 'source', label: 'Source', icon: Code2 },
 ] as const
@@ -55,6 +57,9 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
       <div className="flex-1 overflow-hidden">
         {activeTab === 'graph' && (
           <ExplorerCanvas model={model} savedPositions={savedPositions} />
+        )}
+        {activeTab === '3d' && (
+          <Graph3D model={model} />
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

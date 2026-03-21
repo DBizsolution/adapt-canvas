@@ -25,7 +25,7 @@ const LIFECYCLE_COLORS: Record<string, string> = {
   entity: '#0081F2',
   actor: '#8B5CF6',
   journey: '#10B981',
-  rule: '#F59E0B',
+  rule: '#9CA3AF',
   constraint: '#EF4444',
 }
 
@@ -107,6 +107,22 @@ function buildShip(THREE: typeof import('three')): import('three').Group {
     g.add(cont)
   }
 
+  // "ON VESSEL" text painted on hull side
+  const textCanvas = document.createElement('canvas')
+  textCanvas.width = 512
+  textCanvas.height = 128
+  const tCtx = textCanvas.getContext('2d')!
+  tCtx.font = 'bold 48px system-ui, sans-serif'
+  tCtx.fillStyle = 'rgba(255,255,255,0.8)'
+  tCtx.textAlign = 'center'
+  tCtx.textBaseline = 'middle'
+  tCtx.fillText('ON VESSEL', 256, 64)
+  const textTex = new THREE.CanvasTexture(textCanvas)
+  const textMat = new THREE.MeshBasicMaterial({ map: textTex, transparent: true, side: THREE.DoubleSide })
+  const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), textMat)
+  textPlane.position.set(0, -0.5, 2.55)
+  g.add(textPlane)
+
   return g
 }
 
@@ -154,6 +170,21 @@ function buildWharf(THREE: typeof import('three')): import('three').Group {
   const craneArm = new THREE.Mesh(new THREE.BoxGeometry(8, 0.5, 0.5), craneMat)
   craneArm.position.set(2, 4.6, 0)
   g.add(craneArm)
+
+  // "AT WHARF" text on platform surface
+  const wTC = document.createElement('canvas')
+  wTC.width = 512; wTC.height = 128
+  const wTx = wTC.getContext('2d')!
+  wTx.font = 'bold 52px system-ui, sans-serif'
+  wTx.fillStyle = 'rgba(255,255,255,0.7)'
+  wTx.textAlign = 'center'; wTx.textBaseline = 'middle'
+  wTx.fillText('AT WHARF', 256, 64)
+  const wTex = new THREE.CanvasTexture(wTC)
+  const wTMat = new THREE.MeshBasicMaterial({ map: wTex, transparent: true, side: THREE.DoubleSide })
+  const wText = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), wTMat)
+  wText.rotation.x = -Math.PI / 2
+  wText.position.set(0, 0.45, 0)
+  g.add(wText)
 
   return g
 }
@@ -207,6 +238,20 @@ function buildContainer(THREE: typeof import('three')): import('three').Group {
       }
     }
   }
+
+  // "IN YARD" text on container side
+  const cTC = document.createElement('canvas')
+  cTC.width = 512; cTC.height = 128
+  const cTx = cTC.getContext('2d')!
+  cTx.font = 'bold 56px system-ui, sans-serif'
+  cTx.fillStyle = 'rgba(255,255,255,0.8)'
+  cTx.textAlign = 'center'; cTx.textBaseline = 'middle'
+  cTx.fillText('IN YARD', 256, 64)
+  const cTex = new THREE.CanvasTexture(cTC)
+  const cTMat = new THREE.MeshBasicMaterial({ map: cTex, transparent: true, side: THREE.DoubleSide })
+  const cText = new THREE.Mesh(new THREE.PlaneGeometry(7, 2), cTMat)
+  cText.position.set(0, 0, 2.05)
+  g.add(cText)
 
   return g
 }
@@ -279,6 +324,20 @@ function buildOpenBox(THREE: typeof import('three')): import('three').Group {
   item2.position.set(1.5, 3.2, -0.5)
   g.add(item2)
 
+  // "UNPACKED" text on front wall
+  const uTC = document.createElement('canvas')
+  uTC.width = 512; uTC.height = 128
+  const uTx = uTC.getContext('2d')!
+  uTx.font = 'bold 48px system-ui, sans-serif'
+  uTx.fillStyle = 'rgba(120,80,50,0.7)'
+  uTx.textAlign = 'center'; uTx.textBaseline = 'middle'
+  uTx.fillText('UNPACKED', 256, 64)
+  const uTex = new THREE.CanvasTexture(uTC)
+  const uTMat = new THREE.MeshBasicMaterial({ map: uTex, transparent: true, side: THREE.DoubleSide })
+  const uText = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), uTMat)
+  uText.position.set(0, 1.5, 2.55)
+  g.add(uText)
+
   return g
 }
 
@@ -339,15 +398,14 @@ function buildTruck(THREE: typeof import('three')): import('three').Group {
   // Wheels — more detailed
   for (const x of [-3, 0.5, 5, 6.5]) {
     for (const z of [-2.3, 2.3]) {
-      // Tire — torus rotated to stand upright, hole faces outward (Z axis)
+      // Tire — torus default lies in XY plane (hole faces Z = outward) — no rotation needed
       const tire = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.35, 12, 16), tireMat)
-      tire.rotation.x = Math.PI / 2
       tire.position.set(x, -2.6, z)
       g.add(tire)
-      // Hub — cylinder aligned with Z axis (facing outward)
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.6, 12), metalMat)
-      hub.rotation.x = Math.PI / 2
-      hub.position.set(x, -2.6, z)
+      // Hub cap — disc facing outward
+      const hub = new THREE.Mesh(new THREE.CircleGeometry(0.4, 12), metalMat)
+      hub.position.set(x, -2.6, z > 0 ? z + 0.35 : z - 0.35)
+      hub.rotation.x = 0
       g.add(hub)
     }
   }
@@ -375,6 +433,20 @@ function buildTruck(THREE: typeof import('three')): import('three').Group {
   checkSprite.scale.set(3, 3, 1)
   checkSprite.position.set(0, 0, 2.2)
   g.add(checkSprite)
+
+  // "COLLECTED" text on trailer side
+  const tTC = document.createElement('canvas')
+  tTC.width = 512; tTC.height = 128
+  const tTx = tTC.getContext('2d')!
+  tTx.font = 'bold 44px system-ui, sans-serif'
+  tTx.fillStyle = 'rgba(255,255,255,0.8)'
+  tTx.textAlign = 'center'; tTx.textBaseline = 'middle'
+  tTx.fillText('COLLECTED', 256, 64)
+  const tTex = new THREE.CanvasTexture(tTC)
+  const tTMat = new THREE.MeshBasicMaterial({ map: tTex, transparent: true, side: THREE.DoubleSide })
+  const tText = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), tTMat)
+  tText.position.set(0, 0, -2.15)
+  g.add(tText)
 
   return g
 }
@@ -535,13 +607,44 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
 
 // --- Component ---
 
+const TOGGLEABLE_TYPES = ['entity', 'actor', 'journey', 'rule', 'constraint'] as const
+
 export function Graph3DLifecycle({ model }: { model: IntentModel }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedNode, setSelectedNode] = useState<LifecycleNode | null>(null)
+  const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set())
+  const graphRef = useRef<any>(null)
+  const fullData = useRef(buildLifecycleData(model))
+
+  const toggleType = useCallback((type: string) => {
+    setHiddenTypes(prev => {
+      const next = new Set(prev)
+      if (next.has(type)) next.delete(type)
+      else next.add(type)
+      return next
+    })
+  }, [])
 
   const handleNodeClick = useCallback((node: LifecycleNode) => {
     setSelectedNode(prev => prev?.id === node.id ? null : node)
   }, [])
+
+  // Filter graph data when toggles change
+  useEffect(() => {
+    if (!graphRef.current) return
+    const { nodes, links } = fullData.current
+    const visibleNodes = nodes.filter(n => n.type === 'milestone' || !hiddenTypes.has(n.type))
+    const visibleIds = new Set(visibleNodes.map(n => n.id))
+    const visibleLinks = links.filter(l => {
+      const src = typeof l.source === 'string' ? l.source : (l.source as unknown as LifecycleNode)?.id
+      const tgt = typeof l.target === 'string' ? l.target : (l.target as unknown as LifecycleNode)?.id
+      return visibleIds.has(src) && visibleIds.has(tgt)
+    })
+    graphRef.current.graphData({
+      nodes: visibleNodes.filter(n => n.type !== 'milestone'),
+      links: visibleLinks.filter(l => l.type !== 'spine'),
+    })
+  }, [hiddenTypes])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -608,24 +711,6 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         milestoneModel.position.set(i * SPINE_SPACING, 0, 0)
         milestoneModel.scale.setScalar(1.2)
         graph.scene().add(milestoneModel)
-
-        // Label below the model
-        const labelCanvas = document.createElement('canvas')
-        const labelCtx = labelCanvas.getContext('2d')!
-        labelCanvas.width = 1024
-        labelCanvas.height = 128
-        labelCtx.font = 'bold 64px system-ui, -apple-system, sans-serif'
-        labelCtx.fillStyle = '#002C61'
-        labelCtx.textAlign = 'center'
-        labelCtx.textBaseline = 'middle'
-        labelCtx.fillText(MILESTONE_LABELS[states[i]] ?? states[i], 512, 64)
-
-        const labelTex = new THREE.CanvasTexture(labelCanvas)
-        const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthWrite: false })
-        const label = new THREE.Sprite(labelMat)
-        label.scale.set(30, 30 * (128 / 1024), 1)
-        label.position.set(i * SPINE_SPACING, -12, 0)
-        graph.scene().add(label)
       }
 
       // --- Graph setup ---
@@ -691,17 +776,13 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
             topY = 5
 
           } else if (node.type === 'rule') {
-            // Cube with beveled edges
-            const ruleMat = new THREE.MeshPhongMaterial({ color, shininess: 30, side: THREE.DoubleSide })
-            const cube = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4, 2, 2, 2), ruleMat)
-            group.add(cube)
-            // Edge wireframe
-            const edges = new THREE.LineSegments(
-              new THREE.EdgesGeometry(new THREE.BoxGeometry(4, 4, 4)),
-              new THREE.LineBasicMaterial({ color: '#CC8800' }),
-            )
-            group.add(edges)
-            topY = 4
+            // Transparent cool gray sphere
+            const ruleMat = new THREE.MeshPhongMaterial({ color: '#9CA3AF', shininess: 60, transparent: true, opacity: 0.35, side: THREE.DoubleSide })
+            group.add(new THREE.Mesh(new THREE.SphereGeometry(3, 24, 24), ruleMat))
+            // Inner core for visibility
+            const coreMat = new THREE.MeshPhongMaterial({ color: '#6B7280', shininess: 40 })
+            group.add(new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), coreMat))
+            topY = 4.5
 
           } else if (node.type === 'constraint') {
             // Octahedron (stop sign shape)
@@ -769,6 +850,8 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       graph.d3Force('charge', null)
       graph.d3Force('link', null)
 
+      graphRef.current = graph
+
       // Tooltip fix
       const style = document.createElement('style')
       style.textContent = '.graph-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }'
@@ -814,12 +897,28 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           HBL Lifecycle
         </span>
-        {Object.entries(LIFECYCLE_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
-            <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{LIFECYCLE_LABELS[type]}</span>
-          </div>
-        ))}
+        {Object.entries(LIFECYCLE_COLORS).map(([type, color]) => {
+          const canToggle = TOGGLEABLE_TYPES.includes(type as any)
+          const isHidden = hiddenTypes.has(type)
+          return canToggle ? (
+            <button
+              key={type}
+              type="button"
+              onClick={() => toggleType(type)}
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded-md transition-all duration-200"
+              style={{ opacity: isHidden ? 0.3 : 1, background: isHidden ? 'transparent' : `${color}12` }}
+              title={`${isHidden ? 'Show' : 'Hide'} ${LIFECYCLE_LABELS[type]}s`}
+            >
+              <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+              <span className="text-[11px] font-medium" style={{ color: isHidden ? 'var(--text-muted)' : color }}>{LIFECYCLE_LABELS[type]}</span>
+            </button>
+          ) : (
+            <div key={type} className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+              <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{LIFECYCLE_LABELS[type]}</span>
+            </div>
+          )
+        })}
       </div>
 
       {selectedNode && (

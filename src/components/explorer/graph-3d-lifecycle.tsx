@@ -641,7 +641,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       return visibleIds.has(src) && visibleIds.has(tgt)
     })
     graphRef.current.graphData({
-      nodes: visibleNodes.filter(n => n.type !== 'milestone'),
+      nodes: visibleNodes,
       links: visibleLinks.filter(l => l.type !== 'spine'),
     })
   }, [hiddenTypes])
@@ -714,7 +714,8 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       }
 
       // --- Graph setup ---
-      graph.graphData({ nodes: nodes.filter(n => n.type !== 'milestone'), links: links.filter(l => l.type !== 'spine') })
+      // Keep milestones in graph data (needed as link targets) but render them invisible
+      graph.graphData({ nodes, links: links.filter(l => l.type !== 'spine') })
         .backgroundColor('#F8F8F7')
         .nodeLabel((node: LifecycleNode) => `
           <div style="background:rgba(0,0,0,0.9);color:white;padding:10px 14px;border-radius:10px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
@@ -727,6 +728,11 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
           const color = LIFECYCLE_COLORS[node.type]
           const group = new THREE.Group()
           let topY = 4 // default label offset
+
+          if (node.type === 'milestone') {
+            // Invisible — the 3D model is added to scene directly
+            return group
+          }
 
           if (node.type === 'actor') {
             // Person icon: head sphere + solid body (squashed ellipsoid)

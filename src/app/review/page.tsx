@@ -1,31 +1,48 @@
 import { getReviewState } from '@/lib/review-store'
 import { getCurrentModel } from '@/lib/model-store'
 import { getAllModelItems, buildTargetId, getReviewForTarget } from '@/lib/review-utils'
-import { ConsensusDashboard } from '@/components/review/consensus-dashboard'
+import { ConsensusPage } from '@/components/review/consensus-page'
+import type { SectionType } from '@/domain/intent-model/types'
+import { SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
 
 export const dynamic = 'force-dynamic'
+
+const sectionOrder: SectionType[] = [
+  'actor', 'entity', 'journey', 'business_rule', 'constraint', 'open_question',
+]
 
 export default async function ReviewDashboard() {
   const intentModel = await getCurrentModel()
   const reviewState = await getReviewState()
 
-  const modelItems = getAllModelItems(intentModel)
-  const sections = modelItems.map(({ item, type }) => {
+  // Build overview stats
+  const allItems = getAllModelItems(intentModel)
+  const overviewSections = allItems.map(({ item, type }) => {
     const targetId = buildTargetId(type, item.id)
     return getReviewForTarget(reviewState.sections, targetId)
   })
 
+  // Build per-section items
+  const sectionData = sectionOrder.map(type => {
+    const modelKey = SECTION_TYPE_TO_MODEL_KEY[type] as keyof typeof intentModel
+    const modelItems = intentModel[modelKey] as Array<{ id: string; [key: string]: unknown }>
+
+    const items = modelItems.map(item => {
+      const targetId = buildTargetId(type, item.id)
+      const review = getReviewForTarget(reviewState.sections, targetId)
+      return { item, type, review }
+    })
+
+    return { type, items }
+  })
+
   return (
-    <div className="pb-16">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--acfs-navy)' }}>
-          {intentModel.meta.project}
-        </h1>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          v{intentModel.meta.version} — {intentModel.meta.status}
-        </p>
-      </div>
-      <ConsensusDashboard sections={sections} />
-    </div>
+    <ConsensusPage
+      project={intentModel.meta.project}
+      version={intentModel.meta.version}
+      status={intentModel.meta.status}
+      overviewSections={overviewSections}
+      sectionData={sectionData}
+    />
   )
 }

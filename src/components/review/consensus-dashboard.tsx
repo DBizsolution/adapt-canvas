@@ -1,11 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import type { SectionReview, SectionType } from '@/domain/intent-model/types'
-import { SECTION_TYPE_TO_URL_PARAM } from '@/domain/intent-model/types'
 
 type DashboardProps = {
   sections: SectionReview[]
+  onNavigate?: (type: SectionType) => void
 }
 
 const sectionTypeLabels: Record<SectionType, string> = {
@@ -21,7 +20,7 @@ const sectionTypeOrder: SectionType[] = [
   'actor', 'entity', 'journey', 'business_rule', 'constraint', 'open_question',
 ]
 
-export function ConsensusDashboard({ sections }: DashboardProps) {
+export function ConsensusDashboard({ sections, onNavigate }: DashboardProps) {
   return (
     <div className="space-y-2">
       {sectionTypeOrder.map(type => {
@@ -33,7 +32,12 @@ export function ConsensusDashboard({ sections }: DashboardProps) {
         const totalComments = typeSections.reduce((sum, s) => sum + (s.comments?.length ?? 0), 0)
 
         return (
-          <Link key={type} href={`/review/${SECTION_TYPE_TO_URL_PARAM[type]}`}>
+          <button
+            key={type}
+            type="button"
+            onClick={() => onNavigate?.(type)}
+            className="w-full text-left"
+          >
             <div
               className="rounded-xl px-5 py-4 transition-all duration-200 hover:shadow-md mb-1"
               style={{
@@ -58,7 +62,7 @@ export function ConsensusDashboard({ sections }: DashboardProps) {
                 </div>
               </div>
             </div>
-          </Link>
+          </button>
         )
       })}
     </div>

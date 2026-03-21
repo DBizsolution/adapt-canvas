@@ -5,12 +5,6 @@ import { usePathname } from 'next/navigation'
 import { projectConfig } from '@/lib/project-config'
 import {
   LayoutDashboard,
-  Users,
-  Database,
-  Route,
-  Scale,
-  Lock,
-  HelpCircle,
   GitCompare,
   FileText,
   Settings,
@@ -21,13 +15,7 @@ import {
 
 const navItems = [
   { label: 'Explorer', href: '/', icon: Network },
-  { label: 'Dashboard', href: '/review', icon: LayoutDashboard },
-  { label: 'Actors', href: '/review/actors', icon: Users },
-  { label: 'Entities', href: '/review/entities', icon: Database },
-  { label: 'Journeys', href: '/review/journeys', icon: Route },
-  { label: 'Rules', href: '/review/business-rules', icon: Scale },
-  { label: 'Constraints', href: '/review/constraints', icon: Lock },
-  { label: 'Open Qs', href: '/review/open-questions', icon: HelpCircle },
+  { label: 'Consensus', href: '/review', icon: LayoutDashboard },
   { label: 'BRD', href: '/review/brd', icon: ClipboardList },
   { label: 'IA Map', href: '/review/ia', icon: Map },
   { label: 'Diff', href: '/review/diff', icon: GitCompare },
@@ -56,7 +44,7 @@ export function NavSidebar() {
           const isActive = item.href === '/'
             ? pathname === '/'
             : item.href === '/review'
-              ? pathname === '/review'
+              ? pathname.startsWith('/review') && !pathname.startsWith('/review/brd') && !pathname.startsWith('/review/ia') && !pathname.startsWith('/review/diff') && !pathname.startsWith('/review/docs')
               : pathname.startsWith(item.href)
 
           return (

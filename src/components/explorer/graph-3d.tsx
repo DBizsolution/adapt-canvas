@@ -394,7 +394,6 @@ export function Graph3D({ model }: { model: IntentModel }) {
           className="absolute bottom-16 left-4 rounded-xl overflow-hidden"
           style={{
             width: 260,
-            maxHeight: 400,
             background: 'var(--bg-white)',
             border: '1px solid var(--border-default)',
             boxShadow: 'var(--shadow-overlay)',
@@ -403,7 +402,7 @@ export function Graph3D({ model }: { model: IntentModel }) {
           <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-default)' }}>
             Toggle individual nodes
           </div>
-          <div className="overflow-y-auto custom-scroll" style={{ maxHeight: 360 }}>
+          <div>
             {ALL_TYPES.filter(type => !hiddenTypes.has(type)).map(type => {
               const color = TYPE_COLORS[type]
               const nodesOfType = fullGraphData.current.nodes.filter(n => n.type === type)

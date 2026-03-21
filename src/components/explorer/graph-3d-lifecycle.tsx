@@ -3,16 +3,13 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 import type { IntentModel } from '@/domain/intent-model/types'
 
-// HBL lifecycle is the spine — everything branches from milestone states
-// Layout: states along Z axis, actors/journeys/rules branch out at the state where they activate
-
 type LifecycleNode = {
   id: string
   name: string
   type: 'milestone' | 'entity' | 'actor' | 'journey' | 'rule' | 'constraint'
   description: string
   val: number
-  fx?: number  // fixed position
+  fx?: number
   fy?: number
   fz?: number
 }
@@ -41,6 +38,17 @@ const LIFECYCLE_LABELS: Record<string, string> = {
   constraint: 'Constraint',
 }
 
+// Milestone icons — drawn on canvas
+const MILESTONE_ICONS: Record<string, { emoji: string; label: string }> = {
+  on_vessel: { emoji: '🚢', label: 'On Vessel' },
+  at_wharf: { emoji: '⚓', label: 'At Wharf' },
+  in_yard: { emoji: '📦', label: 'In Yard' },
+  unpacked: { emoji: '📂', label: 'Unpacked' },
+  collected: { emoji: '🚛', label: 'Collected' },
+}
+
+const SPINE_SPACING = 100
+
 function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links: LifecycleLink[] } {
   const nodes: LifecycleNode[] = []
   const links: LifecycleLink[] = []
@@ -49,124 +57,92 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
   if (!hbl) return { nodes, links }
 
   const states = hbl.lifecycle.states
-  const stateSpacing = 80
 
-  // Milestone nodes along the Z axis (spine)
+  // Milestone nodes along X axis
   for (let i = 0; i < states.length; i++) {
+    const icon = MILESTONE_ICONS[states[i]]
     nodes.push({
       id: `milestone:${states[i]}`,
-      name: states[i].replace(/_/g, ' '),
+      name: icon?.label ?? states[i],
       type: 'milestone',
       description: `HBL milestone ${i + 1} of ${states.length}`,
-      val: 20,
-      fx: 0,
+      val: 25,
+      fx: i * SPINE_SPACING,
       fy: 0,
-      fz: i * stateSpacing,
+      fz: 0,
     })
 
-    // Spine edges
     if (i > 0) {
-      links.push({
-        source: `milestone:${states[i - 1]}`,
-        target: `milestone:${states[i]}`,
-        type: 'spine',
-      })
+      links.push({ source: `milestone:${states[i - 1]}`, target: `milestone:${states[i]}`, type: 'spine' })
     }
   }
 
-  // Helper: which milestone does a text reference?
-  const mentionsMilestone = (text: string): string[] => {
-    const lower = text.toLowerCase()
-    return states.filter(s => lower.includes(s.replace(/_/g, ' ')) || lower.includes(s))
+  const mentionsBooking = (text: string) => {
+    const l = text.toLowerCase()
+    return l.includes('unpacked') || l.includes('booking readiness') || l.includes('book pickup') || l.includes('book a pickup')
+  }
+  const mentionsCollection = (text: string) => {
+    const l = text.toLowerCase()
+    return l.includes('collected') || l.includes('pickup verification') || l.includes('gatehouse') || l.includes('verifies pickup')
+  }
+  const mentionsDelegation = (text: string) => text.toLowerCase().includes('delegat')
+  const mentionsSlotConfig = (text: string) => {
+    const l = text.toLowerCase()
+    return l.includes('slot config') || l.includes('configures pickup') || l.includes('configure slot')
+  }
+  const mentionsDO = (text: string) => {
+    const l = text.toLowerCase()
+    return l.includes('delivery order') || l.includes('validates do') || l.includes('do validation')
+  }
+  const mentionsCancel = (text: string) => text.toLowerCase().includes('cancel')
+  const mentionsUser = (text: string) => {
+    const l = text.toLowerCase()
+    return l.includes('creates a user') || l.includes('user management') || l.includes('removes a user') || l.includes('updates a user')
   }
 
-  // Helper: does the text mention booking readiness (unpacked + customs cleared)?
-  const mentionsBookingReadiness = (text: string): boolean => {
-    const lower = text.toLowerCase()
-    return lower.includes('unpacked') || lower.includes('booking readiness') || lower.includes('book pickup')
+  const getZPosition = (text: string, defaultZ: number): number => {
+    if (mentionsBooking(text)) return 3 * SPINE_SPACING
+    if (mentionsCollection(text)) return 4 * SPINE_SPACING
+    if (mentionsDelegation(text)) return 0.5 * SPINE_SPACING
+    if (mentionsSlotConfig(text)) return 2.5 * SPINE_SPACING
+    if (mentionsDO(text)) return 2.5 * SPINE_SPACING
+    if (mentionsCancel(text)) return 3.5 * SPINE_SPACING
+    if (mentionsUser(text)) return -0.3 * SPINE_SPACING
+    return defaultZ
   }
 
-  // Helper: does text mention collection/pickup verification?
-  const mentionsCollection = (text: string): boolean => {
-    const lower = text.toLowerCase()
-    return lower.includes('collected') || lower.includes('pickup verification') || lower.includes('gatehouse')
-  }
+  // Key entities
+  const entityPlacements: { id: string; name: string; y: number; z: number; milestoneIdx: number }[] = [
+    { id: 'booking', name: 'Booking', y: 35, z: 20, milestoneIdx: 3 },
+    { id: 'slot', name: 'Pickup Slot', y: 40, z: -25, milestoneIdx: 3 },
+    { id: 'delivery_order', name: 'Delivery Order', y: -35, z: 20, milestoneIdx: 2 },
+    { id: 'delegation', name: 'Delegation', y: -30, z: -20, milestoneIdx: 0 },
+    { id: 'driver_record', name: 'Driver Record', y: 30, z: -30, milestoneIdx: 3 },
+  ]
 
-  // Place entities at relevant milestones
-  const booking = model.entities.find(e => e.id === 'booking')
-  if (booking) {
+  for (const ep of entityPlacements) {
+    const entity = model.entities.find(e => e.id === ep.id)
+    if (!entity) continue
     nodes.push({
-      id: 'entity:booking',
-      name: 'Booking',
+      id: `entity:${ep.id}`,
+      name: ep.name,
       type: 'entity',
-      description: booking.description.slice(0, 120),
-      val: 15,
-      fx: 40,
-      fy: 20,
-      fz: 3 * stateSpacing, // unpacked — where bookings happen
-    })
-    links.push({ source: 'milestone:unpacked', target: 'entity:booking', type: 'activates' })
-  }
-
-  const slot = model.entities.find(e => e.id === 'slot')
-  if (slot) {
-    nodes.push({
-      id: 'entity:slot',
-      name: 'Pickup Slot',
-      type: 'entity',
-      description: slot.description.slice(0, 120),
+      description: entity.description.slice(0, 120),
       val: 12,
-      fx: 50,
-      fy: -25,
-      fz: 3 * stateSpacing,
+      fx: ep.milestoneIdx * SPINE_SPACING + ep.z,
+      fy: ep.y,
+      fz: 15,
     })
-    links.push({ source: 'entity:booking', target: 'entity:slot', type: 'activates' })
+    links.push({ source: `milestone:${states[ep.milestoneIdx]}`, target: `entity:${ep.id}`, type: 'activates' })
   }
 
-  const doEntity = model.entities.find(e => e.id === 'delivery_order')
-  if (doEntity) {
-    nodes.push({
-      id: 'entity:delivery_order',
-      name: 'Delivery Order',
-      type: 'entity',
-      description: doEntity.description.slice(0, 120),
-      val: 12,
-      fx: -45,
-      fy: 20,
-      fz: 2.5 * stateSpacing,
-    })
-    links.push({ source: 'milestone:in_yard', target: 'entity:delivery_order', type: 'activates' })
-  }
-
-  const delegation = model.entities.find(e => e.id === 'delegation')
-  if (delegation) {
-    nodes.push({
-      id: 'entity:delegation',
-      name: 'Delegation',
-      type: 'entity',
-      description: delegation.description.slice(0, 120),
-      val: 12,
-      fx: -40,
-      fy: -20,
-      fz: 0.5 * stateSpacing, // can happen at any milestone
-    })
-    links.push({ source: 'milestone:on_vessel', target: 'entity:delegation', type: 'activates' })
-  }
-
-  // Place actors — position based on when they're most active
-  let actorIndex = 0
+  // Actors — spread around the spine
+  let actorIdx = 0
   for (const actor of model.actors) {
-    const angle = (actorIndex / model.actors.length) * Math.PI * 2
-    const r = 55
-
-    // Determine Z position based on responsibilities
     const allText = actor.responsibilities.map(r => r.description).join(' ')
-    let zPos = 1.5 * stateSpacing // default: middle
-
-    if (mentionsBookingReadiness(allText)) zPos = 3 * stateSpacing
-    else if (mentionsCollection(allText)) zPos = 4 * stateSpacing
-    else if (allText.toLowerCase().includes('assign')) zPos = 0.5 * stateSpacing
-    else if (allText.toLowerCase().includes('slot config')) zPos = 2 * stateSpacing
+    const xPos = getZPosition(allText, 1.5 * SPINE_SPACING)
+    const angle = ((actorIdx / model.actors.length) * Math.PI) - Math.PI / 2
+    const r = 50
 
     nodes.push({
       id: `actor:${actor.id}`,
@@ -174,33 +150,23 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       type: 'actor',
       description: actor.description.slice(0, 120),
       val: 12,
-      fx: Math.cos(angle) * r,
-      fy: Math.sin(angle) * r,
-      fz: zPos,
+      fx: xPos,
+      fy: Math.sin(angle) * r + 50,
+      fz: Math.cos(angle) * 20,
     })
 
-    // Link to nearest milestone
-    const nearestIdx = Math.round(zPos / stateSpacing)
-    const clampedIdx = Math.max(0, Math.min(states.length - 1, nearestIdx))
-    links.push({ source: `actor:${actor.id}`, target: `milestone:${states[clampedIdx]}`, type: 'activates' })
-
-    actorIndex++
+    const nearestIdx = Math.max(0, Math.min(states.length - 1, Math.round(xPos / SPINE_SPACING)))
+    links.push({ source: `actor:${actor.id}`, target: `milestone:${states[nearestIdx]}`, type: 'activates' })
+    actorIdx++
   }
 
-  // Place journeys near their relevant milestone
-  let journeyIndex = 0
+  // Journeys
+  let journeyIdx = 0
   for (const journey of model.journeys) {
     const allText = journey.steps.map(s => s.detail).join(' ') + ' ' + journey.name
-    const angle = (journeyIndex / model.journeys.length) * Math.PI * 2 + 0.3
-    const r = 70
-
-    let zPos = 2 * stateSpacing
-    if (mentionsBookingReadiness(allText)) zPos = 3 * stateSpacing
-    else if (mentionsCollection(allText)) zPos = 4 * stateSpacing
-    else if (allText.toLowerCase().includes('delegat')) zPos = 1 * stateSpacing
-    else if (allText.toLowerCase().includes('slot') || allText.toLowerCase().includes('configur')) zPos = 2 * stateSpacing
-    else if (allText.toLowerCase().includes('cancel')) zPos = 3.5 * stateSpacing
-    else if (allText.toLowerCase().includes('user') || allText.toLowerCase().includes('creates')) zPos = 0 * stateSpacing
+    const xPos = getZPosition(allText, 2 * SPINE_SPACING)
+    const angle = ((journeyIdx / model.journeys.length) * Math.PI) + Math.PI / 2
+    const r = 55
 
     nodes.push({
       id: `journey:${journey.id}`,
@@ -208,32 +174,20 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       type: 'journey',
       description: `${journey.steps.length} steps — ${journey.success_outcome.slice(0, 80)}`,
       val: 10,
-      fx: Math.cos(angle) * r,
-      fy: Math.sin(angle) * r,
-      fz: zPos,
+      fx: xPos,
+      fy: Math.sin(angle) * r - 50,
+      fz: Math.cos(angle) * 20,
     })
 
-    // Link to primary actor
     links.push({ source: `journey:${journey.id}`, target: `actor:${journey.primary_actor}`, type: 'activates' })
-
-    journeyIndex++
+    journeyIdx++
   }
 
-  // Place rules at the milestone they most relate to
-  let ruleIndex = 0
+  // Rules — small, spread below
+  let ruleIdx = 0
   for (const rule of model.business_rules) {
-    const text = rule.description
-    const angle = (ruleIndex / model.business_rules.length) * Math.PI * 2 + 0.6
-    const r = 90
-
-    let zPos = 2 * stateSpacing
-    if (mentionsBookingReadiness(text)) zPos = 3 * stateSpacing
-    else if (mentionsCollection(text)) zPos = 4 * stateSpacing
-    else if (text.toLowerCase().includes('delegat')) zPos = 1 * stateSpacing
-    else if (text.toLowerCase().includes('do ') || text.toLowerCase().includes('delivery order')) zPos = 2.5 * stateSpacing
-    else if (text.toLowerCase().includes('cutoff') || text.toLowerCase().includes('slot')) zPos = 3 * stateSpacing
-    else if (text.toLowerCase().includes('cancel')) zPos = 3.5 * stateSpacing
-    else if (text.toLowerCase().includes('fee') || text.toLowerCase().includes('payment')) zPos = 3.2 * stateSpacing
+    const xPos = getZPosition(rule.description, 2 * SPINE_SPACING)
+    const spread = ((ruleIdx / model.business_rules.length) - 0.5) * 60
 
     nodes.push({
       id: `rule:${rule.id}`,
@@ -241,12 +195,11 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       type: 'rule',
       description: rule.description.slice(0, 120),
       val: 8,
-      fx: Math.cos(angle) * r,
-      fy: Math.sin(angle) * r,
-      fz: zPos,
+      fx: xPos + spread * 0.5,
+      fy: -70 + Math.abs(spread) * 0.3,
+      fz: spread,
     })
 
-    // Link to applies_to entities/actors
     for (const ref of rule.applies_to) {
       if (nodes.some(n => n.id === `entity:${ref}`)) {
         links.push({ source: `rule:${rule.id}`, target: `entity:${ref}`, type: 'governs' })
@@ -254,8 +207,7 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
         links.push({ source: `rule:${rule.id}`, target: `actor:${ref}`, type: 'governs' })
       }
     }
-
-    ruleIndex++
+    ruleIdx++
   }
 
   return { nodes, links }
@@ -271,7 +223,6 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
 
   useEffect(() => {
     if (!containerRef.current) return
-
     let destroyed = false
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -282,77 +233,152 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       const THREE = await import('three')
       const { nodes, links } = buildLifecycleData(model)
 
+      const hbl = model.entities.find(e => e.id === 'hbl')
+      const states = hbl?.lifecycle.states ?? []
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graph: any = ForceGraph3D()(containerRef.current)
+
+      // Build tube geometry along the spine BEFORE setting graph data
+      const spinePoints = states.map((_, i) => new THREE.Vector3(i * SPINE_SPACING, 0, 0))
+      if (spinePoints.length >= 2) {
+        const curve = new THREE.CatmullRomCurve3(spinePoints)
+        const tubeGeo = new THREE.TubeGeometry(curve, 64, 4, 8, false)
+        const tubeMat = new THREE.MeshLambertMaterial({
+          color: '#002C61',
+          transparent: true,
+          opacity: 0.15,
+        })
+        const tube = new THREE.Mesh(tubeGeo, tubeMat)
+        graph.scene().add(tube)
+
+        // Arrow particle that runs through the tube
+        const arrowGeo = new THREE.ConeGeometry(2.5, 6, 6)
+        arrowGeo.rotateZ(-Math.PI / 2) // point along X
+        const arrowMat = new THREE.MeshLambertMaterial({ color: '#0081F2' })
+        const arrow = new THREE.Mesh(arrowGeo, arrowMat)
+        graph.scene().add(arrow)
+
+        // Animate arrow along the tube
+        let arrowT = 0
+        const animateArrow = () => {
+          if (destroyed) return
+          arrowT += 0.002
+          if (arrowT > 1) arrowT = 0
+          const pos = curve.getPointAt(arrowT)
+          const tangent = curve.getTangentAt(arrowT)
+          arrow.position.copy(pos)
+          arrow.lookAt(pos.clone().add(tangent))
+          arrow.rotateZ(-Math.PI / 2)
+          requestAnimationFrame(animateArrow)
+        }
+        animateArrow()
+      }
+
       graph.graphData({ nodes, links })
         .backgroundColor('#F8F8F7')
         .nodeLabel((node: LifecycleNode) => `
           <div style="background:rgba(0,0,0,0.9);color:white;padding:10px 14px;border-radius:10px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
-            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.6;margin-bottom:2px">${LIFECYCLE_LABELS[node.type] ?? node.type}</div>
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.6;margin-bottom:2px">${LIFECYCLE_LABELS[node.type]}</div>
             <div style="font-weight:600;margin-bottom:4px">${node.name}</div>
             <div style="opacity:0.8">${node.description}</div>
           </div>
         `)
         .nodeThreeObject((node: LifecycleNode) => {
-          const color = LIFECYCLE_COLORS[node.type] ?? '#888'
+          const color = LIFECYCLE_COLORS[node.type]
           const group = new THREE.Group()
 
-          const radius = node.type === 'milestone'
-            ? 8
-            : 4 + Math.min(node.val, 15) * 0.3
-          const geometry = new THREE.SphereGeometry(radius, 16, 12)
-          const material = new THREE.MeshLambertMaterial({
-            color,
-            transparent: true,
-            opacity: node.type === 'milestone' ? 1 : 0.85,
-          })
-          group.add(new THREE.Mesh(geometry, material))
+          if (node.type === 'milestone') {
+            // Milestone: emoji icon on a flat plane + label below
+            const stateKey = node.id.replace('milestone:', '')
+            const icon = MILESTONE_ICONS[stateKey]
 
-          // Label
-          const scale = 2
-          const canvasW = 512 * scale
-          const canvasH = 64 * scale
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')!
-          canvas.width = canvasW
-          canvas.height = canvasH
-          ctx.font = `${node.type === 'milestone' ? '700' : '600'} ${22 * scale}px system-ui, -apple-system, sans-serif`
-          ctx.fillStyle = node.type === 'milestone' ? '#002C61' : '#34322D'
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
+            // Emoji disc
+            const discCanvas = document.createElement('canvas')
+            const discCtx = discCanvas.getContext('2d')!
+            discCanvas.width = 256
+            discCanvas.height = 256
+            // Background circle
+            discCtx.beginPath()
+            discCtx.arc(128, 128, 120, 0, Math.PI * 2)
+            discCtx.fillStyle = '#002C61'
+            discCtx.fill()
+            // Emoji
+            discCtx.font = '100px serif'
+            discCtx.textAlign = 'center'
+            discCtx.textBaseline = 'middle'
+            discCtx.fillText(icon?.emoji ?? '⬤', 128, 128)
 
-          const displayName = node.name.length > 24 ? node.name.slice(0, 22) + '…' : node.name
-          ctx.fillText(displayName, canvasW / 2, canvasH / 2)
+            const discTex = new THREE.CanvasTexture(discCanvas)
+            const discMat = new THREE.SpriteMaterial({ map: discTex, transparent: true })
+            const disc = new THREE.Sprite(discMat)
+            disc.scale.set(18, 18, 1)
+            group.add(disc)
 
-          const texture = new THREE.CanvasTexture(canvas)
-          const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
-          const sprite = new THREE.Sprite(spriteMat)
-          const spriteW = node.type === 'milestone' ? 32 : 24
-          sprite.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
-          sprite.position.set(0, radius + 4, 0)
-          group.add(sprite)
+            // Label below
+            const labelCanvas = document.createElement('canvas')
+            const labelCtx = labelCanvas.getContext('2d')!
+            labelCanvas.width = 512
+            labelCanvas.height = 96
+            labelCtx.font = 'bold 40px system-ui, -apple-system, sans-serif'
+            labelCtx.fillStyle = '#002C61'
+            labelCtx.textAlign = 'center'
+            labelCtx.textBaseline = 'middle'
+            labelCtx.fillText(icon?.label ?? stateKey, 256, 48)
+
+            const labelTex = new THREE.CanvasTexture(labelCanvas)
+            const labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true, depthWrite: false })
+            const label = new THREE.Sprite(labelMat)
+            label.scale.set(28, 28 * (96 / 512), 1)
+            label.position.set(0, -14, 0)
+            group.add(label)
+          } else {
+            // Other nodes: sphere + label
+            const radius = Math.max(4, 3 + Math.min(node.val, 15) * 0.2)
+            const geo = new THREE.SphereGeometry(radius, 16, 12)
+            const mat = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.85 })
+            group.add(new THREE.Mesh(geo, mat))
+
+            // Label
+            const scale = 2
+            const canvasW = 512 * scale
+            const canvasH = 64 * scale
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')!
+            canvas.width = canvasW
+            canvas.height = canvasH
+            ctx.font = `600 ${22 * scale}px system-ui, -apple-system, sans-serif`
+            ctx.fillStyle = '#34322D'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            const displayName = node.name.length > 22 ? node.name.slice(0, 20) + '…' : node.name
+            ctx.fillText(displayName, canvasW / 2, canvasH / 2)
+
+            const texture = new THREE.CanvasTexture(canvas)
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+            const sprite = new THREE.Sprite(spriteMat)
+            const spriteW = 24
+            sprite.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
+            sprite.position.set(0, radius + 3, 0)
+            group.add(sprite)
+          }
 
           return group
         })
         .nodeThreeObjectExtend(false)
         .linkColor((link: LifecycleLink) => {
-          if (link.type === 'spine') return '#002C61'
+          if (link.type === 'spine') return 'rgba(0,0,0,0)' // hidden — tube replaces it
           if (link.type === 'governs') return '#F59E0B44'
           return '#85848133'
         })
-        .linkWidth((link: LifecycleLink) => link.type === 'spine' ? 4 : 1)
-        .linkOpacity(0.5)
+        .linkWidth((link: LifecycleLink) => link.type === 'spine' ? 0 : 1)
+        .linkOpacity(0.4)
         .linkDirectionalParticles(0)
         .linkDirectionalParticleWidth(3)
         .linkDirectionalParticleSpeed(0.008)
-        .linkDirectionalParticleColor((link: LifecycleLink) => {
-          if (link.type === 'spine') return '#002C61'
-          return '#0081F2'
-        })
+        .linkDirectionalParticleColor(() => '#0081F2')
         .onNodeClick((node: LifecycleNode) => {
           handleNodeClick(node)
-
-          // Emit particles on direct edges
           const graphData = graph.graphData()
           const getNodeId = (n: unknown) => typeof n === 'string' ? n : (n as LifecycleNode)?.id ?? ''
           const directLinks = graphData.links.filter((l: any) => {
@@ -365,16 +391,14 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
           }
         })
 
-      // No live simulation — all positions are fixed
+      // Fixed positions — no simulation
       graph.warmupTicks(50)
       graph.cooldownTicks(0)
       graph.d3VelocityDecay(0.9)
-
-      // Disable forces since positions are fixed
       graph.d3Force('charge', null)
       graph.d3Force('link', null)
 
-      // Fix tooltip container
+      // Tooltip fix
       const style = document.createElement('style')
       style.textContent = '.graph-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }'
       containerRef.current.appendChild(style)
@@ -382,8 +406,12 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)
 
-      // Point camera along the spine (Z axis)
-      graph.cameraPosition({ x: 100, y: 60, z: 150 }, { x: 0, y: 0, z: 160 })
+      // Camera: slightly above, looking along the spine
+      const midX = (states.length - 1) * SPINE_SPACING / 2
+      graph.cameraPosition(
+        { x: midX, y: 80, z: 200 },
+        { x: midX, y: 0, z: 0 },
+      )
 
       const resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
@@ -403,11 +431,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       {/* Legend */}
       <div
         className="absolute bottom-4 left-4 flex items-center gap-3 rounded-xl px-4 py-2.5"
-        style={{
-          background: 'var(--bg-white)',
-          border: '1px solid var(--border-default)',
-          boxShadow: 'var(--shadow-float)',
-        }}
+        style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-float)' }}
       >
         <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           HBL Lifecycle
@@ -415,23 +439,16 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         {Object.entries(LIFECYCLE_COLORS).map(([type, color]) => (
           <div key={type} className="flex items-center gap-1.5">
             <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
-            <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-              {LIFECYCLE_LABELS[type]}
-            </span>
+            <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>{LIFECYCLE_LABELS[type]}</span>
           </div>
         ))}
       </div>
 
-      {/* Selected node detail */}
+      {/* Selected node */}
       {selectedNode && (
         <div
           className="absolute top-4 right-4 rounded-xl p-4"
-          style={{
-            width: 340,
-            background: 'var(--bg-white)',
-            border: '1px solid var(--border-default)',
-            boxShadow: 'var(--shadow-overlay)',
-          }}
+          style={{ width: 340, background: 'var(--bg-white)', border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-overlay)' }}
         >
           <div className="flex items-center gap-2 mb-2">
             <span

@@ -8,6 +8,7 @@ import { ModelReader } from './model-reader'
 import { ModelSource } from './model-source'
 import { Graph3D } from './graph-3d'
 import { Graph3DLifecycle } from './graph-3d-lifecycle'
+import { Graph3DActors } from './graph-3d-actors'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
@@ -20,6 +21,7 @@ const tabs = [
 const VIEWS_3D = [
   { id: 'force', label: 'Force' },
   { id: 'lifecycle', label: 'Lifecycle' },
+  { id: 'actors', label: 'Actor Layers' },
 ] as const
 
 type View3D = (typeof VIEWS_3D)[number]['id']
@@ -93,6 +95,9 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
         )}
         {activeTab === '3d' && view3d === 'lifecycle' && (
           <Graph3DLifecycle model={model} />
+        )}
+        {activeTab === '3d' && view3d === 'actors' && (
+          <Graph3DActors model={model} />
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

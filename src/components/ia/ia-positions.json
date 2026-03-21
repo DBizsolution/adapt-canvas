@@ -1,6 +1,6 @@
 {
   "_screens": {
-    "wff-login": {
+    "lsp-login": {
       "label": "Login",
       "icon": "LogIn",
       "actor": "lsp",
@@ -9,7 +9,7 @@
       ],
       "status": "not-built"
     },
-    "wff-dashboard": {
+    "lsp-dashboard": {
       "label": "Dashboard",
       "icon": "LayoutDashboard",
       "actor": "lsp",
@@ -20,7 +20,7 @@
       ],
       "status": "done"
     },
-    "wff-delegate": {
+    "lsp-delegate": {
       "label": "Delegate",
       "icon": "ArrowRightLeft",
       "actor": "lsp",
@@ -32,7 +32,7 @@
       ],
       "status": "done"
     },
-    "wff-book": {
+    "lsp-book": {
       "label": "Book Pickup",
       "icon": "CalendarCheck",
       "actor": "lsp",
@@ -45,7 +45,7 @@
       ],
       "status": "done"
     },
-    "wff-view-edit": {
+    "lsp-view-edit": {
       "label": "View / Edit Booking",
       "icon": "Eye",
       "actor": "lsp",
@@ -56,7 +56,7 @@
       ],
       "status": "done"
     },
-    "wff-cancel": {
+    "lsp-cancel": {
       "label": "Cancel Booking",
       "icon": "XCircle",
       "actor": "lsp",
@@ -67,7 +67,7 @@
       ],
       "status": "done"
     },
-    "wff-upload-do": {
+    "lsp-upload-do": {
       "label": "Upload DO",
       "icon": "Upload",
       "actor": "lsp",
@@ -78,7 +78,7 @@
       ],
       "status": "done"
     },
-    "wff-flag-bond": {
+    "lsp-flag-bond": {
       "label": "Flag Under-bond",
       "icon": "Flag",
       "actor": "lsp",
@@ -89,7 +89,7 @@
       ],
       "status": "not-built"
     },
-    "wff-req-docs": {
+    "lsp-req-docs": {
       "label": "Request Missing Docs",
       "icon": "FileQuestion",
       "actor": "lsp",
@@ -352,37 +352,37 @@
     }
   },
   "_edges": {
-    "e-wff-1": {
-      "source": "wff-login",
-      "target": "wff-dashboard"
+    "e-lsp-1": {
+      "source": "lsp-login",
+      "target": "lsp-dashboard"
     },
-    "e-wff-2a": {
-      "source": "wff-dashboard",
-      "target": "wff-delegate"
+    "e-lsp-2a": {
+      "source": "lsp-dashboard",
+      "target": "lsp-delegate"
     },
-    "e-wff-2b": {
-      "source": "wff-dashboard",
-      "target": "wff-book"
+    "e-lsp-2b": {
+      "source": "lsp-dashboard",
+      "target": "lsp-book"
     },
-    "e-wff-2c": {
-      "source": "wff-dashboard",
-      "target": "wff-view-edit"
+    "e-lsp-2c": {
+      "source": "lsp-dashboard",
+      "target": "lsp-view-edit"
     },
-    "e-wff-3a": {
-      "source": "wff-view-edit",
-      "target": "wff-cancel"
+    "e-lsp-3a": {
+      "source": "lsp-view-edit",
+      "target": "lsp-cancel"
     },
-    "e-wff-3b": {
-      "source": "wff-book",
-      "target": "wff-upload-do"
+    "e-lsp-3b": {
+      "source": "lsp-book",
+      "target": "lsp-upload-do"
     },
-    "e-wff-3c": {
-      "source": "wff-book",
-      "target": "wff-flag-bond"
+    "e-lsp-3c": {
+      "source": "lsp-book",
+      "target": "lsp-flag-bond"
     },
-    "e-wff-4": {
-      "source": "wff-upload-do",
-      "target": "wff-req-docs"
+    "e-lsp-4": {
+      "source": "lsp-upload-do",
+      "target": "lsp-req-docs"
     },
     "e-p4tc-1": {
       "source": "p4tc-magic",
@@ -461,7 +461,7 @@
       "target": "gh-exit"
     },
     "e-cross-1": {
-      "source": "wff-delegate",
+      "source": "lsp-delegate",
       "target": "p4tc-magic",
       "label": "Sends magic link",
       "cross": true,
@@ -477,7 +477,7 @@
       "targetHandle": "top"
     },
     "e-cross-3": {
-      "source": "wff-book",
+      "source": "lsp-book",
       "target": "sh-payment",
       "sourceHandle": "bottom",
       "targetHandle": "top"
@@ -490,14 +490,14 @@
       "sourceHandle": "bottom",
       "targetHandle": "top"
     },
-    "e-wff-5a": {
-      "source": "wff-dashboard",
+    "e-lsp-5a": {
+      "source": "lsp-dashboard",
       "target": "sh-bookings",
       "sourceHandle": "bottom",
       "targetHandle": "top"
     },
-    "e-wff-5b": {
-      "source": "wff-dashboard",
+    "e-lsp-5b": {
+      "source": "lsp-dashboard",
       "target": "sh-notifs",
       "sourceHandle": "bottom",
       "targetHandle": "top"
@@ -508,7 +508,7 @@
       "y": 20,
       "height": 320,
       "color": "#0081F2",
-      "label": "WFF / LSP"
+      "label": "LSP"
     },
     "p4tc": {
       "y": 380,
@@ -529,39 +529,39 @@
       "label": "Gatehouse"
     }
   },
-  "wff-login": {
+  "lsp-login": {
     "x": -19,
     "y": 93
   },
-  "wff-dashboard": {
+  "lsp-dashboard": {
     "x": 232,
     "y": 93
   },
-  "wff-delegate": {
+  "lsp-delegate": {
     "x": 501,
     "y": 17
   },
-  "wff-book": {
+  "lsp-book": {
     "x": 500,
     "y": 80
   },
-  "wff-view-edit": {
+  "lsp-view-edit": {
     "x": 493,
     "y": 205
   },
-  "wff-cancel": {
+  "lsp-cancel": {
     "x": 793,
     "y": 286
   },
-  "wff-upload-do": {
+  "lsp-upload-do": {
     "x": 788,
     "y": 84
   },
-  "wff-flag-bond": {
+  "lsp-flag-bond": {
     "x": 793,
     "y": 159
   },
-  "wff-req-docs": {
+  "lsp-req-docs": {
     "x": 977,
     "y": 84
   },

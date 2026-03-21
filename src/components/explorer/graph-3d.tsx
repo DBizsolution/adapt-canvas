@@ -351,8 +351,6 @@ export function Graph3D({ model }: { model: IntentModel }) {
         })
         .linkWidth((link: GraphLink) => link.type === 'entity-entity' ? 2 : 1)
         .linkOpacity(0.4)
-        .linkDirectionalParticles(1)
-        .linkDirectionalParticleSpeed(0.005)
         .onNodeClick(handleNodeClick)
         .onNodeHover((node: GraphNode | null) => setHoveredNode(node))
 
@@ -364,10 +362,11 @@ export function Graph3D({ model }: { model: IntentModel }) {
       const center = graph.d3Force('center')
       if (center?.strength) center.strength(2)
 
-      // Stop vibration — high friction + fast cooldown
+      // Settle quickly — high friction, fast cooldown, pre-compute layout
       graph.d3VelocityDecay(0.6)
       graph.d3AlphaDecay(0.05)
       graph.cooldownTime(3000)
+      graph.warmupTicks(100)
 
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)

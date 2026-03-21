@@ -826,12 +826,9 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
           return group
         })
         .nodeThreeObjectExtend(false)
-        .linkColor((link: LifecycleLink) => {
-          if (link.type === 'governs') return '#9CA3AF'
-          return '#B0B0B0'
-        })
-        .linkWidth(1.5)
-        .linkOpacity(0.7)
+        .linkColor(() => '#888888')
+        .linkWidth(2)
+        .linkOpacity(1)
         .linkDirectionalParticles(0)
         .linkDirectionalParticleWidth(2.5)
         .linkDirectionalParticleSpeed(0.008)

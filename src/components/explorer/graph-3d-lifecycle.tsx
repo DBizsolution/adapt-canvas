@@ -52,150 +52,330 @@ const SPINE_SPACING = 40
 
 function buildShip(THREE: typeof import('three')): import('three').Group {
   const g = new THREE.Group()
-  // Hull
-  const hull = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 3, 5),
-    new THREE.MeshLambertMaterial({ color: '#1a3a5c' }),
-  )
-  g.add(hull)
-  // Cabin
-  const cabin = new THREE.Mesh(
-    new THREE.BoxGeometry(3, 3, 3),
-    new THREE.MeshLambertMaterial({ color: '#2a5a8c' }),
-  )
-  cabin.position.set(-2, 3, 0)
-  g.add(cabin)
-  // Bow wedge
-  const bowGeo = new THREE.BufferGeometry()
-  const verts = new Float32Array([
-    5, 1.5, 2.5,   5, 1.5, -2.5,   8, 0, 0,
-    5, -1.5, 2.5,  5, -1.5, -2.5,  8, 0, 0,
-    5, 1.5, 2.5,   5, -1.5, 2.5,   8, 0, 0,
-    5, 1.5, -2.5,  5, -1.5, -2.5,  8, 0, 0,
-  ])
-  bowGeo.setAttribute('position', new THREE.BufferAttribute(verts, 3))
-  bowGeo.computeVertexNormals()
-  g.add(new THREE.Mesh(bowGeo, new THREE.MeshLambertMaterial({ color: '#1a3a5c' })))
+  const mat = new THREE.MeshPhongMaterial({ color: '#1a3a5c', shininess: 40 })
+  const matLight = new THREE.MeshPhongMaterial({ color: '#2a5a8c', shininess: 30 })
+
+  // Hull — tapered shape using lathe
+  const hullShape = new THREE.Shape()
+  hullShape.moveTo(-5, -2.5)
+  hullShape.lineTo(-5, 0)
+  hullShape.quadraticCurveTo(-4.5, 1.5, 0, 1.8)
+  hullShape.quadraticCurveTo(4.5, 1.5, 6, 0)
+  hullShape.lineTo(7.5, -0.5)
+  hullShape.lineTo(6, -1.5)
+  hullShape.lineTo(-5, -2.5)
+  const hullGeo = new THREE.ExtrudeGeometry(hullShape, { depth: 5, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.2, bevelSegments: 3 })
+  hullGeo.translate(0, 0, -2.5)
+  g.add(new THREE.Mesh(hullGeo, mat))
+
+  // Deck
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(10, 0.3, 4.5), new THREE.MeshPhongMaterial({ color: '#8B7355', shininess: 20 })))
+  g.children[g.children.length - 1].position.set(0, 0.1, 0)
+
+  // Bridge (cabin)
+  const bridge = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 3, 2, 2, 2), matLight)
+  bridge.position.set(-2, 1.5, 0)
+  g.add(bridge)
+
+  // Bridge windows
+  const winMat = new THREE.MeshPhongMaterial({ color: '#88CCFF', transparent: true, opacity: 0.7, shininess: 80 })
+  for (const z of [-1, 0, 1]) {
+    const win = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.8), winMat)
+    win.position.set(-0.7, 2.2, z * 0.9)
+    win.rotation.y = Math.PI / 2
+    g.add(win)
+  }
+
+  // Funnel
+  const funnel = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 1.8, 12), new THREE.MeshPhongMaterial({ color: '#CC3333', shininess: 30 }))
+  funnel.position.set(-2, 3.7, 0)
+  g.add(funnel)
+
+  // Mast
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4, 8), new THREE.MeshPhongMaterial({ color: '#888' }))
+  mast.position.set(2, 2.2, 0)
+  g.add(mast)
+
+  // Containers on deck
+  const contColors = ['#0066AA', '#CC6600', '#CC3333']
+  for (let i = 0; i < 3; i++) {
+    const cont = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 1.2, 1.8),
+      new THREE.MeshPhongMaterial({ color: contColors[i], shininess: 20 }),
+    )
+    cont.position.set(1 + i * 2.2, 0.9, 0)
+    g.add(cont)
+  }
+
   return g
 }
 
 function buildWharf(THREE: typeof import('three')): import('three').Group {
   const g = new THREE.Group()
-  // Platform
-  g.add(new THREE.Mesh(
-    new THREE.BoxGeometry(12, 1, 8),
-    new THREE.MeshLambertMaterial({ color: '#8B7355' }),
-  ))
-  // Pillars
-  for (const x of [-4, 0, 4]) {
-    for (const z of [-3, 3]) {
-      const pillar = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.4, 0.4, 5, 6),
-        new THREE.MeshLambertMaterial({ color: '#6B5340' }),
-      )
-      pillar.position.set(x, -3, z)
+  const woodMat = new THREE.MeshPhongMaterial({ color: '#8B7355', shininess: 15 })
+  const woodDark = new THREE.MeshPhongMaterial({ color: '#6B5340', shininess: 10 })
+  const metalMat = new THREE.MeshPhongMaterial({ color: '#555', shininess: 60 })
+
+  // Main platform with planks
+  const platform = new THREE.Mesh(new THREE.BoxGeometry(14, 0.8, 9), woodMat)
+  g.add(platform)
+
+  // Plank lines
+  for (let z = -4; z <= 4; z += 1) {
+    const plank = new THREE.Mesh(new THREE.BoxGeometry(14.1, 0.05, 0.05), woodDark)
+    plank.position.set(0, 0.42, z)
+    g.add(plank)
+  }
+
+  // Pillars — thicker, rounded
+  for (const x of [-5, -1.5, 2, 5.5]) {
+    for (const z of [-3.5, 0, 3.5]) {
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 6, 12), woodDark)
+      pillar.position.set(x, -3.4, z)
       g.add(pillar)
     }
   }
-  // Bollard
-  const bollard = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.6, 0.8, 1.5, 8),
-    new THREE.MeshLambertMaterial({ color: '#333' }),
-  )
-  bollard.position.set(5, 1.2, 0)
-  g.add(bollard)
+
+  // Bollards
+  for (const x of [-4, 0, 4]) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 1.8, 12), metalMat)
+    post.position.set(x, 1.3, 4)
+    g.add(post)
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 8), metalMat)
+    cap.position.set(x, 2.3, 4)
+    g.add(cap)
+  }
+
+  // Crane arm (simple)
+  const craneMat = new THREE.MeshPhongMaterial({ color: '#CC6600', shininess: 40 })
+  const craneBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4, 1.2), craneMat)
+  craneBase.position.set(6, 2.4, 0)
+  g.add(craneBase)
+  const craneArm = new THREE.Mesh(new THREE.BoxGeometry(8, 0.5, 0.5), craneMat)
+  craneArm.position.set(2, 4.6, 0)
+  g.add(craneArm)
+
   return g
 }
 
 function buildContainer(THREE: typeof import('three')): import('three').Group {
   const g = new THREE.Group()
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(8, 5, 4),
-    new THREE.MeshLambertMaterial({ color: '#0066AA' }),
-  )
-  g.add(box)
-  // Door lines
-  const edges = new THREE.LineSegments(
+  const bodyMat = new THREE.MeshPhongMaterial({ color: '#0066AA', shininess: 30 })
+
+  // Main body
+  const body = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 4), bodyMat)
+  g.add(body)
+
+  // Edges
+  g.add(new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(8, 5, 4)),
-    new THREE.LineBasicMaterial({ color: '#004488' }),
-  )
-  g.add(edges)
-  // Corrugation ridges
-  for (let i = -3; i <= 3; i += 1.5) {
+    new THREE.LineBasicMaterial({ color: '#003366' }),
+  ))
+
+  // Corrugation — more ridges, thinner
+  for (let i = -3.5; i <= 3.5; i += 0.6) {
     const ridge = new THREE.Mesh(
-      new THREE.BoxGeometry(0.15, 4.8, 4.1),
-      new THREE.MeshLambertMaterial({ color: '#004488' }),
+      new THREE.BoxGeometry(0.08, 4.8, 4.05),
+      new THREE.MeshPhongMaterial({ color: '#004488', shininess: 20 }),
     )
     ridge.position.set(i, 0, 0)
     g.add(ridge)
   }
+
+  // Door handles (back face)
+  const handleMat = new THREE.MeshPhongMaterial({ color: '#888', shininess: 60 })
+  for (const y of [-0.8, 0.8]) {
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.5, 8), handleMat)
+    handle.position.set(-4.05, y, 0)
+    handle.rotation.z = Math.PI / 2
+    g.add(handle)
+  }
+
+  // Lock bar
+  const lockBar = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4.5, 0.15), handleMat)
+  lockBar.position.set(-4.05, 0, 0)
+  g.add(lockBar)
+
+  // Corner castings
+  const castMat = new THREE.MeshPhongMaterial({ color: '#333', shininess: 40 })
+  for (const x of [-3.9, 3.9]) {
+    for (const y of [-2.4, 2.4]) {
+      for (const z of [-1.9, 1.9]) {
+        const cast = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), castMat)
+        cast.position.set(x, y, z)
+        g.add(cast)
+      }
+    }
+  }
+
   return g
 }
 
 function buildOpenBox(THREE: typeof import('three')): import('three').Group {
   const g = new THREE.Group()
+  const cardboard = new THREE.MeshPhongMaterial({ color: '#C4956A', shininess: 8 })
+  const cardboardInner = new THREE.MeshPhongMaterial({ color: '#D4A574', shininess: 5 })
+  const tapeMat = new THREE.MeshPhongMaterial({ color: '#CC9933', shininess: 15 })
+
   // Base
-  g.add(new THREE.Mesh(
-    new THREE.BoxGeometry(7, 0.3, 5),
-    new THREE.MeshLambertMaterial({ color: '#C4956A' }),
-  ))
-  // Walls
-  const wallMat = new THREE.MeshLambertMaterial({ color: '#D4A574' })
-  // Back
-  const back = new THREE.Mesh(new THREE.BoxGeometry(7, 4, 0.3), wallMat)
-  back.position.set(0, 2, -2.5)
-  g.add(back)
-  // Left
-  const left = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 5), wallMat)
-  left.position.set(-3.5, 2, 0)
-  g.add(left)
-  // Right
-  const right = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 5), wallMat)
-  right.position.set(3.5, 2, 0)
-  g.add(right)
-  // Front wall (shorter — open top)
-  const front = new THREE.Mesh(new THREE.BoxGeometry(7, 2, 0.3), wallMat)
-  front.position.set(0, 1, 2.5)
-  g.add(front)
-  // Flap (open lid)
-  const flap = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.2, 3), wallMat)
-  flap.position.set(0, 4.2, -4)
-  flap.rotation.x = -0.6
-  g.add(flap)
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(7, 0.4, 5), cardboard))
+
+  // Walls — all 4 sides
+  const wallH = 4
+  const wallBack = new THREE.Mesh(new THREE.BoxGeometry(7, wallH, 0.3), cardboardInner)
+  wallBack.position.set(0, wallH / 2, -2.5)
+  g.add(wallBack)
+  const wallFront = new THREE.Mesh(new THREE.BoxGeometry(7, wallH, 0.3), cardboardInner)
+  wallFront.position.set(0, wallH / 2, 2.5)
+  g.add(wallFront)
+  const wallLeft = new THREE.Mesh(new THREE.BoxGeometry(0.3, wallH, 5), cardboardInner)
+  wallLeft.position.set(-3.5, wallH / 2, 0)
+  g.add(wallLeft)
+  const wallRight = new THREE.Mesh(new THREE.BoxGeometry(0.3, wallH, 5), cardboardInner)
+  wallRight.position.set(3.5, wallH / 2, 0)
+  g.add(wallRight)
+
+  // Flaps — two open, two folded in
+  // Back flap (open, tilted back)
+  const flapBack = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.2, 2.5), cardboard)
+  flapBack.position.set(0, 4.2, -3.8)
+  flapBack.rotation.x = -0.7
+  g.add(flapBack)
+
+  // Front flap (open, tilted forward)
+  const flapFront = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.2, 2.5), cardboard)
+  flapFront.position.set(0, 4.2, 3.8)
+  flapFront.rotation.x = 0.5
+  g.add(flapFront)
+
+  // Side flaps (folded inward)
+  const flapLeft = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.2, 4.6), cardboard)
+  flapLeft.position.set(-3.4, 4.1, 0)
+  flapLeft.rotation.z = 0.3
+  g.add(flapLeft)
+
+  const flapRight = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.2, 4.6), cardboard)
+  flapRight.position.set(3.4, 4.1, 0)
+  flapRight.rotation.z = -0.3
+  g.add(flapRight)
+
+  // Tape strips
+  const tape1 = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.5, 0.05), tapeMat)
+  tape1.position.set(0, 2, 2.52)
+  g.add(tape1)
+  const tape2 = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.5, 0.05), tapeMat)
+  tape2.position.set(0, 2, -2.52)
+  g.add(tape2)
+
+  // Items peeking out — small colored boxes inside
+  const itemMat1 = new THREE.MeshPhongMaterial({ color: '#4488CC', shininess: 30 })
+  const item1 = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 1.5), itemMat1)
+  item1.position.set(-1, 3.5, 0.5)
+  item1.rotation.y = 0.2
+  g.add(item1)
+
+  const itemMat2 = new THREE.MeshPhongMaterial({ color: '#CC4444', shininess: 30 })
+  const item2 = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 2, 12), itemMat2)
+  item2.position.set(1.5, 3.2, -0.5)
+  g.add(item2)
+
   return g
 }
 
 function buildTruck(THREE: typeof import('three')): import('three').Group {
   const g = new THREE.Group()
-  // Trailer
-  g.add(new THREE.Mesh(
-    new THREE.BoxGeometry(9, 4, 4),
-    new THREE.MeshLambertMaterial({ color: '#25BA3B' }),
-  ))
-  // Cab
-  const cab = new THREE.Mesh(
-    new THREE.BoxGeometry(3.5, 3.5, 3.8),
-    new THREE.MeshLambertMaterial({ color: '#1a8a2a' }),
-  )
-  cab.position.set(6, -0.25, 0)
-  g.add(cab)
-  // Windshield
-  const windshield = new THREE.Mesh(
-    new THREE.BoxGeometry(0.1, 2, 3),
-    new THREE.MeshLambertMaterial({ color: '#88CCFF', transparent: true, opacity: 0.7 }),
-  )
-  windshield.position.set(7.8, 0.3, 0)
-  g.add(windshield)
-  // Wheels
-  const wheelMat = new THREE.MeshLambertMaterial({ color: '#222' })
-  for (const x of [-3, 1, 5.5]) {
-    for (const z of [-2.2, 2.2]) {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 8), wheelMat)
-      wheel.rotation.x = Math.PI / 2
-      wheel.position.set(x, -2.5, z)
-      g.add(wheel)
+  const trailerMat = new THREE.MeshPhongMaterial({ color: '#25BA3B', shininess: 30 })
+  const cabMat = new THREE.MeshPhongMaterial({ color: '#1a8a2a', shininess: 35 })
+  const metalMat = new THREE.MeshPhongMaterial({ color: '#666', shininess: 60 })
+  const winMat = new THREE.MeshPhongMaterial({ color: '#88CCFF', transparent: true, opacity: 0.7, shininess: 80 })
+  const wheelMat = new THREE.MeshPhongMaterial({ color: '#222', shininess: 20 })
+  const tireMat = new THREE.MeshPhongMaterial({ color: '#111', shininess: 5 })
+
+  // Trailer body — rounded edges
+  const trailer = new THREE.Mesh(new THREE.BoxGeometry(9, 4.5, 4.2, 2, 2, 2), trailerMat)
+  g.add(trailer)
+
+  // Trailer ridges (sides)
+  for (let x = -4; x <= 4; x += 0.8) {
+    for (const z of [-2.12, 2.12]) {
+      const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.06, 4.3, 0.06), new THREE.MeshPhongMaterial({ color: '#1a7a2a' }))
+      ridge.position.set(x, 0, z)
+      g.add(ridge)
     }
   }
+
+  // Cab
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(3.5, 4, 4, 2, 2, 2), cabMat)
+  cab.position.set(6.2, 0, 0)
+  g.add(cab)
+
+  // Windshield
+  const windshield = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.5), winMat)
+  windshield.position.set(8, 0.5, 0)
+  windshield.rotation.y = Math.PI / 2
+  g.add(windshield)
+
+  // Side windows
+  for (const z of [-2.02, 2.02]) {
+    const sideWin = new THREE.Mesh(new THREE.PlaneGeometry(2, 1.5), winMat)
+    sideWin.position.set(6.2, 0.5, z)
+    sideWin.rotation.y = z > 0 ? 0 : Math.PI
+    g.add(sideWin)
+  }
+
+  // Headlights
+  const lightMat = new THREE.MeshPhongMaterial({ color: '#FFEE88', emissive: '#443300', shininess: 80 })
+  for (const z of [-1.2, 1.2]) {
+    const light = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), lightMat)
+    light.position.set(7.95, -0.8, z)
+    g.add(light)
+  }
+
+  // Bumper
+  const bumper = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.8, 4.4), metalMat)
+  bumper.position.set(8, -1.5, 0)
+  g.add(bumper)
+
+  // Wheels — more detailed
+  for (const x of [-3, 0.5, 5, 6.5]) {
+    for (const z of [-2.3, 2.3]) {
+      // Tire
+      const tire = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.35, 12, 16), tireMat)
+      tire.rotation.y = Math.PI / 2
+      tire.position.set(x, -2.6, z)
+      g.add(tire)
+      // Hub
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.3, 12), metalMat)
+      hub.rotation.x = Math.PI / 2
+      hub.position.set(x, -2.6, z)
+      g.add(hub)
+    }
+  }
+
+  // Mudflaps
+  for (const z of [-2.5, 2.5]) {
+    const flap = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1, 0.05), new THREE.MeshPhongMaterial({ color: '#111' }))
+    flap.position.set(-3.8, -2.2, z)
+    g.add(flap)
+  }
+
+  // Checkmark on trailer (collected = done)
+  const checkCanvas = document.createElement('canvas')
+  const checkCtx = checkCanvas.getContext('2d')!
+  checkCanvas.width = 128
+  checkCanvas.height = 128
+  checkCtx.font = 'bold 80px sans-serif'
+  checkCtx.fillStyle = 'white'
+  checkCtx.textAlign = 'center'
+  checkCtx.textBaseline = 'middle'
+  checkCtx.fillText('✓', 64, 64)
+  const checkTex = new THREE.CanvasTexture(checkCanvas)
+  const checkMat = new THREE.SpriteMaterial({ map: checkTex, transparent: true })
+  const checkSprite = new THREE.Sprite(checkMat)
+  checkSprite.scale.set(3, 3, 1)
+  checkSprite.position.set(0, 0, 2.2)
+  g.add(checkSprite)
+
   return g
 }
 

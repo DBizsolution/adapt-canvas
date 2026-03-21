@@ -199,17 +199,19 @@ export function Graph3D({ model }: { model: IntentModel }) {
     let destroyed = false
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    import('3d-force-graph').then((mod: any) => {
+    import('3d-force-graph').then(async (mod: any) => {
       if (destroyed || !containerRef.current) return
 
       const ForceGraph3D = mod.default || mod
       const { nodes, links } = buildGraphData(model)
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const THREE = await import('three')
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graph: any = ForceGraph3D()(containerRef.current)
       graph.graphData({ nodes, links })
         .backgroundColor('#F8F8F7')
-        .nodeColor((node: GraphNode) => TYPE_COLORS[node.type] ?? '#888')
         .nodeLabel((node: GraphNode) => `
           <div style="background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.6;margin-bottom:2px">${TYPE_LABELS[node.type] ?? node.type}</div>
@@ -218,6 +220,42 @@ export function Graph3D({ model }: { model: IntentModel }) {
           </div>
         `)
         .nodeVal((node: GraphNode) => node.val)
+        .nodeThreeObject((node: GraphNode) => {
+          const color = TYPE_COLORS[node.type] ?? '#888'
+
+          // Create a group to hold sphere + label
+          const group = new THREE.Group()
+
+          // Sphere
+          const radius = Math.cbrt(node.val) * 2
+          const geometry = new THREE.SphereGeometry(radius, 16, 12)
+          const material = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.9 })
+          const sphere = new THREE.Mesh(geometry, material)
+          group.add(sphere)
+
+          // Text label — short name truncated
+          const shortName = node.name.length > 18 ? node.name.slice(0, 16) + '…' : node.name
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')!
+          canvas.width = 256
+          canvas.height = 48
+          ctx.font = 'bold 22px sans-serif'
+          ctx.fillStyle = '#34322D'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillText(shortName, 128, 24)
+
+          const texture = new THREE.CanvasTexture(canvas)
+          texture.needsUpdate = true
+          const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+          const sprite = new THREE.Sprite(spriteMat)
+          sprite.scale.set(24, 4.5, 1)
+          sprite.position.set(0, radius + 4, 0)
+          group.add(sprite)
+
+          return group
+        })
+        .nodeThreeObjectExtend(false)
         .linkColor((link: GraphLink) => {
           if (link.type === 'entity-entity') return '#9CA3AF'
           if (link.type === 'rule-entity') return '#F59E0B66'
@@ -231,9 +269,13 @@ export function Graph3D({ model }: { model: IntentModel }) {
         .onNodeClick(handleNodeClick)
         .onNodeHover((node: GraphNode | null) => setHoveredNode(node))
 
-      // Adjust forces
+      // Tighter forces — bring nodes closer together
       const charge = graph.d3Force('charge')
-      if (charge?.strength) charge.strength(-200)
+      if (charge?.strength) charge.strength(-80)
+      const link = graph.d3Force('link')
+      if (link?.distance) link.distance(30)
+      const center = graph.d3Force('center')
+      if (center?.strength) center.strength(1.5)
 
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)

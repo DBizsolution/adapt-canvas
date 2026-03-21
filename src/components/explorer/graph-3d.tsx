@@ -289,24 +289,53 @@ export function Graph3D({ model }: { model: IntentModel }) {
           const sphere = new THREE.Mesh(geometry, material)
           group.add(sphere)
 
-          // Text label — short name truncated
-          const shortName = node.name.length > 18 ? node.name.slice(0, 16) + '…' : node.name
+          // Text label — wrap into up to 3 lines
           const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')!
-          canvas.width = 256
-          canvas.height = 48
-          ctx.font = 'bold 22px sans-serif'
+          canvas.width = 512
+          canvas.height = 128
+          ctx.font = 'bold 20px sans-serif'
           ctx.fillStyle = '#34322D'
           ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          ctx.fillText(shortName, 128, 24)
+          ctx.textBaseline = 'top'
+
+          // Word-wrap into lines
+          const maxWidth = 480
+          const lineHeight = 26
+          const maxLines = 3
+          const words = node.name.split(' ')
+          const lines: string[] = []
+          let currentLine = ''
+
+          for (const word of words) {
+            const test = currentLine ? `${currentLine} ${word}` : word
+            if (ctx.measureText(test).width > maxWidth && currentLine) {
+              lines.push(currentLine)
+              currentLine = word
+              if (lines.length >= maxLines) break
+            } else {
+              currentLine = test
+            }
+          }
+          if (currentLine && lines.length < maxLines) {
+            lines.push(currentLine)
+          } else if (lines.length >= maxLines) {
+            lines[maxLines - 1] = lines[maxLines - 1] + '…'
+          }
+
+          const totalHeight = lines.length * lineHeight
+          const startY = (128 - totalHeight) / 2
+          for (let i = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], 256, startY + i * lineHeight)
+          }
 
           const texture = new THREE.CanvasTexture(canvas)
           texture.needsUpdate = true
           const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
           const sprite = new THREE.Sprite(spriteMat)
-          sprite.scale.set(24, 4.5, 1)
-          sprite.position.set(0, radius + 4, 0)
+          const spriteHeight = 4 + lines.length * 2.5
+          sprite.scale.set(40, spriteHeight, 1)
+          sprite.position.set(0, radius + 3 + spriteHeight / 2, 0)
           group.add(sprite)
 
           return group

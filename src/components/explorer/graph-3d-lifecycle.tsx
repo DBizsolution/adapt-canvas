@@ -46,7 +46,7 @@ const MILESTONE_LABELS: Record<string, string> = {
   collected: 'Collected',
 }
 
-const SPINE_SPACING = 120
+const SPINE_SPACING = 40
 
 // --- Low-poly 3D milestone builders ---
 
@@ -261,14 +261,14 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
     const entity = model.entities.find(e => e.id === ep.id)
     if (!entity) continue
     const angle = entityAngle * 1.3 + 0.5
-    const r = 35
+    const r = 20
     nodes.push({
       id: `entity:${ep.id}`,
       name: entity.name,
       type: 'entity',
       description: entity.description.slice(0, 120),
       val: 12,
-      fx: ep.milestoneIdx * SPINE_SPACING + Math.cos(angle) * 15,
+      fx: ep.milestoneIdx * SPINE_SPACING + Math.cos(angle) * 5,
       fy: Math.sin(angle) * r,
       fz: Math.cos(angle) * r,
     })
@@ -282,7 +282,7 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
     const allText = actor.responsibilities.map(r => r.description).join(' ')
     const xIdx = classify(allText)
     const angle = (actorIdx / model.actors.length) * Math.PI * 2
-    const r = 45
+    const r = 25
     nodes.push({
       id: `actor:${actor.id}`,
       name: actor.name,
@@ -304,7 +304,7 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
     const allText = journey.steps.map(s => s.detail).join(' ') + ' ' + journey.name
     const xIdx = classify(allText)
     const angle = (journeyIdx / model.journeys.length) * Math.PI * 2 + 0.7
-    const r = 55
+    const r = 30
     nodes.push({
       id: `journey:${journey.id}`,
       name: journey.name,
@@ -324,7 +324,7 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
   for (const rule of model.business_rules) {
     const xIdx = classify(rule.description)
     const angle = (ruleIdx / model.business_rules.length) * Math.PI * 2 + 1.2
-    const r = 65
+    const r = 35
     nodes.push({
       id: `rule:${rule.id}`,
       name: rule.id,

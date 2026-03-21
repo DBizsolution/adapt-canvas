@@ -115,7 +115,7 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
       type: 'business_rule',
       description: r.description.slice(0, 150),
       group: 'business_rule',
-      val: 3,
+      val: 8,
     })
 
     // Rule → applies_to entities/actors
@@ -138,7 +138,7 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
       type: 'constraint',
       description: c.constraint.slice(0, 150),
       group: 'constraint',
-      val: 6,
+      val: 10,
     })
 
     for (const e of model.entities) {
@@ -159,7 +159,7 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
       type: 'open_question',
       description: q.question.slice(0, 150),
       group: 'open_question',
-      val: 6,
+      val: 10,
     })
 
     for (const e of model.entities) {
@@ -282,8 +282,8 @@ export function Graph3D({ model }: { model: IntentModel }) {
           // Create a group to hold sphere + label
           const group = new THREE.Group()
 
-          // Sphere
-          const radius = Math.cbrt(node.val) * 2
+          // Sphere — minimum radius 5 so small nodes are still visible
+          const radius = Math.max(5, Math.cbrt(node.val) * 2)
           const geometry = new THREE.SphereGeometry(radius, 16, 12)
           const material = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.9 })
           const sphere = new THREE.Mesh(geometry, material)
@@ -356,13 +356,13 @@ export function Graph3D({ model }: { model: IntentModel }) {
         .onNodeClick(handleNodeClick)
         .onNodeHover((node: GraphNode | null) => setHoveredNode(node))
 
-      // Tighter forces — bring nodes closer together
+      // Tighter forces — bring nodes closer, strong center pull for orphans
       const charge = graph.d3Force('charge')
-      if (charge?.strength) charge.strength(-80)
-      const link = graph.d3Force('link')
-      if (link?.distance) link.distance(30)
+      if (charge?.strength) charge.strength(-60)
+      const linkForce = graph.d3Force('link')
+      if (linkForce?.distance) linkForce.distance(25)
       const center = graph.d3Force('center')
-      if (center?.strength) center.strength(1.5)
+      if (center?.strength) center.strength(2)
 
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)

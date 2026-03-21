@@ -7,6 +7,7 @@ import { ExplorerCanvas } from './explorer-canvas'
 import { ModelReader } from './model-reader'
 import { ModelSource } from './model-source'
 import { Graph3D } from './graph-3d'
+import { Graph3DLifecycle } from './graph-3d-lifecycle'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
@@ -16,10 +17,18 @@ const tabs = [
   { id: 'source', label: 'Source', icon: Code2 },
 ] as const
 
+const VIEWS_3D = [
+  { id: 'force', label: 'Force' },
+  { id: 'lifecycle', label: 'Lifecycle' },
+] as const
+
+type View3D = (typeof VIEWS_3D)[number]['id']
+
 type TabId = (typeof tabs)[number]['id']
 
 export function ExplorerTabs({ model, savedPositions, modelSource }: { model: IntentModel; savedPositions: ExplorerPositions; modelSource: string }) {
   const [activeTab, setActiveTab] = useState<TabId>('graph')
+  const [view3d, setView3d] = useState<View3D>('force')
 
   return (
     <div className="flex flex-col h-full">
@@ -51,6 +60,27 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
             </button>
           )
         })}
+
+        {/* 3D view selector */}
+        {activeTab === '3d' && (
+          <>
+            <div className="mx-1 h-4 w-px" style={{ background: 'var(--border-default)' }} />
+            {VIEWS_3D.map(view => (
+              <button
+                key={view.id}
+                type="button"
+                onClick={() => setView3d(view.id)}
+                className="px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors duration-200"
+                style={{
+                  color: view3d === view.id ? 'var(--accent-blue)' : 'var(--text-muted)',
+                  background: view3d === view.id ? 'var(--bg-blue-subtle)' : 'transparent',
+                }}
+              >
+                {view.label}
+              </button>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Tab content */}
@@ -58,8 +88,11 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
         {activeTab === 'graph' && (
           <ExplorerCanvas model={model} savedPositions={savedPositions} />
         )}
-        {activeTab === '3d' && (
+        {activeTab === '3d' && view3d === 'force' && (
           <Graph3D model={model} />
+        )}
+        {activeTab === '3d' && view3d === 'lifecycle' && (
+          <Graph3DLifecycle model={model} />
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

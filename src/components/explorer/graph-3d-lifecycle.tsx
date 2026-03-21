@@ -339,13 +339,13 @@ function buildTruck(THREE: typeof import('three')): import('three').Group {
   // Wheels — more detailed
   for (const x of [-3, 0.5, 5, 6.5]) {
     for (const z of [-2.3, 2.3]) {
-      // Tire
+      // Tire — torus rotated to stand upright, hole faces outward (Z axis)
       const tire = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.35, 12, 16), tireMat)
-      tire.rotation.y = Math.PI / 2
+      tire.rotation.x = Math.PI / 2
       tire.position.set(x, -2.6, z)
       g.add(tire)
-      // Hub
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.3, 12), metalMat)
+      // Hub — cylinder aligned with Z axis (facing outward)
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.6, 12), metalMat)
       hub.rotation.x = Math.PI / 2
       hub.position.set(x, -2.6, z)
       g.add(hub)

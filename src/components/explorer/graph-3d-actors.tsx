@@ -237,7 +237,7 @@ export function Graph3DActors({ model }: { model: IntentModel }) {
         labelCanvas.height = 128
         const ctx = labelCanvas.getContext('2d')!
         ctx.font = 'bold 48px system-ui, sans-serif'
-        ctx.fillStyle = 'rgba(139,92,246,0.25)'
+        ctx.fillStyle = 'rgba(139,92,246,0.8)'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(actor.name.toUpperCase(), 512, 64)

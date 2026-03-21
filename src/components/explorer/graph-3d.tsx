@@ -282,27 +282,32 @@ export function Graph3D({ model }: { model: IntentModel }) {
           // Create a group to hold sphere + label
           const group = new THREE.Group()
 
-          // Sphere — minimum radius 5 so small nodes are still visible
-          const radius = Math.max(5, Math.cbrt(node.val) * 2)
+          // Sphere — uniform size range, not too big
+          const radius = 4 + Math.min(node.val, 15) * 0.3
           const geometry = new THREE.SphereGeometry(radius, 16, 12)
           const material = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.9 })
           const sphere = new THREE.Mesh(geometry, material)
           group.add(sphere)
 
-          // Text label — wrap into up to 3 lines
+          // Hi-res text label — 2x canvas for crisp rendering
+          const scale = 2
+          const canvasW = 512 * scale
+          const canvasH = 96 * scale
+          const fontSize = 24 * scale
+          const lineHeight = 30 * scale
+          const maxWidth = 480 * scale
+          const maxLines = 3
+
           const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')!
-          canvas.width = 512
-          canvas.height = 128
-          ctx.font = 'bold 20px sans-serif'
+          canvas.width = canvasW
+          canvas.height = canvasH
+          ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`
           ctx.fillStyle = '#34322D'
           ctx.textAlign = 'center'
           ctx.textBaseline = 'top'
 
-          // Word-wrap into lines
-          const maxWidth = 480
-          const lineHeight = 26
-          const maxLines = 3
+          // Word-wrap
           const words = node.name.split(' ')
           const lines: string[] = []
           let currentLine = ''
@@ -324,18 +329,20 @@ export function Graph3D({ model }: { model: IntentModel }) {
           }
 
           const totalHeight = lines.length * lineHeight
-          const startY = (128 - totalHeight) / 2
+          const startY = (canvasH - totalHeight) / 2
           for (let i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], 256, startY + i * lineHeight)
+            ctx.fillText(lines[i], canvasW / 2, startY + i * lineHeight)
           }
 
           const texture = new THREE.CanvasTexture(canvas)
           texture.needsUpdate = true
           const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
           const sprite = new THREE.Sprite(spriteMat)
-          const spriteHeight = 4 + lines.length * 2.5
-          sprite.scale.set(40, spriteHeight, 1)
-          sprite.position.set(0, radius + 3 + spriteHeight / 2, 0)
+          // Keep aspect ratio matching canvas (512:96 ≈ 5.33:1)
+          const spriteW = 28
+          const spriteH = spriteW * (canvasH / canvasW)
+          sprite.scale.set(spriteW, spriteH, 1)
+          sprite.position.set(0, radius + 2 + spriteH / 2, 0)
           group.add(sprite)
 
           return group

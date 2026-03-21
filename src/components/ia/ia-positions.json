@@ -65,7 +65,7 @@
         "BR-022",
         "C-003"
       ],
-      "status": "not-built"
+      "status": "done"
     },
     "wff-upload-do": {
       "label": "Upload DO",

@@ -713,9 +713,30 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         graph.scene().add(milestoneModel)
       }
 
+      // --- Draw connection lines directly as Three.js lines ---
+      const lineMat = new THREE.LineBasicMaterial({ color: '#999999', transparent: true, opacity: 0.5 })
+      const nodePositions = new Map<string, { x: number; y: number; z: number }>()
+      for (const n of nodes) {
+        if (n.fx !== undefined && n.fy !== undefined && n.fz !== undefined) {
+          nodePositions.set(n.id, { x: n.fx, y: n.fy, z: n.fz })
+        }
+      }
+      for (const link of links) {
+        if (link.type === 'spine') continue
+        const srcPos = nodePositions.get(link.source)
+        const tgtPos = nodePositions.get(link.target)
+        if (!srcPos || !tgtPos) continue
+        const points = [
+          new THREE.Vector3(srcPos.x, srcPos.y, srcPos.z),
+          new THREE.Vector3(tgtPos.x, tgtPos.y, tgtPos.z),
+        ]
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(points)
+        graph.scene().add(new THREE.Line(lineGeo, lineMat))
+      }
+
       // --- Graph setup ---
-      // Keep milestones in graph data (needed as link targets) but render them invisible
-      graph.graphData({ nodes, links: links.filter(l => l.type !== 'spine') })
+      // Milestones in graph data as invisible nodes (link targets)
+      graph.graphData({ nodes, links: [] })
         .backgroundColor('#F8F8F7')
         .nodeLabel((node: LifecycleNode) => `
           <div style="background:rgba(0,0,0,0.9);color:white;padding:10px 14px;border-radius:10px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
@@ -827,8 +848,8 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         })
         .nodeThreeObjectExtend(false)
         .linkColor(() => '#888888')
-        .linkWidth(2)
-        .linkOpacity(1)
+        .linkWidth(0)
+        .linkOpacity(0)
         .linkDirectionalParticles(0)
         .linkDirectionalParticleWidth(2.5)
         .linkDirectionalParticleSpeed(0.008)

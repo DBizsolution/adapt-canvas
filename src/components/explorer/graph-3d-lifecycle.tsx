@@ -663,22 +663,31 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
             topY = 7
 
           } else if (node.type === 'journey') {
-            // Spring: tube along helix curve
-            const springMat = new THREE.MeshPhongMaterial({ color, shininess: 50 })
-            const helixPoints: import('three').Vector3[] = []
-            const coils = 3
-            const springR = 2.5
-            const springH = 6
-            for (let t = 0; t <= coils * Math.PI * 2; t += 0.15) {
-              helixPoints.push(new THREE.Vector3(
-                Math.cos(t) * springR,
-                (t / (coils * Math.PI * 2)) * springH - springH / 2,
-                Math.sin(t) * springR,
-              ))
-            }
-            const helixCurve = new THREE.CatmullRomCurve3(helixPoints)
-            const springGeo = new THREE.TubeGeometry(helixCurve, 80, 0.5, 8, false)
-            group.add(new THREE.Mesh(springGeo, springMat))
+            // Cursor/pointer arrow — extruded 2D arrow shape with depth
+            const cursorMat = new THREE.MeshPhongMaterial({ color, shininess: 50 })
+            const shape = new THREE.Shape()
+            // Classic cursor arrow outline (scaled to ~6 units tall)
+            shape.moveTo(0, 6)      // tip
+            shape.lineTo(-1.8, 1.5) // left edge
+            shape.lineTo(-0.8, 1.8) // notch left
+            shape.lineTo(-2.2, -1)  // tail left
+            shape.lineTo(-1, -0.5)  // tail inner left
+            shape.lineTo(0, 2)      // center bottom
+            shape.lineTo(1, -0.5)   // tail inner right
+            shape.lineTo(2.2, -1)   // tail right
+            shape.lineTo(0.8, 1.8)  // notch right
+            shape.lineTo(1.8, 1.5)  // right edge
+            shape.lineTo(0, 6)      // back to tip
+
+            const cursorGeo = new THREE.ExtrudeGeometry(shape, {
+              depth: 1.5,
+              bevelEnabled: true,
+              bevelThickness: 0.2,
+              bevelSize: 0.15,
+              bevelSegments: 2,
+            })
+            cursorGeo.translate(0, -3, -0.75) // center it
+            group.add(new THREE.Mesh(cursorGeo, cursorMat))
             topY = 5
 
           } else if (node.type === 'rule') {

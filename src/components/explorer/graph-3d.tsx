@@ -269,7 +269,7 @@ export function Graph3D({ model }: { model: IntentModel }) {
       graph.graphData({ nodes, links })
         .backgroundColor('#F8F8F7')
         .nodeLabel((node: GraphNode) => `
-          <div style="background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5">
+          <div style="background:rgba(0,0,0,0.9);color:white;padding:10px 14px;border-radius:10px;font-family:DM Sans Variable,sans-serif;max-width:280px;font-size:12px;line-height:1.5;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.6;margin-bottom:2px">${TYPE_LABELS[node.type] ?? node.type}</div>
             <div style="font-weight:600;margin-bottom:4px">${node.name}</div>
             <div style="opacity:0.8">${node.description}</div>
@@ -373,6 +373,11 @@ export function Graph3D({ model }: { model: IntentModel }) {
       graph.warmupTicks(300)
       graph.cooldownTicks(0)
       graph.d3VelocityDecay(0.8)
+
+      // Fix tooltip container — library adds .graph-tooltip with its own bg
+      const style = document.createElement('style')
+      style.textContent = '.graph-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }'
+      containerRef.current.appendChild(style)
 
       const rect = containerRef.current.getBoundingClientRect()
       graph.width(rect.width).height(rect.height)

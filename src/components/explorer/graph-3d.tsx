@@ -358,7 +358,72 @@ export function Graph3D({ model }: { model: IntentModel }) {
         })
         .linkWidth((link: GraphLink) => link.type === 'entity-entity' ? 2 : 1)
         .linkOpacity(0.4)
-        .onNodeClick(handleNodeClick)
+        .linkDirectionalParticles(0)
+        .linkDirectionalParticleWidth(3)
+        .linkDirectionalParticleSpeed(0.008)
+        .linkDirectionalParticleColor((link: GraphLink) => {
+          if (link.type === 'entity-entity') return '#0081F2'
+          if (link.type === 'rule-entity') return '#F59E0B'
+          if (link.type === 'journey-actor') return '#10B981'
+          if (link.type === 'constraint-entity') return '#EF4444'
+          if (link.type === 'question-entity') return '#EC4899'
+          return '#858481'
+        })
+        .onNodeClick((node: GraphNode) => {
+          handleNodeClick(node)
+
+          // Cascade particles from clicked node through the graph (BFS)
+          const graphData = graph.graphData()
+          const allLinks = graphData.links
+
+          const getNodeId = (n: unknown) =>
+            typeof n === 'string' ? n : (n as GraphNode)?.id ?? ''
+
+          // Build adjacency: nodeId → links connected to it
+          const adjacency = new Map<string, typeof allLinks>()
+          for (const link of allLinks) {
+            const src = getNodeId(link.source)
+            const tgt = getNodeId(link.target)
+            if (!adjacency.has(src)) adjacency.set(src, [])
+            if (!adjacency.has(tgt)) adjacency.set(tgt, [])
+            adjacency.get(src)!.push(link)
+            adjacency.get(tgt)!.push(link)
+          }
+
+          // BFS from clicked node — emit particles with increasing delay
+          const visited = new Set<string>()
+          const queue: { nodeId: string; delay: number }[] = [{ nodeId: node.id, delay: 0 }]
+          visited.add(node.id)
+
+          while (queue.length > 0) {
+            const { nodeId, delay } = queue.shift()!
+            const connectedLinks = adjacency.get(nodeId) ?? []
+
+            // Count outgoing links for this node
+            const outCount = connectedLinks.filter((l: any) => !visited.has(
+              getNodeId(l.source) === nodeId ? getNodeId(l.target) : getNodeId(l.source)
+            )).length
+
+            for (const link of connectedLinks) {
+              const src = getNodeId(link.source)
+              const tgt = getNodeId(link.target)
+              const neighborId = src === nodeId ? tgt : src
+
+              if (visited.has(neighborId)) continue
+              visited.add(neighborId)
+
+              // Emit particles on this link — more particles at branch points
+              const particleCount = Math.max(1, Math.min(outCount, 3))
+              setTimeout(() => {
+                for (let p = 0; p < particleCount; p++) {
+                  setTimeout(() => graph.emitParticle(link), p * 80)
+                }
+              }, delay)
+
+              queue.push({ nodeId: neighborId, delay: delay + 300 })
+            }
+          }
+        })
         .onNodeHover((node: GraphNode | null) => setHoveredNode(node))
 
       // Tighter forces — bring nodes closer, strong center pull for orphans

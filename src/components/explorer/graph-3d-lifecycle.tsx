@@ -629,21 +629,25 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
     setSelectedNode(prev => prev?.id === node.id ? null : node)
   }, [])
 
-  // Filter graph data when toggles change
+  // Filter graph data + connection lines when toggles change
   useEffect(() => {
     if (!graphRef.current) return
-    const { nodes, links } = fullData.current
+    const graph = graphRef.current as any
+    const { nodes } = fullData.current
+
+    // Update graph nodes
     const visibleNodes = nodes.filter(n => n.type === 'milestone' || !hiddenTypes.has(n.type))
-    const visibleIds = new Set(visibleNodes.map(n => n.id))
-    const visibleLinks = links.filter(l => {
-      const src = typeof l.source === 'string' ? l.source : (l.source as unknown as LifecycleNode)?.id
-      const tgt = typeof l.target === 'string' ? l.target : (l.target as unknown as LifecycleNode)?.id
-      return visibleIds.has(src) && visibleIds.has(tgt)
-    })
-    graphRef.current.graphData({
-      nodes: visibleNodes,
-      links: visibleLinks.filter(l => l.type !== 'spine'),
-    })
+    graph.graphData({ nodes: visibleNodes, links: [] })
+
+    // Update connection line visibility
+    const lines = graph.__connectionLines as Array<{ mesh: any; sourceType: string; targetType: string }> | undefined
+    if (lines) {
+      for (const line of lines) {
+        const srcHidden = hiddenTypes.has(line.sourceType)
+        const tgtHidden = hiddenTypes.has(line.targetType)
+        line.mesh.visible = !srcHidden && !tgtHidden
+      }
+    }
   }, [hiddenTypes])
 
   useEffect(() => {
@@ -713,26 +717,47 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         graph.scene().add(milestoneModel)
       }
 
-      // --- Draw connection lines directly as Three.js lines ---
-      const lineMat = new THREE.LineBasicMaterial({ color: '#999999', transparent: true, opacity: 0.5 })
+      // --- Draw connection lines as thin cylinders (WebGL lines don't support width) ---
+      const tubeMat = new THREE.MeshBasicMaterial({ color: '#AAAAAA' })
       const nodePositions = new Map<string, { x: number; y: number; z: number }>()
+      const nodeTypeMap = new Map<string, string>()
       for (const n of nodes) {
         if (n.fx !== undefined && n.fy !== undefined && n.fz !== undefined) {
           nodePositions.set(n.id, { x: n.fx, y: n.fy, z: n.fz })
         }
+        nodeTypeMap.set(n.id, n.type)
       }
+
+      type ConnectionLine = { mesh: import('three').Mesh; sourceType: string; targetType: string }
+      const connectionLines: ConnectionLine[] = []
+
       for (const link of links) {
         if (link.type === 'spine') continue
         const srcPos = nodePositions.get(link.source)
         const tgtPos = nodePositions.get(link.target)
         if (!srcPos || !tgtPos) continue
-        const points = [
-          new THREE.Vector3(srcPos.x, srcPos.y, srcPos.z),
-          new THREE.Vector3(tgtPos.x, tgtPos.y, tgtPos.z),
-        ]
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(points)
-        graph.scene().add(new THREE.Line(lineGeo, lineMat))
+
+        const start = new THREE.Vector3(srcPos.x, srcPos.y, srcPos.z)
+        const end = new THREE.Vector3(tgtPos.x, tgtPos.y, tgtPos.z)
+        const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5)
+        const length = start.distanceTo(end)
+
+        const cylGeo = new THREE.CylinderGeometry(0.15, 0.15, length, 4, 1)
+        const cyl = new THREE.Mesh(cylGeo, tubeMat)
+        cyl.position.copy(mid)
+        cyl.lookAt(end)
+        cyl.rotateX(Math.PI / 2)
+
+        graph.scene().add(cyl)
+        connectionLines.push({
+          mesh: cyl,
+          sourceType: nodeTypeMap.get(link.source) ?? '',
+          targetType: nodeTypeMap.get(link.target) ?? '',
+        })
       }
+
+      // Store for toggle updates
+      ;(graph as any).__connectionLines = connectionLines
 
       // --- Graph setup ---
       // Milestones in graph data as invisible nodes (link targets)

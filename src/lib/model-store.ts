@@ -85,13 +85,18 @@ export async function getCurrentModel(): Promise<IntentModel> {
   if (isVercel) {
     const index = await getKvIndex()
     const latestId = index[index.length - 1]
+    // If only the seed exists, always use the local model.ts (it's the source of truth)
+    // KV seed can be stale. Only trust KV for AI-edited versions (non-seed).
+    if (latestId === 'seed') return intentModel
     const version = await kv.get<ModelVersion>(`${KV_VERSION_PREFIX}${latestId}`)
     return version?.model ?? intentModel
   }
 
   const history = await readLocalHistory()
   const latest = history.versions[history.versions.length - 1]
-  return latest?.model ?? intentModel
+  // Same logic: seed = use model.ts, non-seed = use stored version
+  if (!latest || latest.id === 'seed') return intentModel
+  return latest.model
 }
 
 export async function getLatestVersionId(): Promise<string> {

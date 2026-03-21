@@ -130,7 +130,7 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
     }
   }
 
-  // Constraints
+  // Constraints — link to entities mentioned in constraint text
   for (const c of model.constraints) {
     nodes.push({
       id: `constraint:${c.id}`,
@@ -138,11 +138,20 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
       type: 'constraint',
       description: c.constraint.slice(0, 150),
       group: 'constraint',
-      val: 3,
+      val: 6,
     })
+
+    for (const e of model.entities) {
+      const names = [e.id, e.name.toLowerCase()]
+      const abbr = e.name.match(/\(([A-Z][A-Z0-9]+)\)/)
+      if (abbr) names.push(abbr[1].toLowerCase())
+      if (names.some(n => c.constraint.toLowerCase().includes(n))) {
+        links.push({ source: `constraint:${c.id}`, target: `entity:${e.id}`, type: 'constraint-entity' })
+      }
+    }
   }
 
-  // Open questions
+  // Open questions — link to entities mentioned in question text
   for (const q of model.open_questions) {
     nodes.push({
       id: `question:${q.id}`,
@@ -150,8 +159,17 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
       type: 'open_question',
       description: q.question.slice(0, 150),
       group: 'open_question',
-      val: 3,
+      val: 6,
     })
+
+    for (const e of model.entities) {
+      const names = [e.id, e.name.toLowerCase()]
+      const abbr = e.name.match(/\(([A-Z][A-Z0-9]+)\)/)
+      if (abbr) names.push(abbr[1].toLowerCase())
+      if (names.some(n => q.question.toLowerCase().includes(n) || q.reason.toLowerCase().includes(n))) {
+        links.push({ source: `question:${q.id}`, target: `entity:${e.id}`, type: 'question-entity' })
+      }
+    }
   }
 
   // Entity-to-entity edges (from field references)
@@ -298,6 +316,8 @@ export function Graph3D({ model }: { model: IntentModel }) {
           if (link.type === 'entity-entity') return '#9CA3AF'
           if (link.type === 'rule-entity') return '#F59E0B66'
           if (link.type === 'journey-actor') return '#10B98166'
+          if (link.type === 'constraint-entity') return '#EF444466'
+          if (link.type === 'question-entity') return '#EC489966'
           return '#85848144'
         })
         .linkWidth((link: GraphLink) => link.type === 'entity-entity' ? 2 : 1)

@@ -183,15 +183,53 @@ function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphL
   return { nodes, links }
 }
 
+const ALL_TYPES = Object.keys(TYPE_COLORS) as Array<keyof typeof TYPE_COLORS>
+
 export function Graph3D({ model }: { model: IntentModel }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const graphRef = useRef<ForceGraph3DInstance | null>(null)
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null)
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
+  const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set())
+  const [hiddenNodes, setHiddenNodes] = useState<Set<string>>(new Set())
+  const [showFilters, setShowFilters] = useState(false)
+  const fullGraphData = useRef(buildGraphData(model))
+
+  const toggleType = useCallback((type: string) => {
+    setHiddenTypes(prev => {
+      const next = new Set(prev)
+      if (next.has(type)) next.delete(type)
+      else next.add(type)
+      return next
+    })
+  }, [])
+
+  const toggleNode = useCallback((nodeId: string) => {
+    setHiddenNodes(prev => {
+      const next = new Set(prev)
+      if (next.has(nodeId)) next.delete(nodeId)
+      else next.add(nodeId)
+      return next
+    })
+  }, [])
 
   const handleNodeClick = useCallback((node: GraphNode) => {
     setSelectedNode(prev => prev?.id === node.id ? null : node)
   }, [])
+
+  // Update graph data when filters change
+  useEffect(() => {
+    if (!graphRef.current) return
+    const { nodes, links } = fullGraphData.current
+    const visibleNodes = nodes.filter(n => !hiddenTypes.has(n.type) && !hiddenNodes.has(n.id))
+    const visibleIds = new Set(visibleNodes.map(n => n.id))
+    const visibleLinks = links.filter(l => {
+      const src = typeof l.source === 'string' ? l.source : (l.source as unknown as GraphNode)?.id
+      const tgt = typeof l.target === 'string' ? l.target : (l.target as unknown as GraphNode)?.id
+      return visibleIds.has(src) && visibleIds.has(tgt)
+    })
+    graphRef.current.graphData({ nodes: visibleNodes, links: visibleLinks })
+  }, [hiddenTypes, hiddenNodes])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -308,24 +346,99 @@ export function Graph3D({ model }: { model: IntentModel }) {
     <div className="relative h-full w-full">
       <div ref={containerRef} className="h-full w-full" />
 
-      {/* Legend */}
+      {/* Category toggles */}
       <div
-        className="absolute bottom-4 left-4 flex items-center gap-4 rounded-xl px-4 py-2.5"
+        className="absolute bottom-4 left-4 flex items-center gap-1 rounded-xl px-3 py-2"
         style={{
           background: 'var(--bg-white)',
           border: '1px solid var(--border-default)',
           boxShadow: 'var(--shadow-float)',
         }}
       >
-        {Object.entries(TYPE_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
-            <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-              {TYPE_LABELS[type] ?? type}
-            </span>
-          </div>
-        ))}
+        {ALL_TYPES.map(type => {
+          const color = TYPE_COLORS[type]
+          const isHidden = hiddenTypes.has(type)
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => toggleType(type)}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all duration-200"
+              style={{
+                opacity: isHidden ? 0.35 : 1,
+                background: isHidden ? 'transparent' : `${color}12`,
+              }}
+              title={`${isHidden ? 'Show' : 'Hide'} ${TYPE_LABELS[type]}s`}
+            >
+              <div className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+              <span className="text-[11px] font-medium" style={{ color: isHidden ? 'var(--text-muted)' : color }}>
+                {TYPE_LABELS[type]}
+              </span>
+            </button>
+          )
+        })}
+        <div className="mx-1 h-4 w-px" style={{ background: 'var(--border-default)' }} />
+        <button
+          type="button"
+          onClick={() => setShowFilters(!showFilters)}
+          className="text-[11px] font-medium px-2 py-1 rounded-lg transition-colors duration-200"
+          style={{ color: showFilters ? 'var(--accent-blue)' : 'var(--text-muted)' }}
+        >
+          {showFilters ? '▾ Nodes' : '▸ Nodes'}
+        </button>
       </div>
+
+      {/* Individual node toggles */}
+      {showFilters && (
+        <div
+          className="absolute bottom-16 left-4 rounded-xl overflow-hidden"
+          style={{
+            width: 260,
+            maxHeight: 400,
+            background: 'var(--bg-white)',
+            border: '1px solid var(--border-default)',
+            boxShadow: 'var(--shadow-overlay)',
+          }}
+        >
+          <div className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-default)' }}>
+            Toggle individual nodes
+          </div>
+          <div className="overflow-y-auto custom-scroll" style={{ maxHeight: 360 }}>
+            {ALL_TYPES.filter(type => !hiddenTypes.has(type)).map(type => {
+              const color = TYPE_COLORS[type]
+              const nodesOfType = fullGraphData.current.nodes.filter(n => n.type === type)
+              if (nodesOfType.length === 0) return null
+              return (
+                <div key={type}>
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide" style={{ color, background: `${color}08` }}>
+                    {TYPE_LABELS[type]}s
+                  </div>
+                  {nodesOfType.map(node => {
+                    const isHidden = hiddenNodes.has(node.id)
+                    return (
+                      <button
+                        key={node.id}
+                        type="button"
+                        onClick={() => toggleNode(node.id)}
+                        className="flex items-center gap-2 w-full px-3 py-1.5 text-left transition-all duration-150 hover:bg-[var(--bg-gray-subtle)]"
+                        style={{ opacity: isHidden ? 0.4 : 1 }}
+                      >
+                        <div
+                          className="h-2 w-2 rounded-full shrink-0"
+                          style={{ background: isHidden ? 'var(--text-muted)' : color }}
+                        />
+                        <span className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>
+                          {node.name}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Selected node detail */}
       {selectedNode && (

@@ -800,31 +800,10 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
             topY = 7.5
 
           } else if (node.type === 'journey') {
-            // Cursor/pointer arrow — extruded 2D arrow shape with depth
-            const cursorMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            const shape = new THREE.Shape()
-            // Classic cursor arrow outline (scaled to ~6 units tall)
-            shape.moveTo(0, 6)      // tip
-            shape.lineTo(-1.8, 1.5) // left edge
-            shape.lineTo(-0.8, 1.8) // notch left
-            shape.lineTo(-2.2, -1)  // tail left
-            shape.lineTo(-1, -0.5)  // tail inner left
-            shape.lineTo(0, 2)      // center bottom
-            shape.lineTo(1, -0.5)   // tail inner right
-            shape.lineTo(2.2, -1)   // tail right
-            shape.lineTo(0.8, 1.8)  // notch right
-            shape.lineTo(1.8, 1.5)  // right edge
-            shape.lineTo(0, 6)      // back to tip
-
-            const cursorGeo = new THREE.ExtrudeGeometry(shape, {
-              depth: 1.5,
-              bevelEnabled: true,
-              bevelThickness: 0.2,
-              bevelSize: 0.15,
-              bevelSegments: 2,
-            })
-            cursorGeo.translate(0, -3, -0.75) // center it
-            group.add(new THREE.Mesh(cursorGeo, cursorMat))
+            // Pyramid (4-sided cone)
+            const pyramidMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
+            const pyramidGeo = new THREE.ConeGeometry(3, 6, 4)
+            group.add(new THREE.Mesh(pyramidGeo, pyramidMat))
             topY = 5
 
           } else if (node.type === 'rule') {

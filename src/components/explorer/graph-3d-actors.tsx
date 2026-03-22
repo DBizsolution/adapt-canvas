@@ -314,23 +314,9 @@ export function Graph3DActors({ model }: { model: IntentModel }) {
             group.add(neck)
             topY = 7.5
           } else if (node.type === 'journey') {
-            // Cursor arrow
+            // Pyramid (4-sided cone)
             const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            const shape = new THREE.Shape()
-            shape.moveTo(0, 6)
-            shape.lineTo(-1.8, 1.5)
-            shape.lineTo(-0.8, 1.8)
-            shape.lineTo(-2.2, -1)
-            shape.lineTo(-1, -0.5)
-            shape.lineTo(0, 2)
-            shape.lineTo(1, -0.5)
-            shape.lineTo(2.2, -1)
-            shape.lineTo(0.8, 1.8)
-            shape.lineTo(1.8, 1.5)
-            shape.lineTo(0, 6)
-            const geo = new THREE.ExtrudeGeometry(shape, { depth: 1.5, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.15, bevelSegments: 2 })
-            geo.translate(0, -3, -0.75)
-            group.add(new THREE.Mesh(geo, mat))
+            group.add(new THREE.Mesh(new THREE.ConeGeometry(3, 6, 4), mat))
             topY = 5
           } else if (node.type === 'rule') {
             // Gray sphere

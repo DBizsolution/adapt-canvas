@@ -1,17 +1,67 @@
-# Intent Model Review
+# VBS Intent Model Review
 
-A structured review tool for software intent models — actors, entities, journeys, business rules, constraints, and open questions. Teams use it to reach consensus on business requirements before development begins.
+A structured review platform for the ACFS VBS Pickup Portal intent model — actors, entities, journeys, business rules, constraints, and open questions. Teams use it to reach consensus on business requirements before development begins.
 
 Built with Next.js, React, TypeScript, TailwindCSS, and ShadCN.
 
+## Current model (v0.7.1)
+
+| Pillar | Count | Examples |
+|--------|-------|---------|
+| **Actors** | 5 | LSP, P4TC, Driver, ACFS Internal, Gatehouse |
+| **Entities** | 6 + 5 integrations | HBL, Booking, Pickup Slot, Delivery Order, Delegation, Driver Record |
+| **Journeys** | 14 | LSP Books a Pickup, ACFS Validates DOs, P4TC Books a Pickup |
+| **Business Rules** | 21 | Booking gates, DO policy, modification cutoffs, fee calculation |
+| **Constraints** | 5 | Desktop only, no persistent P4TC credentials, DB-seeded sites |
+| **Open Questions** | 1 | HBL hierarchy data source (OQ-034) |
+
 ## Features
 
-- **Section-by-section review** with consensus tracking across reviewers
+- **Consensus review** — section-by-section review with approve/dispute tracking across reviewers
 - **AI-powered editing** — describe changes in plain language, see diffs, approve/reject
-- **Version history** with side-by-side diffs between any two versions
-- **BRD generation** — auto-generate a Business Requirements Document from the model
-- **Interactive explorer** — visual graph of actors, entities, and journeys
-- **Abbreviation tooltips** — domain acronyms expand on hover
+- **Version history** — full diff tracking between any two model versions
+- **BRD generation** — auto-generated business requirements document from the live model
+- **3D explorer** — interactive visualizations:
+  - **Force graph** — translucent spheres with Lucide icons, force-directed layout
+  - **Lifecycle view** — HBL milestone spine with icon badges (ship, anchor, warehouse, package, truck)
+  - **Actor layers** — horizontal platforms per actor with icon-based nodes
+- **IA map** — implementation architecture linking responsibilities to screens
+- **Docs hub** — upload and reference project documents alongside the model
+
+## Getting started
+
+```bash
+pnpm install
+pnpm dev        # starts on http://localhost:4444
+```
+
+## Project structure
+
+```
+src/
+  domain/intent-model/
+    model.ts          # the intent model (source of truth)
+    types.ts          # TypeScript types for all model sections
+    history/          # archived model snapshots
+  components/
+    explorer/         # 3D graph visualizations (force, lifecycle, actor layers)
+    review/           # consensus review UI (dashboard, section pages, diff)
+    ai/               # AI chat panel, diff preview, version history
+    ia/               # implementation architecture map
+  lib/
+    model-store.ts    # versioning, KV/local persistence
+    model-diff.ts     # diff computation between model versions
+    model-schemas.ts  # zod validation schemas
+    ai-prompt.ts      # AI system prompt for model editing
+    brd-generator.ts  # BRD generation logic
+    docs-config.ts    # docs page configuration
+  app/
+    review/           # review pages (consensus, BRD, diff, docs)
+    api/              # API routes (model edit, versions, BRD export)
+docs/
+  project/            # team guide, changelog, BRD PDF
+  intent-model-simplification.md  # v0.7.1 simplification proposal and status
+```
 
 ## Using for a new project
 
@@ -27,30 +77,13 @@ All project-specific UI text lives in `project.config.ts` at the repo root:
 
 ```ts
 export const projectConfig: ProjectConfig = {
-  // App chrome
   name: 'Your Project — Intent Model Review',
   shortName: 'Your Project',
   iconLetter: 'Y',
   description: 'A review tool for Your Project business requirements',
-
-  // Domain abbreviations (shown as tooltips)
-  abbreviations: {
-    API: 'Application Programming Interface',
-    // ... your domain acronyms
-  },
-
-  // BRD generation text — {project} is replaced with model.meta.project
-  brd: {
-    introText: 'The {project} is a ...',
-    scopeText: 'It enables ...',
-  },
-
-  // AI editing hints — examples for ID generation
-  ai: {
-    idExamples: "short lowercase, e.g. 'admin', 'user'",
-    journeyIdExamples: "kebab-case, e.g. 'user-signs-up'",
-    idPatternHint: 'if actors have admin, user — a new actor gets a short lowercase ID',
-  },
+  abbreviations: { /* domain acronyms */ },
+  brd: { introText: '...', scopeText: '...' },
+  ai: { idExamples: '...', journeyIdExamples: '...', idPatternHint: '...' },
 }
 ```
 
@@ -61,35 +94,15 @@ rm -rf src/domain/intent-model/history/*
 echo '{}' > src/domain/intent-model/review-state.json
 ```
 
-This removes version history and review state from the previous project.
-
 ### 4. Optional: update reference docs
 
-If you use the docs viewer, update `src/lib/docs-config.ts` with paths to your project's reference documents.
-
-## Model structure
-
-The intent model has 6 fixed section types:
-
-| Section | Purpose |
-|---------|---------|
-| **Actors** | Who interacts with the system (users, roles, external systems) |
-| **Entities** | Core data objects with fields and lifecycle states |
-| **Journeys** | User flows with ordered steps, preconditions, and outcomes |
-| **Business Rules** | Logic constraints, validation rules, behavioral rules |
-| **Constraints** | Technical/business limitations (capacity, compliance, etc.) |
-| **Open Questions** | Unresolved items needing stakeholder decisions |
-
-## Development
-
-```bash
-pnpm install
-pnpm dev
-```
-
-The dev server runs on `http://localhost:4444`.
+Update `src/lib/docs-config.ts` with paths to your project's reference documents.
 
 ## Environment variables
 
 - `OPENAI_API_KEY` — required for AI-powered model editing
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` — optional, for Vercel KV storage in production (falls back to local JSON files in dev)
+
+## Related repos
+
+- **[vbs-portal](https://github.com/DBizsolution/vbs-portal)** — the actual pickup portal frontend (LSP, P4TC, ACFS, Gatehouse views)

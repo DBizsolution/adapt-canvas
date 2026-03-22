@@ -1,5 +1,54 @@
 # Intent Model Changelog
 
+## v0.7.1 — 2026-03-22
+
+**Source:** Internal simplification review (Rahul). No new requirements — same logic, fewer items.
+
+### Rule Consolidation (30 → 21)
+
+Nine rules absorbed into consolidated versions:
+
+| Consolidated Rule | Absorbed | What changed |
+|---|---|---|
+| **BR-002** (DO Policy) | BR-003, BR-021, BR-031 | Single rule covers: per-tier DO uploads, no inheritance, free_release waiver, under_bond waiver, ACFS validates each individually |
+| **BR-005** (Slot Config) | C-001 | Added: no hard capacity limits, density indicator only |
+| **BR-012** (Notifications) | BR-020 | Covers confirmation, modification, and cancellation notifications in one rule |
+| **BR-014** (User Management) | BR-024, BR-025 | Added: soft-delete on removal, 72h welcome link expiry |
+| **BR-015** (Modifications) | BR-006, BR-023, BR-027 | Covers: cutoff rules, no-show rebooking (fee-free), P4TC can't self-modify, admin modifications fee-free |
+| **BR-022** (Cancellation) | C-003 | Added: refund processed outside system (portal is refund-agnostic) |
+| **BR-026** (Slot Protection) | C-002 | Added: slots can't be modified Phase 1, blackout via holiday overlay |
+
+### Constraint Consolidation (8 → 5)
+
+| Removed | Absorbed into |
+|---------|--------------|
+| C-001 (no hard capacity) | BR-005 |
+| C-002 (slots with bookings immutable) | BR-026 |
+| C-003 (refunds offline) | BR-022 |
+
+C-004 simplified — removed email mention (now covered by BR-012).
+
+### HBL Entity Field Updates
+
+- **Removed** `storage_fee_flag` — derived from `last_free_storage_date` on read, not stored
+- **Updated** `chargeable_weight` — marked as derived (computed as `max(weight_kg, volume_m3)`)
+- **Added** `do_waived` — computed boolean: `release_type === 'free_release' || under_bond === true`
+- **Updated** `release_type` — description clarified, two values only: `do_required | free_release`
+
+### Integration Entities Tagged
+
+Five integration "entities" (Maximus, AGS, Payment, Email, LSP Registry) tagged with `is_integration: true` to distinguish from domain entities. Total: 6 domain entities + 5 integrations.
+
+### Portal Alignment (vbs-portal)
+
+- `intent-contract.ts` — rules synced to match consolidated model
+- `release_type` — removed `'under_bond'` as enum value (was redundant with `under_bond` boolean)
+- Added `underBond: boolean` to LSP Hbl type (previously encoded in releaseType)
+- Booking readiness now auto-passes under-bond HBLs for DO checks
+- All label/filter functions updated to check `underBond` boolean
+
+---
+
 ## v0.3.0 — 2026-03-18
 
 **Source:** ACFS VBS 18 March.pdf (process flow diagram)

@@ -2,9 +2,9 @@ import type { IntentModel } from './types'
 
 export const intentModel: IntentModel = {
   meta: {
-    version: '0.7.0',
+    version: '0.7.1',
     project: 'ACFS VBS Pickup Portal',
-    lastUpdated: '2026-03-21',
+    lastUpdated: '2026-03-22',
     status: 'draft',
   },
   actors: [
@@ -92,7 +92,7 @@ export const intentModel: IntentModel = {
         { name: 'consignee', type: 'string', description: 'Next party in the chain. Data source is AGS feed (not ICS/Maximus — too inconsistent). Identified by account name or account code.' },
         { name: 'weight_kg', type: 'number', description: 'Weight measurement for fee calculation.' },
         { name: 'volume_m3', type: 'number', description: 'Volumetric measurement for fee calculation.' },
-        { name: 'chargeable_weight', type: 'number', description: 'Max of weight vs volume per HBL. Used for fee calculation: chargeable_weight × rate. Calculated and stored as a field.' },
+        { name: 'chargeable_weight', type: 'number', description: 'Derived: max(weight_kg, volume_m3) per HBL. Used for fee calculation: chargeable_weight × rate. Computed by backend, not stored independently.' },
         { name: 'quantity', type: 'number', description: 'Number of packages (e.g. 3 boxes). Optional — may not be required for decision-making.' },
         { name: 'pack_type', type: 'string', description: 'Package type description. Optional — may not be required for decision-making.' },
         { name: 'description', type: 'string', description: 'Goods description. Two source fields exist in Maximus: "description" and "marks and numbers" — may consolidate.' },
@@ -101,9 +101,9 @@ export const intentModel: IntentModel = {
         { name: 'customs_clearance_status', type: 'string', description: 'Customs clearance state including quarantine. Must be fully cleared (not partial) for booking. Shown in HBL table. Sourced from Maximus — update frequency from ICS unclear.' },
         { name: 'under_bond', type: 'boolean', description: 'Flag — NOT a lifecycle state. Goods moving between bonded facilities before customs clearance (Australian Border Force customs bond). Manually set by LSP/ACFS in portal. Movement permission replaces DO requirement. Not synced from Maximus.' },
         { name: 'under_bond_verified', type: 'boolean', description: 'Whether ACFS has verified the under-bond marking. Verification happens outside the portal; portal records the result. Set by ACFS staff only.' },
-        { name: 'storage_fee_flag', type: 'boolean', description: 'Visual indicator that storage fees apply. Derived from last_free_storage_date — auto-calculated, not manually set.' },
-        { name: 'last_free_storage_date', type: 'date', description: 'Last date of free storage. After this date, storage_fee_flag is automatically set to true. Sourced from Maximus or set by ACFS.' },
-        { name: 'release_type', type: "'do_required' | 'free_release'", description: 'Determines DO requirements. Phase 1 supports two types: "do_required" (default — DO must be uploaded and validated) and "free_release" (no DO needed for that tier). Under-bond HBLs skip DO requirement entirely via the under_bond flag.' },
+        { name: 'last_free_storage_date', type: 'date', description: 'Last date of free storage. After this date, storage fees apply (computed on read, not stored as a separate flag). Sourced from Maximus or set by ACFS.' },
+        { name: 'release_type', type: "'do_required' | 'free_release'", description: 'Determines DO requirements per tier. "do_required" (default — DO must be uploaded and validated) or "free_release" (no DO needed for that tier).' },
+        { name: 'do_waived', type: 'boolean', description: 'Derived: true when release_type is "free_release" OR under_bond is true. Booking readiness checks this single field instead of inspecting release_type and under_bond separately.' },
         { name: 'assigned_lsp', type: 'string', description: 'LSP this HBL is allocated to. Set by ACFS during HBL/WFF assignment or auto-assigned from data.' },
       ],
       lifecycle: {
@@ -245,6 +245,7 @@ export const intentModel: IntentModel = {
     {
       id: 'integration_maximus',
       name: 'Maximus Integration (Inbound)',
+      is_integration: true,
       description: 'Primary data source for HBL shipment data. Periodic batch sync from custom cargo table. Portal fetches data starting 7 days before vessel arrival. Provides lowest-level HBL references, weight, volume, customs clearance status, and consignee data. Does NOT provide HBL hierarchy relationships or freight forwarder party assignments.',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Inbound — Maximus → Portal' },
@@ -262,6 +263,7 @@ export const intentModel: IntentModel = {
     {
       id: 'integration_ags',
       name: 'AGS Data Feed (Inbound)',
+      is_integration: true,
       description: 'Provides master HBL references, HBL hierarchy (parent-child relationships), and freight forwarder party data (name, account code). Data is consistent (unlike ICS which has variations across organisations). Matt and William are defining the exact data format and delivery mechanism.',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Inbound — AGS → Portal' },
@@ -279,6 +281,7 @@ export const intentModel: IntentModel = {
     {
       id: 'integration_payment',
       name: 'Payment Integration (Outbound)',
+      is_integration: true,
       description: 'Payment processing for booking fees. Stripe embedded checkout for Phase 1. Payment integration is abstracted behind a single checkout redirect — provider can be swapped later if needed.',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Outbound — Portal → Stripe' },
@@ -294,6 +297,7 @@ export const intentModel: IntentModel = {
     {
       id: 'integration_email',
       name: 'Email Notifications (Outbound)',
+      is_integration: true,
       description: 'Event-driven email notifications sent by the portal.',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Outbound — Portal → Email' },
@@ -309,6 +313,7 @@ export const intentModel: IntentModel = {
     {
       id: 'integration_lsp_registry',
       name: 'LSP Registry Seed (One-time)',
+      is_integration: true,
       description: 'One-time bulk upload of LSP party data from AGS portal/party manager into the portal local DB.',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Inbound — AGS → Portal (one-time)' },
@@ -558,16 +563,10 @@ export const intentModel: IntentModel = {
     },
     {
       id: 'BR-002',
-      description: 'Under-bond HBLs skip the DO requirement. Under-bond is a boolean flag set manually by LSP/ACFS staff in the portal. Not synced from Maximus. Verification happens outside the portal.',
-      applies_to: ['hbl'],
-      source: 'BRD s4.3 + discussion between Rahul, Roni, and Matt on 2026-03-17',
+      description: 'DO requirement per HBL: each delegation tier uploads its own DO independently — one-to-many, no inheritance. ACFS validates each DO individually (HBL-centric). DO requirement is waived by under_bond flag (manual, ACFS-verified outside portal, not synced from Maximus) or free_release flag (per tier). Bottom-most party must have all tiers\' DOs present.',
+      applies_to: ['hbl', 'delivery_order', 'lsp', 'p4tc', 'acfs'],
+      source: 'BRD s4.3–4.4 + discussions 2026-03-17 through 2026-03-20. Consolidates former BR-002, BR-003, BR-021, BR-031.',
       warn: 'Under-bond is an LSP/ACFS manual flag — not a lifecycle or automated process.',
-    },
-    {
-      id: 'BR-003',
-      description: 'DO rules follow a multi-level hierarchy. Each level uploads its own DO independently — no inheritance or cascading. Bottom-most party must have ALL DOs present across all tiers. Free release removes the DO requirement for that tier.',
-      applies_to: ['hbl', 'lsp', 'p4tc', 'acfs'],
-      source: 'BRD s4.4 + discussion between Rahul, Roni, and Matt on 2026-03-17',
     },
     {
       id: 'BR-004',
@@ -577,15 +576,9 @@ export const intentModel: IntentModel = {
     },
     {
       id: 'BR-005',
-      description: 'Slot cutoffs are relative day + time (e.g. "previous working day, 4 PM" or "same day, 10 AM"). Booking cutoff and change cutoff configured separately per slot template. Per-site configuration.',
+      description: 'Slot cutoffs are relative day + time (e.g. "previous working day, 4 PM" or "same day, 10 AM"). Booking cutoff and change cutoff configured separately per slot template. Per-site configuration. No hard capacity limits — density indicator only (threshold-based, nice-to-have Phase 1). Does not block booking.',
       applies_to: ['booking', 'slot'],
-      source: 'discussion between Roni and Matt on 2026-03-18',
-    },
-    {
-      id: 'BR-006',
-      description: 'No-show rebooking: ACFS admin edits the pickup slot (and optionally driver/truck) on the existing booking. No new booking is created. Fee-free for Phase 1. No separate FOC rebook button — uses inline edit on the booking detail view. LSP must call ACFS — no self-service for no-show rebooking.',
-      applies_to: ['booking', 'acfs'],
-      source: 'discussion between Rahul, Roni, and Matt on 2026-03-17 + discussion between Rahul and Roni on 2026-03-20',
+      source: 'discussion between Roni and Matt on 2026-03-18. Absorbs former C-001 (capacity constraint).',
     },
     {
       id: 'BR-007',
@@ -613,9 +606,9 @@ export const intentModel: IntentModel = {
     },
     {
       id: 'BR-012',
-      description: 'Booking confirmation is sent to the account email (LSP) or P4TC email only. No system email is sent to the driver — the booking party forwards the booking reference to the driver externally via their own rostering process.',
-      applies_to: ['booking'],
-      source: 'discussion between Roni and Matt on 2026-03-18',
+      description: 'Booking confirmation, modification, and cancellation notifications sent to booking party email (LSP account email or P4TC email). Driver receives nothing from the system — booking party forwards details externally via their own rostering process.',
+      applies_to: ['booking', 'acfs'],
+      source: 'discussion between Roni and Matt on 2026-03-18. Consolidates former BR-012 and BR-020.',
     },
     {
       id: 'BR-013',
@@ -625,15 +618,15 @@ export const intentModel: IntentModel = {
     },
     {
       id: 'BR-014',
-      description: 'ACFS manages user lifecycle: create, update, remove LSP and ACFS internal users. Feature permissions can be configured per user.',
+      description: 'ACFS manages user lifecycle: create, update, remove LSP and ACFS internal users. Feature permissions configurable per user. Removal is soft-delete — access and notifications disabled, data retained. Welcome email signin link expires in 72 hours.',
       applies_to: ['acfs', 'lsp'],
-      source: 'March 18 flow diagram',
+      source: 'March 18 flow diagram + Miro board. Consolidates former BR-014, BR-024, BR-025.',
     },
     {
       id: 'BR-015',
-      description: 'Booking modifications by external users: truck/driver can be changed at any time until shipment is collected (no cutoff restriction). Slot date/time and HBL changes (add/remove) allowed before change cutoff only. Cost-impacting changes after cutoff require ACFS admin intervention. ACFS admin can override all cutoffs.',
+      description: 'Booking modifications: truck/driver changeable anytime until collection. Slot/HBL changes (add/remove) allowed before change cutoff only. Cost-impacting changes after cutoff require ACFS admin override. ACFS admin can override all cutoffs. Admin and no-show rebookings are fee-free inline edits on the existing booking (no new booking created). P4TC cannot self-service modify — must contact ACFS.',
       applies_to: ['booking', 'lsp', 'p4tc', 'acfs'],
-      source: 'discussion between Roni and Matt on 2026-03-18',
+      source: 'discussion between Roni and Matt on 2026-03-18 + 2026-03-20. Consolidates former BR-006, BR-015, BR-023, BR-027.',
     },
     {
       id: 'BR-016',
@@ -660,52 +653,16 @@ export const intentModel: IntentModel = {
       source: 'discussion between Roni and Matt on 2026-03-18',
     },
     {
-      id: 'BR-020',
-      description: 'Booking update notifications are sent to the booking party\'s account email when ACFS makes changes to a booking.',
-      applies_to: ['booking', 'acfs'],
-      source: 'discussion between Roni and Matt on 2026-03-18',
-    },
-    {
-      id: 'BR-021',
-      description: 'Each HBL requires either a DO upload or a free release flag — one or the other per shipment. Free release removes the DO requirement for that tier entirely. This is a per-HBL choice made during the booking readiness step.',
-      applies_to: ['hbl', 'lsp', 'p4tc'],
-      source: 'March 18 Miro board — "Either DO or Free release per shipment Free Release Flag"',
-    },
-    {
       id: 'BR-022',
-      description: 'Booking cancellation: LSP can cancel their own bookings. ACFS can cancel any booking (requires cancellation reason). Cancellation notification sent to booking party. Refund processed outside the system. HBLs revert to previous status.',
+      description: 'Booking cancellation: LSP can cancel their own bookings. ACFS can cancel any booking (requires cancellation reason). Cancellation notification sent to booking party. Refund processed outside the system (portal is refund-agnostic). HBLs revert to previous status.',
       applies_to: ['booking', 'lsp', 'acfs'],
-      source: 'March 18 Miro board — cancel booking flows',
-    },
-    {
-      id: 'BR-023',
-      description: 'P4TC (one-off booking party) cannot self-service modify bookings. Must contact ACFS for any changes.',
-      applies_to: ['booking', 'p4tc'],
-      source: 'March 18 Miro board — "CONTACT ACFS FOR ANY BOOKING MODIFICATIONS"',
-    },
-    {
-      id: 'BR-024',
-      description: 'User account removal is soft-delete (archive). Access is disabled and email notifications are disabled. User data is retained.',
-      applies_to: ['acfs', 'lsp'],
-      source: 'March 18 Miro board — "ARCHIVE USER ON REMOVAL"',
-    },
-    {
-      id: 'BR-025',
-      description: 'Welcome email signin link expires in 72 hours. User must click and set password (LSP) or complete SSO login (ACFS) within this window.',
-      applies_to: ['acfs', 'lsp'],
-      source: 'March 18 Miro board — "LINK EXPIRY 72 HOURS"',
+      source: 'March 18 Miro board — cancel booking flows. Absorbs former C-003 (refund constraint).',
     },
     {
       id: 'BR-026',
-      description: 'Slots with active bookings cannot be removed. ACFS must cancel or reschedule bookings before removing a slot.',
+      description: 'Slots with active bookings cannot be removed or modified in Phase 1. ACFS must cancel or reschedule bookings before removing a slot. Blackout dates enforced via holiday calendar overlay.',
       applies_to: ['slot', 'acfs'],
-      source: 'March 18 Miro board — "ACTIVE BOOKINGS? YES → CANNOT REMOVE SLOT"',
-    },
-    {
-      id: 'BR-027',
-      description: 'Admin booking modifications (add/remove HBLs, change slot) are fee-free for Phase 1. When HBLs are added or removed, the fee total recalculates to reflect the new weight but no additional payment is collected. No truck capacity validation on HBL add — carrier\'s responsibility.',
-      applies_to: ['booking', 'acfs'],
-      source: 'discussion between Rahul and Roni on 2026-03-20',
+      source: 'March 18 Miro board. Absorbs former C-002 (temporal constraint).',
     },
     {
       id: 'BR-028',
@@ -725,32 +682,11 @@ export const intentModel: IntentModel = {
       applies_to: ['booking', 'lsp'],
       source: 'discussion between Rahul and Roni on 2026-03-20',
     },
-    {
-      id: 'BR-031',
-      description: 'Multiple DOs per HBL — one DO per delegation tier (one-to-many relationship). Each DO is validated individually by ACFS. ACFS browses between DOs for a given HBL and marks each as validated or flagged.',
-      applies_to: ['hbl', 'delivery_order', 'acfs'],
-      source: 'discussion between Rahul and Roni on 2026-03-20',
-    },
   ],
   constraints: [
     {
-      id: 'C-001',
-      constraint: 'Pickup slots have NO hard capacity limits. Density indicator only (low/moderate/high based on configurable threshold). Does NOT block booking. Per-site configuration. Nice-to-have for Phase 1.',
-      type: 'capacity',
-    },
-    {
-      id: 'C-002',
-      constraint: 'Slots with existing bookings cannot be modified in Phase 1. Blackout dates enforced via holiday calendar overlay.',
-      type: 'temporal',
-    },
-    {
-      id: 'C-003',
-      constraint: 'Refunds are completely outside the portal. Handled offline by ACFS. Portal is refund-agnostic.',
-      type: 'pricing',
-    },
-    {
       id: 'C-004',
-      constraint: 'Driver has no portal access. No system emails to driver. Booking party manages driver communication externally.',
+      constraint: 'Driver has no portal access. Booking party manages driver communication externally.',
       type: 'access',
     },
     {
@@ -770,7 +706,7 @@ export const intentModel: IntentModel = {
     },
     {
       id: 'C-008',
-      constraint: 'Email is the primary notification channel. In-app notifications are available for logged-in users (LSPs, ACFS) but are not a Phase 1 blocker. P4TC (no login) receives email only. DO flag-for-correction triggers email to booking party.',
+      constraint: 'Email is the primary notification channel. In-app notifications are available for logged-in users (LSPs, ACFS) but are not a Phase 1 blocker. P4TC (no login) receives email only.',
       type: 'notification',
     },
   ],

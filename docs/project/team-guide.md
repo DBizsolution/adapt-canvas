@@ -8,16 +8,18 @@ How to use the intent model and this platform in your day-to-day work, whether y
 
 The intent model is the **single source of truth** for what the VBS Pickup Portal does. It's a structured document with six pillars:
 
-| Pillar | What it captures | Example |
-|--------|-----------------|---------|
-| **Actors** | Who uses the system, how they authenticate, what they can do | LSP logs in with username/password, can delegate or book |
-| **Entities** | Data objects with fields and lifecycle states | HBL has milestone (on_vessel → collected) and hbl_status (unassigned → booked) |
-| **Journeys** | Step-by-step workflows from a specific actor's perspective | "LSP Books a Pickup" — 8 steps from selection to confirmation |
-| **Business Rules** | Hard constraints the system must enforce | BR-004: LSP can either delegate or book per HBL, never both |
-| **Constraints** | System-level limits (capacity, pricing, access) | C-001: No hard slot capacity — density indicator only |
-| **Open Questions** | Unresolved decisions that block implementation | OQ-023: What is the minimum charge amount? |
+| Pillar | Count | What it captures | Example |
+|--------|-------|-----------------|---------|
+| **Actors** | 5 | Who uses the system, how they authenticate, what they can do | LSP logs in with username/password, can delegate or book |
+| **Entities** | 6 + 5 integrations | Data objects with fields and lifecycle states | HBL has milestone (on_vessel → collected) and hbl_status (unassigned → booked) |
+| **Journeys** | 14 | Step-by-step workflows from a specific actor's perspective | "LSP Books a Pickup" — 8 steps from selection to confirmation |
+| **Business Rules** | 21 | Hard constraints the system must enforce | BR-004: LSP can either delegate or book per HBL, never both |
+| **Constraints** | 5 | Platform-level limits (access, admin, platform, notification) | C-007: Desktop/laptop only, no mobile responsive design |
+| **Open Questions** | 1 | Unresolved decisions that block implementation | OQ-034: HBL hierarchy data source TBD |
 
 Everything downstream — state machines, TypeScript types, database schemas, screens, components — is derived from this model. If it's not in the model, it doesn't exist.
+
+> **Note on rule consolidation (v0.7.1):** Business rules were consolidated from 30 → 21 and constraints from 8 → 5. No logic was removed — related rules were merged into single, comprehensive rules. For example, the four DO-related rules (BR-002, BR-003, BR-021, BR-031) are now a single BR-002 "DO Policy" rule. See the Changelog for full details.
 
 ---
 
@@ -26,10 +28,10 @@ Everything downstream — state machines, TypeScript types, database schemas, sc
 ### 1. Open the platform
 
 ```
-http://localhost:3002
+http://localhost:4444
 ```
 
-Dev server runs on port 3002. Ask the project lead to start it if it's not running (`pnpm dev` in the vbs-intent repo).
+Dev server runs on port 4444. Ask the project lead to start it if it's not running (`pnpm dev` in the vbs-intent repo).
 
 ### 2. Set your identity
 
@@ -312,6 +314,11 @@ function canBook(hbls: HBL[]): boolean {
 function canDelegate(hbl: HBL): boolean {
   return hbl.hbl_status !== 'booked'
 }
+
+// From BR-002 — DO waiver (computed field)
+function isDoWaived(hbl: HBL): boolean {
+  return hbl.release_type === 'free_release' || hbl.under_bond
+}
 ```
 
 **API route structure** — derive from journeys:
@@ -332,7 +339,9 @@ const HBLSchema = z.object({
   milestone: z.enum(['on_vessel', 'at_wharf', 'in_yard', 'unpacked', 'collected']),
   hbl_status: z.enum(['unassigned', 'assigned', 'delegated', 'booked']),
   customs_clearance_status: z.string(),
+  release_type: z.enum(['do_required', 'free_release']),
   under_bond: z.boolean(),
+  do_waived: z.boolean(), // derived: release_type === 'free_release' || under_bond
   // ...
 })
 ```

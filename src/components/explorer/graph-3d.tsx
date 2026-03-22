@@ -61,6 +61,108 @@ const TYPE_LABELS: Record<string, string> = {
   open_question: 'Question',
 }
 
+// --- Lucide icon SVG content (from lucide-react v0.577.0) ---
+
+const ICON_SVG: Record<string, string> = {
+  database: [
+    '<ellipse cx="12" cy="5" rx="9" ry="3"/>',
+    '<path d="M3 5V19A9 3 0 0 0 21 19V5"/>',
+    '<path d="M3 12A9 3 0 0 0 21 12"/>',
+  ].join(''),
+  user: [
+    '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>',
+    '<circle cx="12" cy="7" r="4"/>',
+  ].join(''),
+  route: [
+    '<circle cx="6" cy="19" r="3"/>',
+    '<path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>',
+    '<circle cx="18" cy="5" r="3"/>',
+  ].join(''),
+  scale: [
+    '<path d="M12 3v18"/>',
+    '<path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/>',
+    '<path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/>',
+    '<path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/>',
+    '<path d="M7 21h10"/>',
+  ].join(''),
+  shieldAlert: [
+    '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    '<path d="M12 8v4"/>',
+    '<path d="M12 16h.01"/>',
+  ].join(''),
+  circleHelp: [
+    '<circle cx="12" cy="12" r="10"/>',
+    '<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>',
+    '<path d="M12 17h.01"/>',
+  ].join(''),
+}
+
+const TYPE_ICONS: Record<string, string> = {
+  entity: 'database',
+  actor: 'user',
+  journey: 'route',
+  business_rule: 'scale',
+  constraint: 'shieldAlert',
+  open_question: 'circleHelp',
+}
+
+// --- Icon texture helpers ---
+
+// Darker shades of each type color for the icon stroke
+const TYPE_ICON_COLORS: Record<string, string> = {
+  entity: '#004A99',
+  actor: '#5B21B6',
+  journey: '#065F46',
+  business_rule: '#92400E',
+  constraint: '#991B1B',
+  open_question: '#9D174D',
+}
+
+function buildIconSvg(iconContent: string, strokeColor: string): string {
+  const s = 256
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
+    <svg x="28" y="28" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      ${iconContent}
+    </svg>
+  </svg>`
+}
+
+function loadSvgTexture(
+  THREE: typeof import('three'),
+  svgMarkup: string,
+): Promise<import('three').CanvasTexture> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 256
+      canvas.height = 256
+      canvas.getContext('2d')!.drawImage(img, 0, 0, 256, 256)
+      resolve(new THREE.CanvasTexture(canvas))
+    }
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`
+  })
+}
+
+async function loadAllIconTextures(THREE: typeof import('three')): Promise<Map<string, import('three').CanvasTexture>> {
+  const cache = new Map<string, import('three').CanvasTexture>()
+
+  // Map icon key back to its type to get the dark color
+  const iconToType: Record<string, string> = {}
+  for (const [type, iconKey] of Object.entries(TYPE_ICONS)) {
+    iconToType[iconKey] = type
+  }
+
+  await Promise.all(
+    Object.entries(ICON_SVG).map(([key, svg]) => {
+      const type = iconToType[key] ?? 'entity'
+      const darkColor = TYPE_ICON_COLORS[type] ?? '#333'
+      return loadSvgTexture(THREE, buildIconSvg(svg, darkColor)).then(tex => cache.set(key, tex))
+    }),
+  )
+  return cache
+}
+
 function buildGraphData(model: IntentModel): { nodes: GraphNode[]; links: GraphLink[] } {
   const nodes: GraphNode[] = []
   const links: GraphLink[] = []
@@ -264,6 +366,10 @@ export function Graph3D({ model }: { model: IntentModel }) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const THREE = await import('three')
 
+      // Load icon textures
+      const textures = await loadAllIconTextures(THREE)
+      if (destroyed || !containerRef.current) return
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graph: any = ForceGraph3D()(containerRef.current)
       graph.graphData({ nodes, links })
@@ -278,18 +384,32 @@ export function Graph3D({ model }: { model: IntentModel }) {
         .nodeVal((node: GraphNode) => node.val)
         .nodeThreeObject((node: GraphNode) => {
           const color = TYPE_COLORS[node.type] ?? '#888'
-
-          // Create a group to hold sphere + label
           const group = new THREE.Group()
 
-          // Sphere — uniform size range, not too big
+          // Translucent sphere
           const radius = 4 + Math.min(node.val, 15) * 0.3
-          const geometry = new THREE.SphereGeometry(radius, 16, 12)
-          const material = new THREE.MeshLambertMaterial({ color, transparent: true, opacity: 0.9 })
-          const sphere = new THREE.Mesh(geometry, material)
-          group.add(sphere)
+          const geometry = new THREE.SphereGeometry(radius, 24, 16)
+          const material = new THREE.MeshPhongMaterial({
+            color,
+            transparent: true,
+            opacity: 0.35,
+            shininess: 60,
+            depthWrite: false,
+          })
+          group.add(new THREE.Mesh(geometry, material))
 
-          // Hi-res text label — 2x canvas for crisp rendering
+          // Icon sprite inside the sphere — solid, no transparency
+          const iconKey = TYPE_ICONS[node.type]
+          const iconTex = iconKey ? textures.get(iconKey) : undefined
+          if (iconTex) {
+            const iconMat = new THREE.SpriteMaterial({ map: iconTex, transparent: true, depthWrite: true })
+            const iconSprite = new THREE.Sprite(iconMat)
+            const iconSize = radius * 1.1
+            iconSprite.scale.set(iconSize, iconSize, 1)
+            group.add(iconSprite)
+          }
+
+          // Text label above sphere
           const scale = 2
           const canvasW = 512 * scale
           const canvasH = 96 * scale
@@ -307,7 +427,6 @@ export function Graph3D({ model }: { model: IntentModel }) {
           ctx.textAlign = 'center'
           ctx.textBaseline = 'top'
 
-          // Word-wrap
           const words = node.name.split(' ')
           const lines: string[] = []
           let currentLine = ''
@@ -325,7 +444,7 @@ export function Graph3D({ model }: { model: IntentModel }) {
           if (currentLine && lines.length < maxLines) {
             lines.push(currentLine)
           } else if (lines.length >= maxLines) {
-            lines[maxLines - 1] = lines[maxLines - 1] + '…'
+            lines[maxLines - 1] = lines[maxLines - 1] + '\u2026'
           }
 
           const totalHeight = lines.length * lineHeight
@@ -338,7 +457,6 @@ export function Graph3D({ model }: { model: IntentModel }) {
           texture.needsUpdate = true
           const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
           const sprite = new THREE.Sprite(spriteMat)
-          // Keep aspect ratio matching canvas (512:96 ≈ 5.33:1)
           const spriteW = 28
           const spriteH = spriteW * (canvasH / canvasW)
           sprite.scale.set(spriteW, spriteH, 1)

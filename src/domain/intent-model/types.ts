@@ -44,6 +44,7 @@ export type Entity = {
     transitions: Transition[]
     warn?: string
   }
+  is_integration?: boolean
 }
 
 export type Field = {

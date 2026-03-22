@@ -50,6 +50,131 @@ const ACTOR_LAYERS: Record<string, number> = {
 
 const LAYER_SPACING_X = 30
 
+// --- Lucide icon SVG content (from lucide-react v0.577.0) ---
+
+const ICON_SVG: Record<string, string> = {
+  database: [
+    '<ellipse cx="12" cy="5" rx="9" ry="3"/>',
+    '<path d="M3 5V19A9 3 0 0 0 21 19V5"/>',
+    '<path d="M3 12A9 3 0 0 0 21 12"/>',
+  ].join(''),
+  user: [
+    '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>',
+    '<circle cx="12" cy="7" r="4"/>',
+  ].join(''),
+  route: [
+    '<circle cx="6" cy="19" r="3"/>',
+    '<path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>',
+    '<circle cx="18" cy="5" r="3"/>',
+  ].join(''),
+  scale: [
+    '<path d="M12 3v18"/>',
+    '<path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/>',
+    '<path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/>',
+    '<path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/>',
+    '<path d="M7 21h10"/>',
+  ].join(''),
+  shieldAlert: [
+    '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    '<path d="M12 8v4"/>',
+    '<path d="M12 16h.01"/>',
+  ].join(''),
+}
+
+const TYPE_ICONS: Record<string, string> = {
+  entity: 'database',
+  actor: 'user',
+  journey: 'route',
+  rule: 'scale',
+  constraint: 'shieldAlert',
+}
+
+const ICON_SIZES: Record<string, number> = {
+  actor: 8,
+  entity: 8,
+  journey: 8,
+  rule: 6,
+  constraint: 7,
+}
+
+// --- Icon texture helpers ---
+
+function buildIconSvg(iconContent: string, bgColor: string): string {
+  const s = 256
+  const pad = s * 0.22
+  const iconSize = s - pad * 2
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
+    <circle cx="${s / 2}" cy="${s / 2}" r="${s / 2 - 2}" fill="${bgColor}"/>
+    <svg x="${pad}" y="${pad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      ${iconContent}
+    </svg>
+  </svg>`
+}
+
+function loadSvgTexture(
+  THREE: typeof import('three'),
+  svgMarkup: string,
+): Promise<import('three').CanvasTexture> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 256
+      canvas.height = 256
+      canvas.getContext('2d')!.drawImage(img, 0, 0, 256, 256)
+      resolve(new THREE.CanvasTexture(canvas))
+    }
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`
+  })
+}
+
+async function loadAllIconTextures(THREE: typeof import('three')): Promise<Map<string, import('three').CanvasTexture>> {
+  const cache = new Map<string, import('three').CanvasTexture>()
+
+  const configs: [string, string, string][] = [
+    ['database', ICON_SVG.database, LAYER_COLORS.entity],
+    ['user', ICON_SVG.user, LAYER_COLORS.actor],
+    ['route', ICON_SVG.route, LAYER_COLORS.journey],
+    ['scale', ICON_SVG.scale, LAYER_COLORS.rule],
+    ['shieldAlert', ICON_SVG.shieldAlert, LAYER_COLORS.constraint],
+  ]
+
+  await Promise.all(configs.map(([key, svg, color]) =>
+    loadSvgTexture(THREE, buildIconSvg(svg, color)).then(tex => cache.set(key, tex)),
+  ))
+
+  return cache
+}
+
+function makeTextSprite(
+  THREE: typeof import('three'),
+  text: string,
+  fontSize: number = 44,
+  color: string = '#34322D',
+): import('three').Sprite {
+  const canvasW = 1024
+  const canvasH = 128
+  const canvas = document.createElement('canvas')
+  canvas.width = canvasW
+  canvas.height = canvasH
+  const ctx = canvas.getContext('2d')!
+  ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`
+  ctx.fillStyle = color
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  const label = text.length > 20 ? text.slice(0, 18) + '\u2026' : text
+  ctx.fillText(label, canvasW / 2, canvasH / 2)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+  const sprite = new THREE.Sprite(mat)
+  const spriteW = 22
+  sprite.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
+  return sprite
+}
+
+// --- Data builder ---
+
 function buildActorLayerData(model: IntentModel): { nodes: LayerNode[]; links: LayerLink[] } {
   const nodes: LayerNode[] = []
   const links: LayerLink[] = []
@@ -170,6 +295,8 @@ function buildActorLayerData(model: IntentModel): { nodes: LayerNode[]; links: L
   return { nodes, links }
 }
 
+// --- Component ---
+
 const TOGGLEABLE = ['entity', 'actor', 'journey', 'rule', 'constraint'] as const
 
 export function Graph3DActors({ model }: { model: IntentModel }) {
@@ -219,6 +346,10 @@ export function Graph3DActors({ model }: { model: IntentModel }) {
       const ForceGraph3D = mod.default || mod
       const THREE = await import('three')
       const { nodes, links } = buildActorLayerData(model)
+
+      // Load all icon textures
+      const textures = await loadAllIconTextures(THREE)
+      if (destroyed) return
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graph: any = ForceGraph3D()(containerRef.current)
@@ -295,62 +426,21 @@ export function Graph3DActors({ model }: { model: IntentModel }) {
           </div>
         `)
         .nodeThreeObject((node: LayerNode) => {
-          const color = LAYER_COLORS[node.type]
           const group = new THREE.Group()
-          let topY = 4
+          const iconKey = TYPE_ICONS[node.type]
+          const texture = textures.get(iconKey)
+          const size = ICON_SIZES[node.type] ?? 8
 
-          if (node.type === 'actor') {
-            // Person icon
-            const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 12, 12), mat)
-            head.position.set(0, 4, 0)
-            group.add(head)
-            const bodyGeo = new THREE.SphereGeometry(3.2, 12, 12)
-            bodyGeo.scale(1, 0.6, 0.8)
-            group.add(new THREE.Mesh(bodyGeo, mat))
-            group.children[group.children.length - 1].position.set(0, 1, 0)
-            const neck = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 1, 12), mat)
-            neck.position.set(0, 2.5, 0)
-            group.add(neck)
-            topY = 7.5
-          } else if (node.type === 'journey') {
-            // Pyramid (4-sided cone)
-            const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            group.add(new THREE.Mesh(new THREE.ConeGeometry(3, 6, 4), mat))
-            topY = 5
-          } else if (node.type === 'rule') {
-            // Gray sphere
-            group.add(new THREE.Mesh(new THREE.SphereGeometry(3, 12, 12), new THREE.MeshLambertMaterial({ color })))
-            topY = 4.5
-          } else if (node.type === 'constraint') {
-            // Octahedron
-            group.add(new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })))
-            topY = 5
-          } else {
-            // Entity sphere
-            const radius = Math.max(3, 2 + Math.min(node.val, 15) * 0.2)
-            group.add(new THREE.Mesh(new THREE.SphereGeometry(radius, 12, 12), new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })))
-            topY = radius + 2
+          if (texture) {
+            const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+            const sprite = new THREE.Sprite(mat)
+            sprite.scale.set(size, size, 1)
+            group.add(sprite)
           }
 
-          // Label
-          const canvasW = 1024
-          const canvasH = 128
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')!
-          canvas.width = canvasW
-          canvas.height = canvasH
-          ctx.font = '600 44px system-ui, -apple-system, sans-serif'
-          ctx.fillStyle = '#34322D'
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          const name = node.name.length > 20 ? node.name.slice(0, 18) + '…' : node.name
-          ctx.fillText(name, canvasW / 2, canvasH / 2)
-          const texture = new THREE.CanvasTexture(canvas)
-          const labelMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
-          const label = new THREE.Sprite(labelMat)
-          label.scale.set(22, 22 * (canvasH / canvasW), 1)
-          label.position.set(0, topY + 1.5, 0)
+          // Label below icon
+          const label = makeTextSprite(THREE, node.name)
+          label.position.set(0, -(size / 2 + 2), 0)
           group.add(label)
 
           return group
@@ -360,7 +450,6 @@ export function Graph3DActors({ model }: { model: IntentModel }) {
         .linkOpacity(0)
         .onNodeClick((node: LayerNode) => {
           handleNodeClick(node)
-          // Emit particles on direct connection lines (visual pulse)
         })
 
       graph.warmupTicks(100)
@@ -434,7 +523,7 @@ export function Graph3DActors({ model }: { model: IntentModel }) {
             >
               {LAYER_LABELS[selectedNode.type]}
             </span>
-            <button type="button" onClick={() => setSelectedNode(null)} className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>✕</button>
+            <button type="button" onClick={() => setSelectedNode(null)} className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>&#x2715;</button>
           </div>
           <h3 className="text-sm font-semibold m-0 mb-1" style={{ color: 'var(--text-primary)' }}>{selectedNode.name}</h3>
           <p className="text-xs leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>{selectedNode.description}</p>

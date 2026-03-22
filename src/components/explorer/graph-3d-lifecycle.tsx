@@ -48,415 +48,172 @@ const MILESTONE_LABELS: Record<string, string> = {
 
 const SPINE_SPACING = 40
 
-// --- Low-poly 3D milestone builders ---
+// --- Lucide icon SVG content (from lucide-react v0.577.0) ---
 
-function buildShip(THREE: typeof import('three')): import('three').Group {
-  const g = new THREE.Group()
-  const mat = new THREE.MeshPhongMaterial({ color: '#1a3a5c', shininess: 40 })
-  const matLight = new THREE.MeshPhongMaterial({ color: '#2a5a8c', shininess: 30 })
-
-  // Hull — tapered shape using lathe
-  const hullShape = new THREE.Shape()
-  hullShape.moveTo(-5, -2.5)
-  hullShape.lineTo(-5, 0)
-  hullShape.quadraticCurveTo(-4.5, 1.5, 0, 1.8)
-  hullShape.quadraticCurveTo(4.5, 1.5, 6, 0)
-  hullShape.lineTo(7.5, -0.5)
-  hullShape.lineTo(6, -1.5)
-  hullShape.lineTo(-5, -2.5)
-  const hullGeo = new THREE.ExtrudeGeometry(hullShape, { depth: 5, bevelEnabled: true, bevelThickness: 0.3, bevelSize: 0.2, bevelSegments: 3 })
-  hullGeo.translate(0, 0, -2.5)
-  g.add(new THREE.Mesh(hullGeo, mat))
-
-  // Deck
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(10, 0.3, 4.5), new THREE.MeshPhongMaterial({ color: '#8B7355', shininess: 20 })))
-  g.children[g.children.length - 1].position.set(0, 0.1, 0)
-
-  // Bridge (cabin)
-  const bridge = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 3, 2, 2, 2), matLight)
-  bridge.position.set(-2, 1.5, 0)
-  g.add(bridge)
-
-  // Bridge windows
-  const winMat = new THREE.MeshPhongMaterial({ color: '#88CCFF', transparent: true, opacity: 0.7, shininess: 80 })
-  for (const z of [-1, 0, 1]) {
-    const win = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.8), winMat)
-    win.position.set(-0.7, 2.2, z * 0.9)
-    win.rotation.y = Math.PI / 2
-    g.add(win)
-  }
-
-  // Funnel
-  const funnel = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 1.8, 12), new THREE.MeshPhongMaterial({ color: '#CC3333', shininess: 30 }))
-  funnel.position.set(-2, 3.7, 0)
-  g.add(funnel)
-
-  // Mast
-  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4, 8), new THREE.MeshPhongMaterial({ color: '#888' }))
-  mast.position.set(2, 2.2, 0)
-  g.add(mast)
-
-  // Containers on deck
-  const contColors = ['#0066AA', '#CC6600', '#CC3333']
-  for (let i = 0; i < 3; i++) {
-    const cont = new THREE.Mesh(
-      new THREE.BoxGeometry(2, 1.2, 1.8),
-      new THREE.MeshPhongMaterial({ color: contColors[i], shininess: 20 }),
-    )
-    cont.position.set(1 + i * 2.2, 0.9, 0)
-    g.add(cont)
-  }
-
-  // "ON VESSEL" text painted on hull side
-  const textCanvas = document.createElement('canvas')
-  textCanvas.width = 512
-  textCanvas.height = 128
-  const tCtx = textCanvas.getContext('2d')!
-  tCtx.font = 'bold 48px system-ui, sans-serif'
-  tCtx.fillStyle = 'rgba(255,255,255,0.8)'
-  tCtx.textAlign = 'center'
-  tCtx.textBaseline = 'middle'
-  tCtx.fillText('ON VESSEL', 256, 64)
-  const textTex = new THREE.CanvasTexture(textCanvas)
-  const textMat = new THREE.MeshBasicMaterial({ map: textTex, transparent: true, side: THREE.DoubleSide })
-  const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), textMat)
-  textPlane.position.set(0, -0.5, 2.55)
-  g.add(textPlane)
-
-  return g
+const ICON_SVG: Record<string, string> = {
+  ship: [
+    '<path d="M12 10.189V14"/>',
+    '<path d="M12 2v3"/>',
+    '<path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/>',
+    '<path d="M19.38 20A11.6 11.6 0 0 0 21 14l-8.188-3.639a2 2 0 0 0-1.624 0L3 14a11.6 11.6 0 0 0 2.81 7.76"/>',
+    '<path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+  ].join(''),
+  anchor: [
+    '<path d="M12 6v16"/>',
+    '<path d="m19 13 2-1a9 9 0 0 1-18 0l2 1"/>',
+    '<path d="M9 11h6"/>',
+    '<circle cx="12" cy="4" r="2"/>',
+  ].join(''),
+  warehouse: [
+    '<path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11"/>',
+    '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z"/>',
+    '<path d="M6 13h12"/>',
+    '<path d="M6 17h12"/>',
+  ].join(''),
+  packageOpen: [
+    '<path d="M12 22v-9"/>',
+    '<path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z"/>',
+    '<path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13"/>',
+    '<path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z"/>',
+  ].join(''),
+  truck: [
+    '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>',
+    '<path d="M15 18H9"/>',
+    '<path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>',
+    '<circle cx="17" cy="18" r="2"/>',
+    '<circle cx="7" cy="18" r="2"/>',
+  ].join(''),
+  database: [
+    '<ellipse cx="12" cy="5" rx="9" ry="3"/>',
+    '<path d="M3 5V19A9 3 0 0 0 21 19V5"/>',
+    '<path d="M3 12A9 3 0 0 0 21 12"/>',
+  ].join(''),
+  user: [
+    '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>',
+    '<circle cx="12" cy="7" r="4"/>',
+  ].join(''),
+  route: [
+    '<circle cx="6" cy="19" r="3"/>',
+    '<path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>',
+    '<circle cx="18" cy="5" r="3"/>',
+  ].join(''),
+  scale: [
+    '<path d="M12 3v18"/>',
+    '<path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/>',
+    '<path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/>',
+    '<path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/>',
+    '<path d="M7 21h10"/>',
+  ].join(''),
+  shieldAlert: [
+    '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    '<path d="M12 8v4"/>',
+    '<path d="M12 16h.01"/>',
+  ].join(''),
 }
 
-function buildWharf(THREE: typeof import('three')): import('three').Group {
-  const g = new THREE.Group()
-  const woodMat = new THREE.MeshPhongMaterial({ color: '#8B7355', shininess: 15 })
-  const woodDark = new THREE.MeshPhongMaterial({ color: '#6B5340', shininess: 10 })
-  const metalMat = new THREE.MeshPhongMaterial({ color: '#555', shininess: 60 })
+const MILESTONE_ICONS: Record<string, string> = {
+  on_vessel: 'ship',
+  at_wharf: 'anchor',
+  in_yard: 'warehouse',
+  unpacked: 'packageOpen',
+  collected: 'truck',
+}
 
-  // Main platform with planks
-  const platform = new THREE.Mesh(new THREE.BoxGeometry(14, 0.8, 9), woodMat)
-  g.add(platform)
+const TYPE_ICONS: Record<string, string> = {
+  entity: 'database',
+  actor: 'user',
+  journey: 'route',
+  rule: 'scale',
+  constraint: 'shieldAlert',
+}
 
-  // Plank lines
-  for (let z = -4; z <= 4; z += 1) {
-    const plank = new THREE.Mesh(new THREE.BoxGeometry(14.1, 0.05, 0.05), woodDark)
-    plank.position.set(0, 0.42, z)
-    g.add(plank)
-  }
+const ICON_SIZES: Record<string, number> = {
+  entity: 8,
+  actor: 8,
+  journey: 8,
+  rule: 6,
+  constraint: 7,
+}
 
-  // Pillars — thicker, rounded
-  for (const x of [-5, -1.5, 2, 5.5]) {
-    for (const z of [-3.5, 0, 3.5]) {
-      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 6, 12), woodDark)
-      pillar.position.set(x, -3.4, z)
-      g.add(pillar)
+// --- Icon texture helpers ---
+
+function buildIconSvg(iconContent: string, bgColor: string): string {
+  const s = 256
+  const pad = s * 0.22
+  const iconSize = s - pad * 2
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
+    <circle cx="${s / 2}" cy="${s / 2}" r="${s / 2 - 2}" fill="${bgColor}"/>
+    <svg x="${pad}" y="${pad}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      ${iconContent}
+    </svg>
+  </svg>`
+}
+
+function loadSvgTexture(
+  THREE: typeof import('three'),
+  svgMarkup: string,
+): Promise<import('three').CanvasTexture> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 256
+      canvas.height = 256
+      canvas.getContext('2d')!.drawImage(img, 0, 0, 256, 256)
+      resolve(new THREE.CanvasTexture(canvas))
     }
-  }
-
-  // Bollards
-  for (const x of [-4, 0, 4]) {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 1.8, 12), metalMat)
-    post.position.set(x, 1.3, 4)
-    g.add(post)
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 8), metalMat)
-    cap.position.set(x, 2.3, 4)
-    g.add(cap)
-  }
-
-  // Crane arm (simple)
-  const craneMat = new THREE.MeshPhongMaterial({ color: '#CC6600', shininess: 40 })
-  const craneBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 4, 1.2), craneMat)
-  craneBase.position.set(6, 2.4, 0)
-  g.add(craneBase)
-  const craneArm = new THREE.Mesh(new THREE.BoxGeometry(8, 0.5, 0.5), craneMat)
-  craneArm.position.set(2, 4.6, 0)
-  g.add(craneArm)
-
-  // "AT WHARF" text on platform surface
-  const wTC = document.createElement('canvas')
-  wTC.width = 512; wTC.height = 128
-  const wTx = wTC.getContext('2d')!
-  wTx.font = 'bold 52px system-ui, sans-serif'
-  wTx.fillStyle = 'rgba(255,255,255,0.7)'
-  wTx.textAlign = 'center'; wTx.textBaseline = 'middle'
-  wTx.fillText('AT WHARF', 256, 64)
-  const wTex = new THREE.CanvasTexture(wTC)
-  const wTMat = new THREE.MeshBasicMaterial({ map: wTex, transparent: true, side: THREE.DoubleSide })
-  const wText = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), wTMat)
-  wText.rotation.x = -Math.PI / 2
-  wText.position.set(0, 0.45, 0)
-  g.add(wText)
-
-  return g
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`
+  })
 }
 
-function buildContainer(THREE: typeof import('three')): import('three').Group {
-  const g = new THREE.Group()
-  const bodyMat = new THREE.MeshPhongMaterial({ color: '#0066AA', shininess: 30 })
+async function loadAllIconTextures(THREE: typeof import('three')): Promise<Map<string, import('three').CanvasTexture>> {
+  const cache = new Map<string, import('three').CanvasTexture>()
 
-  // Main body
-  const body = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 4), bodyMat)
-  g.add(body)
+  const configs: [string, string, string][] = [
+    ['ship', ICON_SVG.ship, LIFECYCLE_COLORS.milestone],
+    ['anchor', ICON_SVG.anchor, LIFECYCLE_COLORS.milestone],
+    ['warehouse', ICON_SVG.warehouse, LIFECYCLE_COLORS.milestone],
+    ['packageOpen', ICON_SVG.packageOpen, LIFECYCLE_COLORS.milestone],
+    ['truck', ICON_SVG.truck, LIFECYCLE_COLORS.milestone],
+    ['database', ICON_SVG.database, LIFECYCLE_COLORS.entity],
+    ['user', ICON_SVG.user, LIFECYCLE_COLORS.actor],
+    ['route', ICON_SVG.route, LIFECYCLE_COLORS.journey],
+    ['scale', ICON_SVG.scale, LIFECYCLE_COLORS.rule],
+    ['shieldAlert', ICON_SVG.shieldAlert, LIFECYCLE_COLORS.constraint],
+  ]
 
-  // Edges
-  g.add(new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(8, 5, 4)),
-    new THREE.LineBasicMaterial({ color: '#003366' }),
+  await Promise.all(configs.map(([key, svg, color]) =>
+    loadSvgTexture(THREE, buildIconSvg(svg, color)).then(tex => cache.set(key, tex)),
   ))
 
-  // Corrugation — more ridges, thinner
-  for (let i = -3.5; i <= 3.5; i += 0.6) {
-    const ridge = new THREE.Mesh(
-      new THREE.BoxGeometry(0.08, 4.8, 4.05),
-      new THREE.MeshPhongMaterial({ color: '#004488', shininess: 20 }),
-    )
-    ridge.position.set(i, 0, 0)
-    g.add(ridge)
-  }
-
-  // Door handles (back face)
-  const handleMat = new THREE.MeshPhongMaterial({ color: '#888', shininess: 60 })
-  for (const y of [-0.8, 0.8]) {
-    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.5, 8), handleMat)
-    handle.position.set(-4.05, y, 0)
-    handle.rotation.z = Math.PI / 2
-    g.add(handle)
-  }
-
-  // Lock bar
-  const lockBar = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4.5, 0.15), handleMat)
-  lockBar.position.set(-4.05, 0, 0)
-  g.add(lockBar)
-
-  // Corner castings
-  const castMat = new THREE.MeshPhongMaterial({ color: '#333', shininess: 40 })
-  for (const x of [-3.9, 3.9]) {
-    for (const y of [-2.4, 2.4]) {
-      for (const z of [-1.9, 1.9]) {
-        const cast = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), castMat)
-        cast.position.set(x, y, z)
-        g.add(cast)
-      }
-    }
-  }
-
-  // "IN YARD" text on container side
-  const cTC = document.createElement('canvas')
-  cTC.width = 512; cTC.height = 128
-  const cTx = cTC.getContext('2d')!
-  cTx.font = 'bold 56px system-ui, sans-serif'
-  cTx.fillStyle = 'rgba(255,255,255,0.8)'
-  cTx.textAlign = 'center'; cTx.textBaseline = 'middle'
-  cTx.fillText('IN YARD', 256, 64)
-  const cTex = new THREE.CanvasTexture(cTC)
-  const cTMat = new THREE.MeshBasicMaterial({ map: cTex, transparent: true, side: THREE.DoubleSide })
-  const cText = new THREE.Mesh(new THREE.PlaneGeometry(7, 2), cTMat)
-  cText.position.set(0, 0, 2.05)
-  g.add(cText)
-
-  return g
+  return cache
 }
 
-function buildOpenBox(THREE: typeof import('three')): import('three').Group {
-  const g = new THREE.Group()
-  const cardboard = new THREE.MeshPhongMaterial({ color: '#C4956A', shininess: 8 })
-  const cardboardInner = new THREE.MeshPhongMaterial({ color: '#D4A574', shininess: 5 })
-  const tapeMat = new THREE.MeshPhongMaterial({ color: '#CC9933', shininess: 15 })
+function makeTextSprite(
+  THREE: typeof import('three'),
+  text: string,
+  fontSize: number = 44,
+  color: string = '#34322D',
+): import('three').Sprite {
+  const canvasW = 1024
+  const canvasH = 128
+  const canvas = document.createElement('canvas')
+  canvas.width = canvasW
+  canvas.height = canvasH
+  const ctx = canvas.getContext('2d')!
+  ctx.font = `600 ${fontSize}px system-ui, -apple-system, sans-serif`
+  ctx.fillStyle = color
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  const label = text.length > 20 ? text.slice(0, 18) + '\u2026' : text
+  ctx.fillText(label, canvasW / 2, canvasH / 2)
 
-  // Base
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(7, 0.4, 5), cardboard))
-
-  // Walls — all 4 sides
-  const wallH = 4
-  const wallBack = new THREE.Mesh(new THREE.BoxGeometry(7, wallH, 0.3), cardboardInner)
-  wallBack.position.set(0, wallH / 2, -2.5)
-  g.add(wallBack)
-  const wallFront = new THREE.Mesh(new THREE.BoxGeometry(7, wallH, 0.3), cardboardInner)
-  wallFront.position.set(0, wallH / 2, 2.5)
-  g.add(wallFront)
-  const wallLeft = new THREE.Mesh(new THREE.BoxGeometry(0.3, wallH, 5), cardboardInner)
-  wallLeft.position.set(-3.5, wallH / 2, 0)
-  g.add(wallLeft)
-  const wallRight = new THREE.Mesh(new THREE.BoxGeometry(0.3, wallH, 5), cardboardInner)
-  wallRight.position.set(3.5, wallH / 2, 0)
-  g.add(wallRight)
-
-  // Flaps — two open, two folded in
-  // Back flap (open, tilted back)
-  const flapBack = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.2, 2.5), cardboard)
-  flapBack.position.set(0, 4.2, -3.8)
-  flapBack.rotation.x = -0.7
-  g.add(flapBack)
-
-  // Front flap (open, tilted forward)
-  const flapFront = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.2, 2.5), cardboard)
-  flapFront.position.set(0, 4.2, 3.8)
-  flapFront.rotation.x = 0.5
-  g.add(flapFront)
-
-  // Side flaps (folded inward)
-  const flapLeft = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.2, 4.6), cardboard)
-  flapLeft.position.set(-3.4, 4.1, 0)
-  flapLeft.rotation.z = 0.3
-  g.add(flapLeft)
-
-  const flapRight = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.2, 4.6), cardboard)
-  flapRight.position.set(3.4, 4.1, 0)
-  flapRight.rotation.z = -0.3
-  g.add(flapRight)
-
-  // Tape strips
-  const tape1 = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.5, 0.05), tapeMat)
-  tape1.position.set(0, 2, 2.52)
-  g.add(tape1)
-  const tape2 = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.5, 0.05), tapeMat)
-  tape2.position.set(0, 2, -2.52)
-  g.add(tape2)
-
-  // Items peeking out — small colored boxes inside
-  const itemMat1 = new THREE.MeshPhongMaterial({ color: '#4488CC', shininess: 30 })
-  const item1 = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 1.5), itemMat1)
-  item1.position.set(-1, 3.5, 0.5)
-  item1.rotation.y = 0.2
-  g.add(item1)
-
-  const itemMat2 = new THREE.MeshPhongMaterial({ color: '#CC4444', shininess: 30 })
-  const item2 = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 2, 12), itemMat2)
-  item2.position.set(1.5, 3.2, -0.5)
-  g.add(item2)
-
-  // "UNPACKED" text on front wall
-  const uTC = document.createElement('canvas')
-  uTC.width = 512; uTC.height = 128
-  const uTx = uTC.getContext('2d')!
-  uTx.font = 'bold 48px system-ui, sans-serif'
-  uTx.fillStyle = 'rgba(120,80,50,0.7)'
-  uTx.textAlign = 'center'; uTx.textBaseline = 'middle'
-  uTx.fillText('UNPACKED', 256, 64)
-  const uTex = new THREE.CanvasTexture(uTC)
-  const uTMat = new THREE.MeshBasicMaterial({ map: uTex, transparent: true, side: THREE.DoubleSide })
-  const uText = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), uTMat)
-  uText.position.set(0, 1.5, 2.55)
-  g.add(uText)
-
-  return g
-}
-
-function buildTruck(THREE: typeof import('three')): import('three').Group {
-  const g = new THREE.Group()
-  const trailerMat = new THREE.MeshPhongMaterial({ color: '#25BA3B', shininess: 30 })
-  const cabMat = new THREE.MeshPhongMaterial({ color: '#1a8a2a', shininess: 35 })
-  const metalMat = new THREE.MeshPhongMaterial({ color: '#666', shininess: 60 })
-  const winMat = new THREE.MeshPhongMaterial({ color: '#88CCFF', transparent: true, opacity: 0.7, shininess: 80 })
-  const wheelMat = new THREE.MeshPhongMaterial({ color: '#222', shininess: 20 })
-  const tireMat = new THREE.MeshPhongMaterial({ color: '#111', shininess: 5 })
-
-  // Trailer body — rounded edges
-  const trailer = new THREE.Mesh(new THREE.BoxGeometry(9, 4.5, 4.2, 2, 2, 2), trailerMat)
-  g.add(trailer)
-
-  // Trailer ridges (sides)
-  for (let x = -4; x <= 4; x += 0.8) {
-    for (const z of [-2.12, 2.12]) {
-      const ridge = new THREE.Mesh(new THREE.BoxGeometry(0.06, 4.3, 0.06), new THREE.MeshPhongMaterial({ color: '#1a7a2a' }))
-      ridge.position.set(x, 0, z)
-      g.add(ridge)
-    }
-  }
-
-  // Cab
-  const cab = new THREE.Mesh(new THREE.BoxGeometry(3.5, 4, 4, 2, 2, 2), cabMat)
-  cab.position.set(6.2, 0, 0)
-  g.add(cab)
-
-  // Windshield
-  const windshield = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.5), winMat)
-  windshield.position.set(8, 0.5, 0)
-  windshield.rotation.y = Math.PI / 2
-  g.add(windshield)
-
-  // Side windows
-  for (const z of [-2.02, 2.02]) {
-    const sideWin = new THREE.Mesh(new THREE.PlaneGeometry(2, 1.5), winMat)
-    sideWin.position.set(6.2, 0.5, z)
-    sideWin.rotation.y = z > 0 ? 0 : Math.PI
-    g.add(sideWin)
-  }
-
-  // Headlights
-  const lightMat = new THREE.MeshPhongMaterial({ color: '#FFEE88', emissive: '#443300', shininess: 80 })
-  for (const z of [-1.2, 1.2]) {
-    const light = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), lightMat)
-    light.position.set(7.95, -0.8, z)
-    g.add(light)
-  }
-
-  // Bumper
-  const bumper = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.8, 4.4), metalMat)
-  bumper.position.set(8, -1.5, 0)
-  g.add(bumper)
-
-  // Wheels — more detailed
-  for (const x of [-3, 0.5, 5, 6.5]) {
-    for (const z of [-2.3, 2.3]) {
-      // Tire — torus default lies in XY plane (hole faces Z = outward) — no rotation needed
-      const tire = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.35, 12, 16), tireMat)
-      tire.position.set(x, -2.6, z)
-      g.add(tire)
-      // Hub cap — disc facing outward
-      const hub = new THREE.Mesh(new THREE.CircleGeometry(0.4, 12), metalMat)
-      hub.position.set(x, -2.6, z > 0 ? z + 0.35 : z - 0.35)
-      hub.rotation.x = 0
-      g.add(hub)
-    }
-  }
-
-  // Mudflaps
-  for (const z of [-2.5, 2.5]) {
-    const flap = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1, 0.05), new THREE.MeshPhongMaterial({ color: '#111' }))
-    flap.position.set(-3.8, -2.2, z)
-    g.add(flap)
-  }
-
-  // Checkmark on trailer (collected = done)
-  const checkCanvas = document.createElement('canvas')
-  const checkCtx = checkCanvas.getContext('2d')!
-  checkCanvas.width = 128
-  checkCanvas.height = 128
-  checkCtx.font = 'bold 80px sans-serif'
-  checkCtx.fillStyle = 'white'
-  checkCtx.textAlign = 'center'
-  checkCtx.textBaseline = 'middle'
-  checkCtx.fillText('✓', 64, 64)
-  const checkTex = new THREE.CanvasTexture(checkCanvas)
-  const checkMat = new THREE.SpriteMaterial({ map: checkTex, transparent: true })
-  const checkSprite = new THREE.Sprite(checkMat)
-  checkSprite.scale.set(3, 3, 1)
-  checkSprite.position.set(0, 0, 2.2)
-  g.add(checkSprite)
-
-  // "COLLECTED" text on trailer side
-  const tTC = document.createElement('canvas')
-  tTC.width = 512; tTC.height = 128
-  const tTx = tTC.getContext('2d')!
-  tTx.font = 'bold 44px system-ui, sans-serif'
-  tTx.fillStyle = 'rgba(255,255,255,0.8)'
-  tTx.textAlign = 'center'; tTx.textBaseline = 'middle'
-  tTx.fillText('COLLECTED', 256, 64)
-  const tTex = new THREE.CanvasTexture(tTC)
-  const tTMat = new THREE.MeshBasicMaterial({ map: tTex, transparent: true, side: THREE.DoubleSide })
-  const tText = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), tTMat)
-  tText.position.set(0, 0, -2.15)
-  g.add(tText)
-
-  return g
-}
-
-const MILESTONE_BUILDERS: Record<string, (THREE: typeof import('three')) => import('three').Group> = {
-  on_vessel: buildShip,
-  at_wharf: buildWharf,
-  in_yard: buildContainer,
-  unpacked: buildOpenBox,
-  collected: buildTruck,
+  const texture = new THREE.CanvasTexture(canvas)
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+  const sprite = new THREE.Sprite(mat)
+  const spriteW = 22
+  sprite.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
+  return sprite
 }
 
 // --- Data builder ---
@@ -567,7 +324,6 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       fy: Math.sin(angle) * r,
       fz: Math.cos(angle) * r,
     })
-    // Connect to actor AND nearest milestone
     links.push({ source: `journey:${journey.id}`, target: `actor:${journey.primary_actor}`, type: 'activates' })
     const jMilestoneIdx = Math.max(0, Math.min(states.length - 1, Math.round(xIdx)))
     links.push({ source: `journey:${journey.id}`, target: `milestone:${states[jMilestoneIdx]}`, type: 'activates' })
@@ -590,7 +346,6 @@ function buildLifecycleData(model: IntentModel): { nodes: LifecycleNode[]; links
       fy: Math.sin(angle) * r,
       fz: Math.cos(angle) * r,
     })
-    // Connect to applies_to AND nearest milestone
     for (const ref of rule.applies_to) {
       if (nodes.some(n => n.id === `entity:${ref}`))
         links.push({ source: `rule:${rule.id}`, target: `entity:${ref}`, type: 'governs' })
@@ -635,11 +390,9 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
     const graph = graphRef.current as any
     const { nodes } = fullData.current
 
-    // Update graph nodes
     const visibleNodes = nodes.filter(n => n.type === 'milestone' || !hiddenTypes.has(n.type))
     graph.graphData({ nodes: visibleNodes, links: [] })
 
-    // Update connection line visibility
     const lines = graph.__connectionLines as Array<{ mesh: any; sourceType: string; targetType: string }> | undefined
     if (lines) {
       for (const line of lines) {
@@ -665,12 +418,15 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       const hbl = model.entities.find(e => e.id === 'hbl')
       const states = hbl?.lifecycle.states ?? []
 
+      // Load all icon textures
+      const textures = await loadAllIconTextures(THREE)
+      if (destroyed) return
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graph: any = ForceGraph3D()(containerRef.current)
 
-      // --- Tube (thin pipeline) ---
+      // --- Spine tube (pipeline) ---
       const spinePoints = states.map((_, i) => new THREE.Vector3(i * SPINE_SPACING, 0, 0))
-      // Extend slightly beyond first/last milestone
       if (spinePoints.length >= 2) {
         spinePoints.unshift(new THREE.Vector3(-15, 0, 0))
         spinePoints.push(new THREE.Vector3((states.length - 1) * SPINE_SPACING + 8, 0, 0))
@@ -680,12 +436,10 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         const tubeMat = new THREE.MeshLambertMaterial({ color: '#002C61', transparent: true, opacity: 0.25 })
         graph.scene().add(new THREE.Mesh(tubeGeo, tubeMat))
 
-        // Glowing inner tube
         const innerGeo = new THREE.TubeGeometry(curve, 64, 0.6, 8, false)
         const innerMat = new THREE.MeshBasicMaterial({ color: '#0081F2', transparent: true, opacity: 0.4 })
         graph.scene().add(new THREE.Mesh(innerGeo, innerMat))
 
-        // Animated arrow
         const arrowGeo = new THREE.ConeGeometry(1.8, 5, 6)
         arrowGeo.rotateZ(-Math.PI / 2)
         const arrowMat = new THREE.MeshLambertMaterial({ color: '#0081F2' })
@@ -707,18 +461,26 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         animateArrow()
       }
 
-      // --- Low-poly milestone models (added directly to scene, not as graph nodes) ---
+      // --- Milestone icon sprites ---
       for (let i = 0; i < states.length; i++) {
-        const builder = MILESTONE_BUILDERS[states[i]]
-        if (!builder) continue
-        const milestoneModel = builder(THREE)
-        milestoneModel.position.set(i * SPINE_SPACING, 0, 0)
-        milestoneModel.scale.setScalar(1.2)
-        graph.scene().add(milestoneModel)
+        const iconKey = MILESTONE_ICONS[states[i]]
+        const texture = textures.get(iconKey)
+        if (!texture) continue
+
+        const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+        const sprite = new THREE.Sprite(mat)
+        sprite.scale.set(14, 14, 1)
+        sprite.position.set(i * SPINE_SPACING, 0, 0)
+        graph.scene().add(sprite)
+
+        // Label below milestone
+        const label = makeTextSprite(THREE, MILESTONE_LABELS[states[i]] ?? states[i], 48, '#002C61')
+        label.position.set(i * SPINE_SPACING, -10, 0)
+        graph.scene().add(label)
       }
 
-      // --- Draw connection lines as thin cylinders (WebGL lines don't support width) ---
-      const tubeMat = new THREE.MeshBasicMaterial({ color: '#AAAAAA' })
+      // --- Connection lines ---
+      const lineMat = new THREE.MeshBasicMaterial({ color: '#AAAAAA' })
       const nodePositions = new Map<string, { x: number; y: number; z: number }>()
       const nodeTypeMap = new Map<string, string>()
       for (const n of nodes) {
@@ -743,7 +505,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         const length = start.distanceTo(end)
 
         const cylGeo = new THREE.CylinderGeometry(0.15, 0.15, length, 4, 1)
-        const cyl = new THREE.Mesh(cylGeo, tubeMat)
+        const cyl = new THREE.Mesh(cylGeo, lineMat)
         cyl.position.copy(mid)
         cyl.lookAt(end)
         cyl.rotateX(Math.PI / 2)
@@ -756,11 +518,9 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
         })
       }
 
-      // Store for toggle updates
       ;(graph as any).__connectionLines = connectionLines
 
       // --- Graph setup ---
-      // Milestones in graph data as invisible nodes (link targets)
       graph.graphData({ nodes, links: [] })
         .backgroundColor('#F8F8F7')
         .nodeLabel((node: LifecycleNode) => `
@@ -771,81 +531,24 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
           </div>
         `)
         .nodeThreeObject((node: LifecycleNode) => {
-          const color = LIFECYCLE_COLORS[node.type]
           const group = new THREE.Group()
-          let topY = 4 // default label offset
 
-          if (node.type === 'milestone') {
-            // Invisible — the 3D model is added to scene directly
-            return group
+          if (node.type === 'milestone') return group
+
+          const iconKey = TYPE_ICONS[node.type]
+          const texture = textures.get(iconKey)
+          const size = ICON_SIZES[node.type] ?? 8
+
+          if (texture) {
+            const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
+            const sprite = new THREE.Sprite(mat)
+            sprite.scale.set(size, size, 1)
+            group.add(sprite)
           }
 
-          if (node.type === 'actor') {
-            // Person icon: head sphere + solid body (squashed ellipsoid)
-            const personMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            // Head
-            const head = new THREE.Mesh(new THREE.SphereGeometry(2, 12, 12), personMat)
-            head.position.set(0, 4, 0)
-            group.add(head)
-            // Body — full sphere, squashed vertically and widened
-            const bodyGeo = new THREE.SphereGeometry(3.2, 12, 12)
-            bodyGeo.scale(1, 0.6, 0.8)
-            const body = new THREE.Mesh(bodyGeo, personMat)
-            body.position.set(0, 1, 0)
-            group.add(body)
-            // Neck
-            const neck = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 1, 16), personMat)
-            neck.position.set(0, 2.5, 0)
-            group.add(neck)
-            topY = 7.5
-
-          } else if (node.type === 'journey') {
-            // Pyramid (4-sided cone)
-            const pyramidMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            const pyramidGeo = new THREE.ConeGeometry(3, 6, 4)
-            group.add(new THREE.Mesh(pyramidGeo, pyramidMat))
-            topY = 5
-
-          } else if (node.type === 'rule') {
-            // Solid cool gray sphere
-            const ruleMat = new THREE.MeshPhongMaterial({ color: '#9CA3AF', shininess: 40 })
-            group.add(new THREE.Mesh(new THREE.SphereGeometry(3, 12, 12), ruleMat))
-            topY = 4.5
-
-          } else if (node.type === 'constraint') {
-            // Octahedron (stop sign shape)
-            const constMat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            group.add(new THREE.Mesh(new THREE.OctahedronGeometry(3, 0), constMat))
-            topY = 5
-
-          } else {
-            // Entity / default: sphere
-            const radius = Math.max(3, 2 + Math.min(node.val, 15) * 0.2)
-            const mat = new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
-            group.add(new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 12), mat))
-            topY = radius + 2
-          }
-
-          // Label
-          const canvasW = 1024
-          const canvasH = 128
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')!
-          canvas.width = canvasW
-          canvas.height = canvasH
-          ctx.font = '600 44px system-ui, -apple-system, sans-serif'
-          ctx.fillStyle = '#34322D'
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          const name = node.name.length > 20 ? node.name.slice(0, 18) + '…' : node.name
-          ctx.fillText(name, canvasW / 2, canvasH / 2)
-
-          const texture = new THREE.CanvasTexture(canvas)
-          const labelMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false })
-          const label = new THREE.Sprite(labelMat)
-          const spriteW = 22
-          label.scale.set(spriteW, spriteW * (canvasH / canvasW), 1)
-          label.position.set(0, topY + 1.5, 0)
+          // Label below icon
+          const label = makeTextSprite(THREE, node.name)
+          label.position.set(0, -(size / 2 + 2), 0)
           group.add(label)
 
           return group
@@ -888,9 +591,8 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
       // Isometric camera
       const midX = (states.length - 1) * SPINE_SPACING / 2
       const dist = 280
-      // Isometric angles: 45° azimuth, ~35° elevation
       const azimuth = Math.PI / 4
-      const elevation = Math.atan(1 / Math.sqrt(2)) // ~35.264°
+      const elevation = Math.atan(1 / Math.sqrt(2))
       graph.cameraPosition(
         {
           x: midX + dist * Math.cos(elevation) * Math.sin(azimuth),
@@ -958,7 +660,7 @@ export function Graph3DLifecycle({ model }: { model: IntentModel }) {
             >
               {LIFECYCLE_LABELS[selectedNode.type]}
             </span>
-            <button type="button" onClick={() => setSelectedNode(null)} className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>✕</button>
+            <button type="button" onClick={() => setSelectedNode(null)} className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>&#x2715;</button>
           </div>
           <h3 className="text-sm font-semibold m-0 mb-1" style={{ color: 'var(--text-primary)' }}>{selectedNode.name}</h3>
           <p className="text-xs leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>{selectedNode.description}</p>

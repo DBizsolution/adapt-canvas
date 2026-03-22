@@ -11,7 +11,7 @@ The intent model is the **single source of truth** for what the VBS Pickup Porta
 | Pillar | Count | What it captures | Example |
 |--------|-------|-----------------|---------|
 | **Actors** | 5 | Who uses the system, how they authenticate, what they can do | LSP logs in with username/password, can delegate or book |
-| **Entities** | 6 + 5 integrations | Data objects with fields and lifecycle states | HBL has milestone (on_vessel → collected) and hbl_status (unassigned → booked) |
+| **Entities** | 7 + 5 integrations | Data objects with fields and lifecycle states | HBL has milestone (on_vessel → collected) and hbl_status (unassigned → booked) |
 | **Journeys** | 14 | Step-by-step workflows from a specific actor's perspective | "LSP Books a Pickup" — 8 steps from selection to confirmation |
 | **Business Rules** | 21 | Hard constraints the system must enforce | BR-004: LSP can either delegate or book per HBL, never both |
 | **Constraints** | 5 | Platform-level limits (access, admin, platform, notification) | C-007: Desktop/laptop only, no mobile responsive design |

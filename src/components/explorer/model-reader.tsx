@@ -125,7 +125,8 @@ export function ModelReader({ model }: { model: IntentModel }) {
           <div className="grid grid-cols-2 gap-2">
             {([
               ['actors', 'Actors', model.actors.length],
-              ['entities', 'Entities', model.entities.length],
+              ['entities', 'Entities', model.entities.filter(e => !e.is_integration).length],
+              ['integrations', 'Integrations', model.entities.filter(e => e.is_integration).length],
               ['journeys', 'Journeys', model.journeys.length],
               ['business_rules', 'Business Rules', model.business_rules.length],
               ['constraints', 'Constraints', model.constraints.length],
@@ -174,8 +175,8 @@ export function ModelReader({ model }: { model: IntentModel }) {
 
         {/* Entities */}
         <div id="section-entities" className="mb-10">
-          <SectionHeading title="Entities" count={model.entities.length} section="entities" />
-          {model.entities.map(entity => {
+          <SectionHeading title="Entities" count={model.entities.filter(e => !e.is_integration).length} section="entities" />
+          {model.entities.filter(e => !e.is_integration).map(entity => {
             const isExpanded = expandedSections.has(entity.id)
             return (
               <Card key={entity.id} id={`entity-${entity.id}`}>
@@ -241,6 +242,29 @@ export function ModelReader({ model }: { model: IntentModel }) {
               </Card>
             )
           })}
+        </div>
+
+        {/* Integrations */}
+        <div id="section-integrations" className="mb-10">
+          <SectionHeading title="Integrations" count={model.entities.filter(e => e.is_integration).length} section="entities" />
+          {model.entities.filter(e => e.is_integration).map(entity => (
+            <Card key={entity.id} id={`entity-${entity.id}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md" style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)' }}>Integration</span>
+                <h3 className="text-sm font-bold m-0" style={{ color: 'var(--text-primary)' }}>{entity.name}</h3>
+              </div>
+              <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{entity.description}</p>
+              {entity.key_fields.map(f => (
+                <div key={f.name} className="py-1.5" style={{ borderBottom: '1px solid var(--border-default)' }}>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-mono text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
+                  </div>
+                  <p className="text-xs leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>{f.description}</p>
+                  {f.warn && <p className="text-xs mt-1 mb-0 px-2 py-1 rounded" style={{ background: 'rgba(245,158,11,0.08)', color: '#92400E' }}>{f.warn}</p>}
+                </div>
+              ))}
+            </Card>
+          ))}
         </div>
 
         {/* Journeys */}

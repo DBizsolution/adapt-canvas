@@ -281,7 +281,7 @@ Both fields say *"Optional — may not be required for decision-making."* They'r
 |------|--------|-------|
 | Business rules | 30 | 21 |
 | Constraints | 8 | 5 |
-| Entities | 11 | 6 + 5 tagged integrations |
+| Entities | 11 | 7 + 5 tagged integrations (was 11, now separated) |
 | HBL fields | 19 | 18 (-1 removed, +1 computed) |
 | Total rules/constraints | 38 | 26 |
 

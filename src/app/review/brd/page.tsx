@@ -152,7 +152,7 @@ export default async function BRDPage() {
             <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--acfs-navy)' }}>
               3. Entities — Key Data with Lifecycle
             </h2>
-            {model.entities.map(entity => (
+            {model.entities.filter(e => !e.is_integration).map(entity => (
               <div key={entity.id} className="mb-10">
                 <h3 className="text-[17px] font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
                   {entity.name}
@@ -241,6 +241,34 @@ export default async function BRDPage() {
               </div>
             ))}
           </section>
+
+          {/* 3b. Integrations */}
+          {model.entities.some(e => e.is_integration) && (
+            <section className="mt-8">
+              <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
+                Integrations
+              </h3>
+              {model.entities.filter(e => e.is_integration).map(entity => (
+                <div key={entity.id} className="mb-6">
+                  <h4 className="text-[15px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{entity.name}</h4>
+                  <p className="text-[14px] leading-7 mb-3" style={{ color: 'var(--text-secondary)' }}>{entity.description}</p>
+                  {entity.key_fields.length > 0 && (
+                    <table className="mb-3 w-full text-[14px] leading-6 border-collapse">
+                      <tbody>
+                        {entity.key_fields.map(f => (
+                          <tr key={f.name} style={{ borderBottom: '1px solid var(--border-default)' }}>
+                            <td className="py-2 pr-4 font-medium whitespace-nowrap align-top" style={{ color: 'var(--text-primary)', width: '20%' }}>{f.name}</td>
+                            <td className="py-2" style={{ color: 'var(--text-secondary)' }}>{f.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                  {entity.lifecycle.warn && <WarnCallout text={entity.lifecycle.warn} />}
+                </div>
+              ))}
+            </section>
+          )}
 
           <SectionDivider />
 

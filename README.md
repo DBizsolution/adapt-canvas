@@ -9,7 +9,7 @@ Built with Next.js, React, TypeScript, TailwindCSS, and ShadCN.
 | Pillar | Count | Examples |
 |--------|-------|---------|
 | **Actors** | 5 | LSP, P4TC, Driver, ACFS Internal, Gatehouse |
-| **Entities** | 6 + 5 integrations | HBL, Booking, Pickup Slot, Delivery Order, Delegation, Driver Record |
+| **Entities** | 7 + 5 integrations | HBL, Booking, Pickup Slot, Site, Delivery Order, Delegation, Driver Record |
 | **Journeys** | 14 | LSP Books a Pickup, ACFS Validates DOs, P4TC Books a Pickup |
 | **Business Rules** | 21 | Booking gates, DO policy, modification cutoffs, fee calculation |
 | **Constraints** | 5 | Desktop only, no persistent P4TC credentials, DB-seeded sites |

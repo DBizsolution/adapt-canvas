@@ -82,7 +82,7 @@ function createPlatformTexture(actor: Actor): THREE.CanvasTexture {
 }
 
 export function GlassPlatform({ actor, position, selected, faded, onClick }: GlassPlatformProps) {
-  const [hovered, setHovered] = useState(false)
+  const [_hovered, setHovered] = useState(false)
   const invalidate = useThree(s => s.invalidate)
 
   const texture = useMemo(() => createPlatformTexture(actor), [actor])

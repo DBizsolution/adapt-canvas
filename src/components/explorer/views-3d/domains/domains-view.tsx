@@ -23,8 +23,8 @@ export function DomainsView({ model }: ViewProps) {
     })
   }, [])
 
-  // Entity position lookup
-  const entityPositionMap = useMemo(() => {
+  // Entity position lookup (used by journey threads)
+  const _entityPositionMap = useMemo(() => {
     const map = new Map<string, [number, number, number]>()
     for (const ec of data.entityCards) map.set(ec.id, ec.position)
     return map

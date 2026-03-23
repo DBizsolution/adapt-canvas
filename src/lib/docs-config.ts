@@ -22,6 +22,7 @@ const staticDocs: DocEntry[] = [
   { slug: 'changelog', label: 'Intent Model Changelog', path: join(DOCS, 'project', 'CHANGELOG.md'), category: 'project' },
 
   // Rahul's Build Log — working docs, superseded notes, build specs
+  { slug: 'how-i-built-this', label: 'How I Built This', path: join(DOCS, 'project', 'how-i-built-this.md'), category: 'build-log' },
   { slug: 'how-it-works', label: 'How It Works (superseded by Team Guide)', path: join(DOCS, 'project', 'how-it-works.md'), category: 'build-log' },
   { slug: 'interface-guide', label: 'VBS Interface Guide', path: join(DOCS, 'project', 'VBS-interface-guide.md'), category: 'build-log' },
   { slug: 'pm-questions', label: 'PM Questions & Answers', path: join(DOCS, 'project', 'vbs-pm-questions.md'), category: 'build-log' },

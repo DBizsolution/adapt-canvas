@@ -44,11 +44,27 @@ Every model item renders as a floating card in 3D space — no spheres, no meshe
 - No bloom
 - Optional subtle depth-of-field on far cards when something is selected
 
+### Card Rendering Strategy
+Cards are **canvas-drawn textures on billboarded planes** — not HTML overlays. Each card renders its content (icon, text, stat) to an offscreen canvas, then applies it as a texture to a `PlaneGeometry` with `MeshStandardMaterial` (opacity 0.75-0.85, transparent). This avoids the performance ceiling of Drei's `<Html>` (separate DOM overlay per instance, backdrop-filter kills FPS at scale).
+
+The frosted glass look comes from the material, not CSS: semi-transparent white with a subtle environment map reflection and soft emissive tint. No `<MeshTransmissionMaterial>` (too expensive — extra render pass per card). Reserve `<Html>` only for the single hovered/focused card tooltip if canvas text isn't sufficient.
+
+Card sizes in scene units:
+- **Large** (Anatomy main panel, Domains platforms): 8 × 6
+- **Medium** (Galaxy entities/actors/journeys, Flow step cards): 4 × 3
+- **Small** (Galaxy rules/constraints, orbiting cards, branch cards): 2.5 × 2
+
+### Rendering Model
+- **On-demand rendering** by default — only re-render when scene state changes (selection, hover, filter toggle, camera move)
+- **Continuous loop** activates during: presentation mode auto-orbit, particle drift on selected connections, step-through animation, entry/exit transitions
+- Continuous loop deactivates when interaction ends (e.g., deselection stops particle drift)
+
 ### Tech Stack
 - React Three Fiber + Drei (replacing raw 3d-force-graph)
-- Key Drei utilities: `<Billboard>`, `<Html>`, `<Float>`, `<MeshTransmissionMaterial>`, `<OrbitControls>`
-- On-demand rendering (only re-render when scene changes)
-- Instanced geometry where possible for performance
+- Key Drei utilities: `<Billboard>`, `<Float>`, `<OrbitControls>`, `<Text>` (for cluster labels)
+- `d3-force-3d` for Galaxy seeded layout (standalone, not bundled in 3d-force-graph)
+- `@react-three/postprocessing` — SSAO for depth (applied to WebGL layer only, not HTML overlays)
+- Desktop-only — no tablet/mobile targets. Minimum viewport: 1024px wide.
 
 ---
 
@@ -64,7 +80,13 @@ Items cluster by type in soft zones — archipelago, not spreadsheet:
 - Rules scatter lower-center
 - Constraints and open questions at the periphery
 
-Positioning uses a seeded force simulation that runs once on load, then locks. Same layout every time for the same model — no randomness between visits.
+Positioning uses `d3-force-3d` with a deterministic seed (hash of model version + item count). Type-specific cluster forces pull items toward their zone center. Runs 300 ticks on mount, then locks all positions. Same layout every time for the same model — no randomness between visits.
+
+Force parameters:
+- `forceCenter` at origin
+- `forceManyBody` charge: -60
+- `forceLink` distance: 25 (cross-reference edges)
+- Custom radial forces per type pushing toward zone centers (entities→origin, actors→upper-left, journeys→right, rules→lower-center, constraints/questions→periphery)
 
 ### Cards
 Standard glass cards. Size varies by importance:
@@ -81,7 +103,7 @@ Cross-reference lines hidden by default. Appear on hover/selection. Subtle parti
 Floating translucent text ("Entities", "Actors", etc.) behind each cluster, large and faded (15% opacity).
 
 ### Filter Bar
-Bottom of canvas. Pill buttons to toggle type visibility (filled = active, outline = inactive). Cards animate in/out with soft fade + scale.
+Bottom of canvas. Pill buttons to toggle type visibility (filled = active, outline = inactive). Default: all types visible. Cards animate in/out with soft fade + scale. Filtering hides cards in-place (no re-layout) and hides their connections.
 
 ### Presentation Mode
 Button or keyboard shortcut. Auto-orbits camera slowly. Cards face camera as it moves.
@@ -113,6 +135,8 @@ Each step surfaces what it touches as smaller cards branching vertically:
 - Rule cards branch down-right (amber)
 - Connected by curved lines to the step card
 
+**How step→item relationships are inferred:** The model does not store per-step references. `flows-data.ts` infers them by text matching step `title` and `detail` against entity names, actor names, and rule `applies_to` arrays — the same heuristic the existing lifecycle/actor views use for classification. The journey's `primary_actor` is always linked to step 1. This is imprecise but good enough — false positives (an extra card) are harmless, false negatives (a missing card) can be manually tagged later if the model adds per-step refs.
+
 ### Journey Selector
 Left sidebar overlay (glass style). Lists all 14 journeys. Click to load. Entry animation: rail draws left-to-right, step cards pop in sequentially (80ms stagger), branch cards fade in after.
 
@@ -137,11 +161,10 @@ Large frosted glass panel at center — the "specimen on the table":
 
 ### Lifecycle Rail
 Horizontal rail below main panel:
-- Each state is a small glass card on a timeline
-- Directional arrows between states
-- Transitions labeled (trigger text, small type)
-- Guards shown as tiny lock icons
-- Left-to-right flow
+- Each state is a small glass card on a timeline, left-to-right
+- Directional arrows between states, labeled with `transition.trigger` text (small type below the arrow)
+- `transition.guard` rendered as a tiny lock icon on the arrow with guard text on hover
+- `transition.from` → `transition.to` determines arrow direction and position on the rail
 
 ### Orbiting Cards
 Related items float around the main panel:
@@ -233,6 +256,22 @@ src/components/explorer/
       domains-data.ts       — model → actor platform data
   explorer-tabs.tsx          — updated tab switcher (4 new tabs)
 ```
+
+### Routing
+All four views live as tabs within the existing explorer page (same as current 3D views). The explorer's detail panel (`detail-panel.tsx`) handles double-click → detail. Tab switcher (`explorer-tabs.tsx`) updated with: Galaxy, Flows, Anatomy, Domains (replacing Force Graph, Lifecycle, Actor Layers).
+
+### Domains platform component
+The Domains view platforms are a separate `glass-platform.tsx` component — not a variant of `glass-card.tsx`. Platforms are tilted planes with multi-row content, not billboarded single-stat cards. They share the same material (semi-transparent white, environment map) but have different geometry and layout logic.
+
+### Connection component variants
+`connection-line.tsx` is a base component (curved bezier between two points). View-specific behaviors are props:
+- `visible` — Galaxy hides by default, others show
+- `color` — default gray, overridden by type color or journey color
+- `animated` — particle drift on/off
+- `thickness` — thin for Galaxy/Anatomy, slightly thicker for Flows rail and Domains threads
+
+### Deferred items
+Items with `deferred: true` (some actors, journeys) render with reduced opacity (50%) and a dashed left edge strip instead of solid. Present in all views but visually recede.
 
 ### Performance budget
 - Target 60fps on mid-range laptop

@@ -9,6 +9,7 @@ import { ModelSource } from './model-source'
 import { GalaxyView } from './views-3d/galaxy/galaxy-view'
 import { FlowsView } from './views-3d/flows/flows-view'
 import { AnatomyView } from './views-3d/anatomy/anatomy-view'
+import { DomainsView } from './views-3d/domains/domains-view'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
@@ -101,7 +102,7 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
           <AnatomyView model={model} />
         )}
         {activeTab === '3d' && view3d === 'domains' && (
-          <div className="flex items-center justify-center h-full text-sm" style={{ color: '#858481' }}>Domains view — coming soon</div>
+          <DomainsView model={model} />
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

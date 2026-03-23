@@ -6,9 +6,7 @@ import type { IntentModel } from '@/domain/intent-model/types'
 import { ExplorerCanvas } from './explorer-canvas'
 import { ModelReader } from './model-reader'
 import { ModelSource } from './model-source'
-import { Graph3D } from './graph-3d'
-import { Graph3DLifecycle } from './graph-3d-lifecycle'
-import { Graph3DActors } from './graph-3d-actors'
+import { GalaxyView } from './views-3d/galaxy/galaxy-view'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
@@ -19,9 +17,10 @@ const tabs = [
 ] as const
 
 const VIEWS_3D = [
-  { id: 'force', label: 'Force' },
-  { id: 'lifecycle', label: 'Lifecycle' },
-  { id: 'actors', label: 'Actor Layers' },
+  { id: 'galaxy', label: 'Galaxy' },
+  { id: 'flows', label: 'Flows' },
+  { id: 'anatomy', label: 'Anatomy' },
+  { id: 'domains', label: 'Domains' },
 ] as const
 
 type View3D = (typeof VIEWS_3D)[number]['id']
@@ -30,7 +29,7 @@ type TabId = (typeof tabs)[number]['id']
 
 export function ExplorerTabs({ model, savedPositions, modelSource }: { model: IntentModel; savedPositions: ExplorerPositions; modelSource: string }) {
   const [activeTab, setActiveTab] = useState<TabId>('graph')
-  const [view3d, setView3d] = useState<View3D>('force')
+  const [view3d, setView3d] = useState<View3D>('galaxy')
 
   return (
     <div className="flex flex-col h-full">
@@ -90,14 +89,17 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
         {activeTab === 'graph' && (
           <ExplorerCanvas model={model} savedPositions={savedPositions} />
         )}
-        {activeTab === '3d' && view3d === 'force' && (
-          <Graph3D model={model} />
+        {activeTab === '3d' && view3d === 'galaxy' && (
+          <GalaxyView model={model} />
         )}
-        {activeTab === '3d' && view3d === 'lifecycle' && (
-          <Graph3DLifecycle model={model} />
+        {activeTab === '3d' && view3d === 'flows' && (
+          <div className="flex items-center justify-center h-full text-sm" style={{ color: '#858481' }}>Flows view — coming soon</div>
         )}
-        {activeTab === '3d' && view3d === 'actors' && (
-          <Graph3DActors model={model} />
+        {activeTab === '3d' && view3d === 'anatomy' && (
+          <div className="flex items-center justify-center h-full text-sm" style={{ color: '#858481' }}>Anatomy view — coming soon</div>
+        )}
+        {activeTab === '3d' && view3d === 'domains' && (
+          <div className="flex items-center justify-center h-full text-sm" style={{ color: '#858481' }}>Domains view — coming soon</div>
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

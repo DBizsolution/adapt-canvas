@@ -7,6 +7,7 @@ import { ExplorerCanvas } from './explorer-canvas'
 import { ModelReader } from './model-reader'
 import { ModelSource } from './model-source'
 import { GalaxyView } from './views-3d/galaxy/galaxy-view'
+import { FlowsView } from './views-3d/flows/flows-view'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
@@ -93,7 +94,7 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
           <GalaxyView model={model} />
         )}
         {activeTab === '3d' && view3d === 'flows' && (
-          <div className="flex items-center justify-center h-full text-sm" style={{ color: '#858481' }}>Flows view — coming soon</div>
+          <FlowsView model={model} />
         )}
         {activeTab === '3d' && view3d === 'anatomy' && (
           <div className="flex items-center justify-center h-full text-sm" style={{ color: '#858481' }}>Anatomy view — coming soon</div>

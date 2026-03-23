@@ -10,6 +10,9 @@ import { GalaxyView } from './views-3d/galaxy/galaxy-view'
 import { FlowsView } from './views-3d/flows/flows-view'
 import { AnatomyView } from './views-3d/anatomy/anatomy-view'
 import { DomainsView } from './views-3d/domains/domains-view'
+import { Graph3D } from './graph-3d'
+import { Graph3DLifecycle } from './graph-3d-lifecycle'
+import { Graph3DActors } from './graph-3d-actors'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
@@ -24,6 +27,9 @@ const VIEWS_3D = [
   { id: 'flows', label: 'Flows' },
   { id: 'anatomy', label: 'Anatomy' },
   { id: 'domains', label: 'Domains' },
+  { id: 'force', label: 'Force' },
+  { id: 'lifecycle', label: 'Lifecycle' },
+  { id: 'actors', label: 'Actor Layers' },
 ] as const
 
 type View3D = (typeof VIEWS_3D)[number]['id']
@@ -103,6 +109,15 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
         )}
         {activeTab === '3d' && view3d === 'domains' && (
           <DomainsView model={model} />
+        )}
+        {activeTab === '3d' && view3d === 'force' && (
+          <Graph3D model={model} />
+        )}
+        {activeTab === '3d' && view3d === 'lifecycle' && (
+          <Graph3DLifecycle model={model} />
+        )}
+        {activeTab === '3d' && view3d === 'actors' && (
+          <Graph3DActors model={model} />
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

@@ -21,7 +21,7 @@ export const TableNode = memo(function TableNode({ data, selected }: NodeProps) 
   }, [])
 
   return (
-    <div className="relative" style={{ width: 280 }}>
+    <div className="relative" style={{ width: 360 }}>
       {/* Handles — each position has both source and target for flexible edge routing */}
       <Handle type="target" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-0 !h-0" />
       <Handle type="source" position={Position.Top} id="top-src" className="!bg-transparent !border-0 !w-0 !h-0" />
@@ -50,7 +50,7 @@ export const TableNode = memo(function TableNode({ data, selected }: NodeProps) 
             borderLeft: `4px solid ${ENTITY_COLOR}`,
           }}
         >
-          <span className="text-[13px] font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
             {d.name}
           </span>
           {d.states.length > 0 && (

@@ -10,6 +10,7 @@ const SECTION_COLORS = {
   business_rules: { bg: '#F59E0B18', color: '#F59E0B', label: 'Rule' },
   constraints: { bg: '#EF444418', color: '#EF4444', label: 'Constraint' },
   open_questions: { bg: '#EC489918', color: '#EC4899', label: 'Question' },
+  integrations: { bg: '#6B728018', color: '#6B7280', label: 'Integration' },
 } as const
 
 type SectionKey = keyof typeof SECTION_COLORS

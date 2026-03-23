@@ -91,7 +91,7 @@ function DataModelCanvasInner({ initialNodes, initialEdges, stats }: DataModelCa
         minZoom={0.1}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
-        nodesDraggable={false}
+        nodesDraggable
         nodesConnectable={false}
         edgesFocusable={false}
       >

@@ -25,6 +25,7 @@ export type Actor = {
   description: string
   auth: string
   responsibilities: Responsibility[]
+  deferred?: boolean
 }
 
 export type Responsibility = {
@@ -45,6 +46,7 @@ export type Entity = {
     warn?: string
   }
   is_integration?: boolean
+  deferred?: boolean
 }
 
 export type Field = {
@@ -70,6 +72,7 @@ export type Journey = {
   steps: JourneyStep[]
   success_outcome: string
   warn?: string
+  deferred?: boolean
 }
 
 export type JourneyStep = {

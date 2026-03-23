@@ -10,12 +10,14 @@ import { INTEGRATION_COLOR } from './data-model-graph'
 export const IntegrationNode = memo(function IntegrationNode({ data, selected }: NodeProps) {
   const d = data as unknown as TableNodeData
 
-  // Infer direction from description
-  const isInbound = /inbound/i.test(d.description)
-  const direction = isInbound ? 'Inbound' : 'Outbound'
+  // Infer direction from name or field descriptions
+  const searchText = `${d.name} ${d.description} ${d.fields.map(f => f.description).join(' ')}`
+  const isInbound = /inbound/i.test(searchText)
+  const isOneTime = /one-time/i.test(searchText)
+  const direction = isOneTime ? 'One-time' : isInbound ? 'Inbound' : 'Outbound'
 
   return (
-    <div className="relative" style={{ width: 200 }}>
+    <div className="relative" style={{ width: 'max-content' }}>
       <Handle type="target" position={Position.Top} id="top" className="!bg-transparent !border-0 !w-0 !h-0" />
       <Handle type="source" position={Position.Top} id="top-src" className="!bg-transparent !border-0 !w-0 !h-0" />
       <Handle type="target" position={Position.Left} id="left" className="!bg-transparent !border-0 !w-0 !h-0" />
@@ -42,9 +44,9 @@ export const IntegrationNode = memo(function IntegrationNode({ data, selected }:
         >
           <Plug size={14} style={{ color: INTEGRATION_COLOR }} strokeWidth={1.8} />
         </div>
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col">
           <span
-            className="text-[12px] font-semibold truncate"
+            className="text-[12px] font-semibold whitespace-nowrap"
             style={{ color: 'var(--text-primary)' }}
           >
             {d.name}

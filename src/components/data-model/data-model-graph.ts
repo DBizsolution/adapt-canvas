@@ -19,11 +19,11 @@ export const INTEGRATION_COLOR = '#6B7280'
 
 // --- Dimensions ---
 
-const TABLE_WIDTH = 280
+const TABLE_WIDTH = 360
 const TABLE_HEADER = 40
 const TABLE_ROW = 28
 const TABLE_FOOTER = 32
-const INTEGRATION_WIDTH = 200
+const INTEGRATION_WIDTH = 280
 const INTEGRATION_HEIGHT = 56
 
 function tableHeight(entity: Entity): number {
@@ -143,6 +143,13 @@ export function buildDataModelGraph(model: IntentModel): DataModelGraphData {
     })
   }
 
+  // Build integration direction lookup
+  const integrationDirection = new Map<string, 'inbound' | 'outbound'>()
+  for (const entity of integrationEntities) {
+    const text = `${entity.name} ${entity.description} ${entity.key_fields.map(f => f.description).join(' ')}`
+    integrationDirection.set(entity.id, /inbound/i.test(text) ? 'inbound' : 'outbound')
+  }
+
   // Build edges
   const seenEdgeKeys = new Set<string>()
   const edges: Edge[] = []
@@ -154,8 +161,26 @@ export function buildDataModelGraph(model: IntentModel): DataModelGraphData {
       if (seenEdgeKeys.has(key)) continue
       seenEdgeKeys.add(key)
 
-      const srcNode = g.node(entity.id)
-      const tgtNode = g.node(edge.targetEntityId)
+      // Determine correct source/target for data flow direction
+      // Inbound integrations → domain entity (integration is source)
+      // Domain entity → outbound integrations (integration is target)
+      let source = entity.id
+      let target = edge.targetEntityId
+
+      const srcDir = integrationDirection.get(entity.id)
+      const tgtDir = integrationDirection.get(edge.targetEntityId)
+      if (tgtDir === 'inbound') {
+        // Target is inbound integration, flip so integration is source
+        source = edge.targetEntityId
+        target = entity.id
+      } else if (srcDir === 'outbound') {
+        // Source is outbound integration, flip so domain entity is source
+        source = edge.targetEntityId
+        target = entity.id
+      }
+
+      const srcNode = g.node(source)
+      const tgtNode = g.node(target)
       const handles = pickHandles(
         srcNode?.x ?? 0, srcNode?.y ?? 0,
         tgtNode?.x ?? 0, tgtNode?.y ?? 0,
@@ -165,8 +190,8 @@ export function buildDataModelGraph(model: IntentModel): DataModelGraphData {
 
       edges.push({
         id: `dm-edge-${key}`,
-        source: entity.id,
-        target: edge.targetEntityId,
+        source,
+        target,
         sourceHandle: handles.sourceHandle,
         targetHandle: handles.targetHandle,
         style: EDGE_STYLE,

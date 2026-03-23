@@ -2,9 +2,9 @@ import type { IntentModel } from './types'
 
 export const intentModel: IntentModel = {
   meta: {
-    version: '0.7.1',
+    version: '0.8.0',
     project: 'ACFS VBS Pickup Portal',
-    lastUpdated: '2026-03-22',
+    lastUpdated: '2026-03-23',
     status: 'draft',
   },
   actors: [
@@ -27,7 +27,8 @@ export const intentModel: IntentModel = {
     {
       id: 'p4tc',
       name: 'Party to Collect (P4TC)',
-      description: 'Tertiary/one-off user with no portal credentials. Receives email with shipment roster and document portal URL. No persistent account or history. Replaces previous "One-off Customer" and "Freight Forwarder" (magic-link) actors.',
+      deferred: true,
+      description: 'Deferred to fast follow (BRD v1.5 excludes from Phase 1). Tertiary/one-off user with no portal credentials. Receives email with shipment roster and document portal URL. No persistent account or history. Replaces previous "One-off Customer" and "Freight Forwarder" (magic-link) actors.',
       auth: 'Magic link + OTP. No login required — clicks link from email, verifies via OTP. Portal access scoped to assigned shipments only. Link expires on collection.',
       responsibilities: [
         { id: 'p4tc:r1', description: 'Access portal via emailed link (no login). Verify identity with OTP.' },
@@ -71,7 +72,8 @@ export const intentModel: IntentModel = {
     {
       id: 'gatehouse',
       name: 'Gatehouse',
-      description: 'ACFS gatehouse staff who verify and confirm physical vehicle entry/exit for pickups. Part of the Pickup Verification flow.',
+      deferred: true,
+      description: 'Deferred to fast follow (BRD v1.5 does not reference gatehouse as a separate actor). ACFS gatehouse staff who verify and confirm physical vehicle entry/exit for pickups. Part of the Pickup Verification flow.',
       auth: 'SSO via OAuth/Okta.',
       responsibilities: [
         { id: 'gatehouse:r1', description: 'Verify booking reference, driver identity, and truck rego on arrival.' },
@@ -83,7 +85,7 @@ export const intentModel: IntentModel = {
     {
       id: 'hbl',
       name: 'House Bill of Lading (HBL)',
-      description: 'Primary tracking unit for a shipment. Sourced from Maximus via periodic batch (once or twice daily). Two orthogonal dimensions: milestone (physical progress) and HBL status (delegation/booking state). HBLs exist in a hierarchy: AGS issues master HBLs (often 500-prefix), freight forwarders issue lower-level HBLs (e.g. 4033-prefix for Mondial). Mostly 1:1 parent-child relationship. The portal primarily deals with the lowest-level HBL as the primary identifier. Full audit trail lives on HBL — shows all hops, delegation chain, assignment changes, and status transitions.',
+      description: 'Primary tracking unit for a shipment. Sourced from Maximus via periodic batch (once or twice daily). Two orthogonal dimensions: milestone (physical progress) and HBL status (delegation/booking state). BRD v1.5 flattens these into a single lifecycle (Unassigned → Assigned → Delegated → Booked → Collected) — the mapping is: BRD lifecycle = hbl_status + the "collected" milestone. Both dimensions are needed for implementation since an HBL can be e.g. in_yard + delegated simultaneously. HBLs exist in a hierarchy: AGS issues master HBLs (often 500-prefix), freight forwarders issue lower-level HBLs (e.g. 4033-prefix for Mondial). Mostly 1:1 parent-child relationship. The portal primarily deals with the lowest-level HBL as the primary identifier. Full audit trail lives on HBL — shows all hops, delegation chain, assignment changes, and status transitions.',
       key_fields: [
         { name: 'hbl_number', type: 'string', description: 'Primary identifier — lowest-level house bill number from Maximus.' },
         { name: 'alt_hbl_reference', type: 'string', description: 'Alternative/parent HBL reference (e.g. AGS master HBL). Optional — present when hierarchy exists. Relationship established via AGS data feed, not Maximus.', warn: 'Exact data source for HBL hierarchy relationship TBD — Matt and William resolving (OQ-034).' },
@@ -186,7 +188,8 @@ export const intentModel: IntentModel = {
     {
       id: 'driver_record',
       name: 'Driver Record',
-      description: 'Saved driver details for reuse across bookings. Built up organically by booking parties — no pre-population. Scoped per LSP account — drivers are NOT globally visible across accounts.',
+      deferred: true,
+      description: 'Deferred to fast follow (BRD v1.5 treats driver as booking attributes only for Phase 1). Saved driver details for reuse across bookings. Built up organically by booking parties — no pre-population. Scoped per LSP account — drivers are NOT globally visible across accounts.',
       key_fields: [
         { name: 'driver_name', type: 'string', description: 'Driver full name.' },
         { name: 'driver_license', type: 'string', description: 'Driver license number. Paired with name.' },
@@ -243,6 +246,63 @@ export const intentModel: IntentModel = {
       },
     },
     {
+      id: 'payment',
+      name: 'Payment',
+      description: 'Records payment transactions for bookings. One payment per booking. Tracks gateway used, amount, and transaction status. Added from BRD v1.5 data model.',
+      key_fields: [
+        { name: 'payment_id', type: 'string', description: 'System-generated unique payment reference.' },
+        { name: 'booking_id', type: 'string', description: 'Booking this payment is for.' },
+        { name: 'amount', type: 'number', description: 'Total amount charged.' },
+        { name: 'payment_gateway', type: 'string', description: 'Gateway used (Stripe for Phase 1, abstracted for future swap to Compay).' },
+        { name: 'payment_status', type: "'pending' | 'completed' | 'failed' | 'refunded'", description: 'Transaction status. Refunds are processed outside VBS but status may be updated by ACFS.' },
+        { name: 'payment_timestamp', type: 'date', description: 'When the payment was processed.' },
+      ],
+      lifecycle: {
+        states: ['pending', 'completed', 'failed', 'refunded'],
+        transitions: [
+          { from: 'pending', to: 'completed', trigger: 'Payment gateway confirms successful charge' },
+          { from: 'pending', to: 'failed', trigger: 'Payment gateway rejects or times out' },
+          { from: 'completed', to: 'refunded', trigger: 'ACFS processes refund outside system and updates status' },
+        ],
+      },
+    },
+    {
+      id: 'user',
+      name: 'User',
+      description: 'Portal user account. Covers LSP company accounts, ACFS Admin, and ACFS User roles. Created by ACFS Admin. Added from BRD v1.5 data model.',
+      key_fields: [
+        { name: 'user_id', type: 'string', description: 'System-generated unique ID.' },
+        { name: 'username', type: 'string', description: 'Login identifier. For LSPs: company-level username. For ACFS: SSO identifier.' },
+        { name: 'role', type: "'lsp' | 'acfs_admin' | 'acfs_user'", description: 'User role determining permissions and portal access level.' },
+        { name: 'linked_lsp_id', type: 'string', description: 'For LSP users: the LSP company this account belongs to. Null for ACFS users.' },
+        { name: 'status', type: "'active' | 'inactive'", description: 'Account status. Inactive = soft-deleted (archived). Access and notifications disabled.' },
+      ],
+      lifecycle: {
+        states: ['active', 'inactive'],
+        transitions: [
+          { from: 'active', to: 'inactive', trigger: 'ACFS Admin deactivates/archives user' },
+          { from: 'inactive', to: 'active', trigger: 'ACFS Admin reactivates user' },
+        ],
+      },
+    },
+    {
+      id: 'booking_hbl_link',
+      name: 'Booking–HBL Link',
+      description: 'Junction entity linking bookings to HBLs with per-HBL fee breakdown. Makes the fee calculation per HBL explicit rather than implicit. Added from BRD v1.5 data model to support BR-019.',
+      key_fields: [
+        { name: 'booking_id', type: 'string', description: 'Parent booking reference.' },
+        { name: 'hbl_id', type: 'string', description: 'Linked HBL reference.' },
+        { name: 'chargeable_weight', type: 'number', description: 'Chargeable weight for this HBL at time of booking (max of weight vs volume).' },
+        { name: 'rate', type: 'number', description: 'Rate applied to this HBL at time of booking.' },
+        { name: 'per_hbl_fee', type: 'number', description: 'Calculated fee for this HBL (chargeable_weight × rate).' },
+      ],
+      lifecycle: {
+        states: ['active'],
+        transitions: [],
+        warn: 'Junction entity — no state transitions. Created when booking is confirmed.',
+      },
+    },
+    {
       id: 'integration_maximus',
       name: 'Maximus Integration (Inbound)',
       is_integration: true,
@@ -264,7 +324,7 @@ export const intentModel: IntentModel = {
       id: 'integration_ags',
       name: 'AGS Data Feed (Inbound)',
       is_integration: true,
-      description: 'Provides master HBL references, HBL hierarchy (parent-child relationships), and freight forwarder party data (name, account code). Data is consistent (unlike ICS which has variations across organisations). Matt and William are defining the exact data format and delivery mechanism.',
+      description: 'Provides master HBL references, HBL hierarchy (parent-child relationships), and freight forwarder party data (name, account code). Data is consistent (unlike ICS which has variations across organisations). Matt and William are defining the exact data format and delivery mechanism. Note: BRD v1.5 does not reference AGS — only mentions Maximas. Needs confirmation from Roni/Matt whether AGS is still planned or manual assignment covers the gap for Phase 1.',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Inbound — AGS → Portal' },
         { name: 'frequency', type: 'string', description: 'TBD — Matt and William resolving (OQ-034).' },
@@ -419,6 +479,7 @@ export const intentModel: IntentModel = {
     {
       id: 'p4tc-books-pickup',
       name: 'P4TC Books a Pickup',
+      deferred: true,
       primary_actor: 'p4tc',
       preconditions: [
         'P4TC has received email with shipment roster and portal URL',
@@ -501,6 +562,7 @@ export const intentModel: IntentModel = {
     {
       id: 'p4tc-manages-booking',
       name: 'P4TC Manages Booking (One-off)',
+      deferred: true,
       primary_actor: 'p4tc',
       preconditions: [
         'P4TC has an active booking',

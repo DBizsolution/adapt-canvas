@@ -17,8 +17,8 @@ export const CANVAS_BG = '#F8F8F7'
 export const FOG_COLOR = '#EBEBEA'
 export const CONNECTION_DEFAULT_COLOR = '#A3A3A3'
 export const CONNECTION_ACTIVE_COLOR = '#0081F2'
-export const CARD_OPACITY = 0.95          // Nearly solid for readability
-export const DEFERRED_OPACITY = 0.65      // Still visible but clearly different
+export const CARD_OPACITY = 0.98          // Nearly solid for readability
+export const DEFERRED_OPACITY = 0.70      // Still visible but clearly different
 
 export const ANIMATION = {
   hoverScale: 1.05,

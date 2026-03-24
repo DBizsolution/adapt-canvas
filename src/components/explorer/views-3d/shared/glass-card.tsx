@@ -60,7 +60,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
       invalidate()
     }
 
-    const targetOpacity = faded ? 0.3 : (node.deferred ? DEFERRED_OPACITY : CARD_OPACITY)
+    const targetOpacity = faded ? 0.5 : (node.deferred ? DEFERRED_OPACITY : CARD_OPACITY)
     if (Math.abs(material.opacity - targetOpacity) > 0.01) {
       material.opacity = THREE.MathUtils.lerp(material.opacity, targetOpacity, 0.1)
       invalidate()

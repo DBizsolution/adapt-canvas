@@ -33,18 +33,21 @@ export function createCardTexture(opts: CardTextureOptions): CanvasTexture {
   canvas.height = h
   const ctx = canvas.getContext('2d')!
 
-  const opacity = opts.deferred ? 0.5 : 0.8
+  const opacity = opts.deferred ? 0.65 : 0.95
   const color = TYPE_COLORS[opts.type] || '#999'
 
+  // Main card background — nearly solid for readability
   ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`
   roundRect(ctx, 0, 0, w, h, 16 * TEXTURE_SCALE)
   ctx.fill()
 
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
+  // Subtle border for definition
+  ctx.strokeStyle = `rgba(0, 0, 0, ${opts.deferred ? 0.06 : 0.08})`
   ctx.lineWidth = 2
   roundRect(ctx, 0, 0, w, h, 16 * TEXTURE_SCALE)
   ctx.stroke()
 
+  // Colored left edge strip
   ctx.fillStyle = color
   if (opts.deferred) {
     const stripW = EDGE_STRIP_WIDTH
@@ -64,17 +67,19 @@ export function createCardTexture(opts: CardTextureOptions): CanvasTexture {
   const iconY = 14 * TEXTURE_SCALE
   drawIcon(ctx, opts.icon, iconX, iconY, iconSize * TEXTURE_SCALE, color)
 
+  // Card name — dark for maximum contrast
   const nameSize = opts.size === 'small' ? 12 : 14
-  ctx.fillStyle = '#34322D'
+  ctx.fillStyle = '#1A1A1A'
   ctx.font = FONT.replace('{{size}}', String(nameSize * TEXTURE_SCALE))
   const nameX = iconX + iconSize * TEXTURE_SCALE + 8 * TEXTURE_SCALE
   const nameY = iconY + iconSize * TEXTURE_SCALE * 0.75
   const maxNameW = w - nameX - 12 * TEXTURE_SCALE
   ctx.fillText(truncate(opts.name, ctx, maxNameW), nameX, nameY)
 
+  // Card stat — gray but readable
   if (opts.stat) {
     const statSize = opts.size === 'small' ? 10 : 11
-    ctx.fillStyle = '#858481'
+    ctx.fillStyle = '#666666'
     ctx.font = FONT.replace('{{size}}', String(statSize * TEXTURE_SCALE))
     const statY = nameY + (nameSize + 6) * TEXTURE_SCALE
     ctx.fillText(truncate(opts.stat, ctx, maxNameW), nameX, statY)

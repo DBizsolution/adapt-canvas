@@ -6,7 +6,7 @@ import { GlassCard } from '../shared/glass-card'
 import { ConnectionLine } from '../shared/connection-line'
 import { buildAnatomyData, buildAnatomyIdleData } from './anatomy-data'
 import { EntitySelector } from './entity-selector'
-import { TYPE_COLORS } from '../shared/constants'
+import { TYPE_COLORS, CONNECTION_ACTIVE_COLOR } from '../shared/constants'
 import type { ViewProps } from '../shared/types'
 
 export function AnatomyView({ model }: ViewProps) {
@@ -78,9 +78,10 @@ export function AnatomyView({ model }: ViewProps) {
               key={edge.id}
               from={fromPos}
               to={toPos}
-              color={edge.color}
+              color={edge.color || CONNECTION_ACTIVE_COLOR}
               visible
-              thickness={1.5}
+              thickness={2}
+              opacity={0.8}
             />
           )
         })}
@@ -101,8 +102,9 @@ export function AnatomyView({ model }: ViewProps) {
               key={edge.id}
               from={fromPos}
               to={toPos}
-              color={toNode ? TYPE_COLORS[toNode.type] : undefined}
+              color={toNode ? TYPE_COLORS[toNode.type] : CONNECTION_ACTIVE_COLOR}
               visible
+              opacity={0.6}
             />
           )
         })}

@@ -6,16 +6,16 @@ import { SceneWrapper } from '../shared/scene-wrapper'
 import { GlassCard } from '../shared/glass-card'
 import { ConnectionLine } from '../shared/connection-line'
 import { buildGalaxyData } from './galaxy-data'
-import { TYPE_COLORS } from '../shared/constants'
+import { TYPE_COLORS, CONNECTION_ACTIVE_COLOR } from '../shared/constants'
 import type { ViewProps, ItemType } from '../shared/types'
 
 const ZONE_LABELS: { type: ItemType; label: string; position: [number, number, number] }[] = [
-  { type: 'entity', label: 'Entities', position: [0, -2, -3] },
-  { type: 'actor', label: 'Actors', position: [-12, 3, -7] },
-  { type: 'journey', label: 'Journeys', position: [12, -1, -5] },
-  { type: 'rule', label: 'Rules', position: [0, -11, -1] },
-  { type: 'constraint', label: 'Constraints', position: [-10, -9, 3] },
-  { type: 'question', label: 'Questions', position: [10, -9, 3] },
+  { type: 'entity', label: 'Entities', position: [0, -2, -1] },
+  { type: 'actor', label: 'Actors', position: [-6, 5, -3] },
+  { type: 'journey', label: 'Journeys', position: [6, 3, -2] },
+  { type: 'rule', label: 'Rules', position: [0, -6, 2] },
+  { type: 'constraint', label: 'Constraints', position: [-5, -5, 4] },
+  { type: 'question', label: 'Questions', position: [5, -5, 4] },
 ]
 
 export function GalaxyView({ model }: ViewProps) {
@@ -63,12 +63,15 @@ export function GalaxyView({ model }: ViewProps) {
             <Text
               key={type}
               position={position}
-              fontSize={3}
+              fontSize={2.5}
               color={TYPE_COLORS[type]}
-              fillOpacity={0.15}
+              fillOpacity={0.8}
               anchorX="center"
               anchorY="middle"
               font="/fonts/DMSans-Variable.ttf"
+              outlineWidth={0.15}
+              outlineColor="#F8F8F7"
+              outlineOpacity={0.9}
             >
               {label}
             </Text>
@@ -99,7 +102,7 @@ export function GalaxyView({ model }: ViewProps) {
 
           const isActive = activeId && (edge.from === activeId || edge.to === activeId)
           const edgeColor = isActive
-            ? TYPE_COLORS[data.nodes.find(n => n.id === activeId)?.type || 'entity']
+            ? CONNECTION_ACTIVE_COLOR
             : undefined
 
           return (
@@ -110,6 +113,8 @@ export function GalaxyView({ model }: ViewProps) {
               visible={!!isActive}
               color={edgeColor}
               animated={!!selectedId && !!isActive}
+              thickness={2}
+              opacity={0.8}
             />
           )
         })}

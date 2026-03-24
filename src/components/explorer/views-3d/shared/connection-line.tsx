@@ -22,8 +22,8 @@ export function ConnectionLine({
   color = CONNECTION_DEFAULT_COLOR,
   visible = true,
   animated = false,
-  thickness = 1,
-  opacity = 0.6,
+  thickness = 1.5,
+  opacity = 0.7,
 }: ConnectionLineProps) {
   const particlesRef = useRef<THREE.Points>(null)
   const invalidate = useThree(s => s.invalidate)

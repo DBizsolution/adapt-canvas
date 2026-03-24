@@ -23,7 +23,6 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   const invalidate = useThree(s => s.invalidate)
 
   const dim = CARD_SIZES[node.size]
-  const color = TYPE_COLORS[node.type] || '#999'
 
   const texture = useMemo(
     () => createCardTexture({
@@ -43,17 +42,17 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
       transparent: true,
       opacity: node.deferred ? DEFERRED_OPACITY : CARD_OPACITY,
       side: THREE.DoubleSide,
-      roughness: 0.3,
-      metalness: 0.05,
+      roughness: 0.4,
+      metalness: 0.02,
       emissive: new THREE.Color('#ffffff'),
-      emissiveIntensity: 0.05,
+      emissiveIntensity: 0.02,
     })
     return mat
   }, [texture, node.deferred])
 
   useFrame(() => {
     if (!meshRef.current) return
-    const targetScale = hovered ? ANIMATION.hoverScale : 1.0
+    const targetScale = selected ? 1.15 : (hovered ? ANIMATION.hoverScale : 1.0)
     const currentScale = meshRef.current.scale.x
     const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.15)
     if (Math.abs(newScale - currentScale) > 0.001) {
@@ -61,7 +60,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
       invalidate()
     }
 
-    const targetOpacity = faded ? 0.4 : (node.deferred ? DEFERRED_OPACITY : CARD_OPACITY)
+    const targetOpacity = faded ? 0.3 : (node.deferred ? DEFERRED_OPACITY : CARD_OPACITY)
     if (Math.abs(material.opacity - targetOpacity) > 0.01) {
       material.opacity = THREE.MathUtils.lerp(material.opacity, targetOpacity, 0.1)
       invalidate()
@@ -96,12 +95,12 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
       </mesh>
 
       {selected && (
-        <mesh>
-          <planeGeometry args={[dim.width + 0.3, dim.height + 0.3]} />
+        <mesh position={[0, 0, -0.01]}>
+          <planeGeometry args={[dim.width + 0.25, dim.height + 0.25]} />
           <meshBasicMaterial
-            color={color}
+            color="#0081F2"
             transparent
-            opacity={0.25}
+            opacity={0.5}
             side={THREE.DoubleSide}
             depthWrite={false}
           />

@@ -154,21 +154,46 @@ export function buildAnatomyData(entity: Entity, model: IntentModel): AnatomyDat
 export function buildAnatomyIdleData(model: IntentModel): CardNode[] {
   const domain = model.entities.filter(e => !e.is_integration)
   const integrations = model.entities.filter(e => e.is_integration)
-  const all = [...domain, ...integrations]
 
-  const cols = 4
-  return all.map((e, i) => ({
-    id: e.id,
-    name: e.name,
-    type: 'entity' as ItemType,
-    stat: `${e.key_fields.length} fields · ${e.lifecycle.states.length} states`,
-    icon: ICON_MAP.entity,
-    size: (e.is_integration ? 'small' : 'medium') as CardSize,
-    deferred: e.deferred,
-    position: [
-      (i % cols) * 5 - (cols * 5) / 2 + 2.5,
-      -Math.floor(i / cols) * 4 + 2,
-      e.is_integration ? 2 : 0,
-    ] as [number, number, number],
-  }))
+  // Radial layout for domain entities
+  const domainCards = domain.map((e, i) => {
+    const angle = (i / domain.length) * Math.PI * 2
+    const radius = 8
+    return {
+      id: e.id,
+      name: e.name,
+      type: 'entity' as ItemType,
+      stat: `${e.key_fields.length} fields · ${e.lifecycle.states.length} states`,
+      icon: ICON_MAP.entity,
+      size: 'medium' as CardSize,
+      deferred: e.deferred,
+      position: [
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        0,
+      ] as [number, number, number],
+    }
+  })
+
+  // Integration entities in a tighter ring behind
+  const integrationCards = integrations.map((e, i) => {
+    const angle = (i / integrations.length) * Math.PI * 2
+    const radius = 4
+    return {
+      id: e.id,
+      name: e.name,
+      type: 'entity' as ItemType,
+      stat: `${e.key_fields.length} fields`,
+      icon: ICON_MAP.entity,
+      size: 'small' as CardSize,
+      deferred: e.deferred,
+      position: [
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius,
+        2,
+      ] as [number, number, number],
+    }
+  })
+
+  return [...domainCards, ...integrationCards]
 }

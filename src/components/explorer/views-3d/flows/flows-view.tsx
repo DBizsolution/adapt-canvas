@@ -6,7 +6,7 @@ import { GlassCard } from '../shared/glass-card'
 import { ConnectionLine } from '../shared/connection-line'
 import { buildFlowsData, buildFlowsIdleData } from './flows-data'
 import { JourneySelector } from './journey-selector'
-import { TYPE_COLORS, ANIMATION } from '../shared/constants'
+import { TYPE_COLORS, CONNECTION_ACTIVE_COLOR, ANIMATION } from '../shared/constants'
 import type { ViewProps } from '../shared/types'
 
 export function FlowsView({ model }: ViewProps) {
@@ -117,7 +117,7 @@ export function FlowsView({ model }: ViewProps) {
           if (!fromPos || !toPos) return null
 
           const toNode = flowData.branchCards.find(n => n.id === edge.to)
-          const color = toNode ? TYPE_COLORS[toNode.type] : undefined
+          const color = toNode ? TYPE_COLORS[toNode.type] : CONNECTION_ACTIVE_COLOR
 
           return (
             <ConnectionLine
@@ -126,6 +126,7 @@ export function FlowsView({ model }: ViewProps) {
               to={toPos}
               color={color}
               visible
+              opacity={0.7}
             />
           )
         })}
@@ -139,8 +140,8 @@ export function FlowsView({ model }: ViewProps) {
               to={flowData.railPoints[i + 1]}
               color={TYPE_COLORS.journey}
               visible
-              opacity={0.3}
-              thickness={2}
+              opacity={0.5}
+              thickness={2.5}
             />
           ))
         )}

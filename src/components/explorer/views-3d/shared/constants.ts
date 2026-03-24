@@ -1,23 +1,24 @@
 export const TYPE_COLORS: Record<string, string> = {
-  entity: '#0081F2',
-  actor: '#8B5CF6',
-  journey: '#10B981',
-  rule: '#F59E0B',
-  constraint: '#EF4444',
-  question: '#EC4899',
+  entity: '#0081F2',     // ACFS blue — primary
+  actor: '#7C3AED',      // Purple — deeper for better contrast
+  journey: '#059669',    // Green — darker for readability
+  rule: '#D97706',       // Amber — deeper for contrast
+  constraint: '#DC2626', // Red — darker for visibility
+  question: '#DB2777',   // Pink — deeper for contrast
 }
 
 export const CARD_SIZES = {
-  large:  { width: 8, height: 6 },
-  medium: { width: 4, height: 3 },
-  small:  { width: 2.5, height: 2 },
+  large:  { width: 9, height: 6.5 },
+  medium: { width: 5, height: 3.5 },
+  small:  { width: 3, height: 2.25 },
 } as const
 
 export const CANVAS_BG = '#F8F8F7'
-export const FOG_COLOR = '#F0F0EE'
-export const CONNECTION_DEFAULT_COLOR = '#D4D4D4'
-export const CARD_OPACITY = 0.8
-export const DEFERRED_OPACITY = 0.5
+export const FOG_COLOR = '#EBEBEA'
+export const CONNECTION_DEFAULT_COLOR = '#A3A3A3'
+export const CONNECTION_ACTIVE_COLOR = '#0081F2'
+export const CARD_OPACITY = 0.95          // Nearly solid for readability
+export const DEFERRED_OPACITY = 0.65      // Still visible but clearly different
 
 export const ANIMATION = {
   hoverScale: 1.05,

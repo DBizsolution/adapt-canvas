@@ -69,8 +69,8 @@ export function DomainsView({ model }: ViewProps) {
               to={thread.points[i + 1]}
               color={thread.color}
               visible
-              thickness={1.5}
-              opacity={0.5}
+              thickness={2}
+              opacity={0.7}
             />
           ))
         })}

@@ -11,14 +11,14 @@ import { ICON_MAP } from '../shared/constants'
 
 type SimNode = CardNode & { fx?: number; fy?: number; fz?: number; x: number; y: number; z: number }
 
-// Zone centers for type clustering
+// Zone centers for type clustering — tighter spacing
 const ZONE_CENTERS: Record<ItemType, [number, number, number]> = {
   entity:     [0, 0, 0],
-  actor:      [-12, 6, -4],
-  journey:    [12, 2, -2],
-  rule:       [0, -8, 2],
-  constraint: [-10, -6, 6],
-  question:   [10, -6, 6],
+  actor:      [-6, 3, -2],
+  journey:    [6, 1, -1],
+  rule:       [0, -4, 1],
+  constraint: [-5, -3, 3],
+  question:   [5, -3, 3],
 }
 
 // Deterministic seed from model content
@@ -172,24 +172,24 @@ export function buildGalaxyData(model: IntentModel): GalaxyData {
   // Initialize positions near zone centers with jitter
   for (const node of nodes) {
     const center = ZONE_CENTERS[node.type]
-    node.x = center[0] + (rand() - 0.5) * 6
-    node.y = center[1] + (rand() - 0.5) * 6
-    node.z = center[2] + (rand() - 0.5) * 6
+    node.x = center[0] + (rand() - 0.5) * 3
+    node.y = center[1] + (rand() - 0.5) * 3
+    node.z = center[2] + (rand() - 0.5) * 3
   }
 
   const simLinks = edges.map(e => ({ source: e.from, target: e.to }))
 
   const sim = forceSimulation(nodes, 3)
-    .force('charge', forceManyBody().strength(-60))
-    .force('link', forceLink(simLinks).id((d: SimNode) => d.id).distance(25))
-    .force('center', forceCenter(0, 0, 0).strength(0.05))
+    .force('charge', forceManyBody().strength(-30))
+    .force('link', forceLink(simLinks).id((d: SimNode) => d.id).distance(12))
+    .force('center', forceCenter(0, 0, 0).strength(0.1))
 
   // Per-type radial forces toward zone centers
   for (const type of Object.keys(ZONE_CENTERS) as ItemType[]) {
     const center = ZONE_CENTERS[type]
     sim.force(`radial-${type}`, forceRadial(
-      8, center[0], center[1], center[2]
-    ).strength((d: SimNode) => d.type === type ? 0.3 : 0))
+      4, center[0], center[1], center[2]
+    ).strength((d: SimNode) => d.type === type ? 0.5 : 0))
   }
 
   sim.tick(300)

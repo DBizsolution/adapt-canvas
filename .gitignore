@@ -7,3 +7,4 @@ model-history.json
 .playwright-mcp/
 docs/uploads/
 docs/generated/
+.claude/settings.local.json

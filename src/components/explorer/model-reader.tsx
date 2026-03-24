@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { ModelReaderToc } from './model-reader-toc'
 import type { IntentModel } from '@/domain/intent-model/types'
 
 const SECTION_COLORS = {
@@ -159,6 +160,7 @@ function StatePill({ children }: { children: React.ReactNode }) {
 
 export function ModelReader({ model }: { model: IntentModel }) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const toggle = (id: string) => {
     setExpandedSections(prev => {
@@ -170,18 +172,20 @@ export function ModelReader({ model }: { model: IntentModel }) {
   }
 
   return (
-    <div className="h-full overflow-y-auto custom-scroll" style={{
-      background: 'var(--bg-page)',
-      fontKerning: 'normal',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
-    }}>
-      <style dangerouslySetInnerHTML={{ __html: `:root { ${TYPOGRAPHY_TOKENS} }` }} />
-      <div style={{
-        maxWidth: 'var(--measure-wide)',
-        margin: '0 auto',
-        padding: '3rem 2rem'
+    <>
+      <ModelReaderToc model={model} containerRef={containerRef} />
+      <div ref={containerRef} className="h-full overflow-y-auto custom-scroll" style={{
+        background: 'var(--bg-page)',
+        fontKerning: 'normal',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale'
       }}>
+        <style dangerouslySetInnerHTML={{ __html: `:root { ${TYPOGRAPHY_TOKENS} }` }} />
+        <div style={{
+          maxWidth: 'var(--measure-wide)',
+          margin: '0 auto',
+          padding: '3rem 2rem'
+        }}>
         {/* Header */}
         <div style={{ marginBottom: 'var(--space-section)' }}>
           <h1 style={{
@@ -650,7 +654,8 @@ export function ModelReader({ model }: { model: IntentModel }) {
             )
           })}
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

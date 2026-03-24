@@ -11,14 +11,14 @@ import { ICON_MAP } from '../shared/constants'
 
 type SimNode = CardNode & { fx?: number; fy?: number; fz?: number; x: number; y: number; z: number }
 
-// Zone centers for type clustering — tighter spacing
+// Zone centers for type clustering — separated spatially
 const ZONE_CENTERS: Record<ItemType, [number, number, number]> = {
   entity:     [0, 0, 0],
   actor:      [-6, 3, -2],
   journey:    [6, 1, -1],
   rule:       [0, -4, 1],
-  constraint: [-5, -3, 3],
-  question:   [5, -3, 3],
+  constraint: [-6, -4, 3],    // lower-left, forward
+  question:   [6, -4, 3],     // lower-right, forward
 }
 
 // Deterministic seed from model content

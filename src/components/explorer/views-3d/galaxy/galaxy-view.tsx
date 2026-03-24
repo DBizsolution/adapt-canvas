@@ -14,8 +14,8 @@ const ZONE_LABELS: { type: ItemType; label: string; position: [number, number, n
   { type: 'actor', label: 'Actors', position: [-6, 5, -3] },
   { type: 'journey', label: 'Journeys', position: [6, 3, -2] },
   { type: 'rule', label: 'Rules', position: [0, -6, 2] },
-  { type: 'constraint', label: 'Constraints', position: [-5, -5, 4] },
-  { type: 'question', label: 'Questions', position: [5, -5, 4] },
+  { type: 'constraint', label: 'Constraints', position: [-6, -6, 4] },
+  { type: 'question', label: 'Questions', position: [6, -6, 4] },
 ]
 
 export function GalaxyView({ model }: ViewProps) {

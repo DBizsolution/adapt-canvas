@@ -1,10 +1,9 @@
 'use client'
 
-import { useRef, useState, useMemo, useCallback } from 'react'
-import { Billboard } from '@react-three/drei'
+import { useRef, useState, useCallback } from 'react'
+import { Billboard, Text, RoundedBox } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { createCardTexture } from './card-texture'
 import { CARD_SIZES, TYPE_COLORS, ANIMATION, CARD_OPACITY, DEFERRED_OPACITY } from './constants'
 import type { CardNode } from './types'
 
@@ -18,51 +17,34 @@ type GlassCardProps = {
 }
 
 export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHover }: GlassCardProps) {
-  const meshRef = useRef<THREE.Mesh>(null)
+  const groupRef = useRef<THREE.Group>(null)
+  const cardMaterialRef = useRef<THREE.MeshStandardMaterial>(null)
   const [hovered, setHovered] = useState(false)
   const invalidate = useThree(s => s.invalidate)
 
   const dim = CARD_SIZES[node.size]
+  const color = TYPE_COLORS[node.type] || '#999'
 
-  const texture = useMemo(
-    () => createCardTexture({
-      name: node.name,
-      type: node.type,
-      stat: node.stat,
-      icon: node.icon || 'database',
-      size: node.size,
-      deferred: node.deferred,
-    }),
-    [node.name, node.type, node.stat, node.icon, node.size, node.deferred]
-  )
-
-  const material = useMemo(() => {
-    const mat = new THREE.MeshStandardMaterial({
-      map: texture,
-      transparent: true,
-      opacity: node.deferred ? DEFERRED_OPACITY : CARD_OPACITY,
-      side: THREE.DoubleSide,
-      roughness: 0.4,
-      metalness: 0.02,
-      emissive: new THREE.Color('#ffffff'),
-      emissiveIntensity: 0.02,
-    })
-    return mat
-  }, [texture, node.deferred])
+  // Typography sizing based on card size
+  const nameSize = node.size === 'small' ? 0.28 : node.size === 'medium' ? 0.32 : 0.38
+  const statSize = node.size === 'small' ? 0.20 : node.size === 'medium' ? 0.22 : 0.24
+  const statOffset = node.size === 'small' ? 0.35 : node.size === 'medium' ? 0.40 : 0.45
+  const edgeWidth = 0.15
 
   useFrame(() => {
-    if (!meshRef.current) return
+    if (!groupRef.current || !cardMaterialRef.current) return
+
     const targetScale = selected ? 1.15 : (hovered ? ANIMATION.hoverScale : 1.0)
-    const currentScale = meshRef.current.scale.x
+    const currentScale = groupRef.current.scale.x
     const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.15)
     if (Math.abs(newScale - currentScale) > 0.001) {
-      meshRef.current.scale.setScalar(newScale)
+      groupRef.current.scale.setScalar(newScale)
       invalidate()
     }
 
     const targetOpacity = faded ? 0.3 : (node.deferred ? DEFERRED_OPACITY : CARD_OPACITY)
-    if (Math.abs(material.opacity - targetOpacity) > 0.01) {
-      material.opacity = THREE.MathUtils.lerp(material.opacity, targetOpacity, 0.1)
+    if (Math.abs(cardMaterialRef.current.opacity - targetOpacity) > 0.01) {
+      cardMaterialRef.current.opacity = THREE.MathUtils.lerp(cardMaterialRef.current.opacity, targetOpacity, 0.1)
       invalidate()
     }
   })
@@ -83,29 +65,88 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
 
   return (
     <Billboard position={node.position} follow lockX={false} lockY={false} lockZ={false}>
-      <mesh
-        ref={meshRef}
-        material={material}
-        onClick={(e) => { e.stopPropagation(); onClick?.(node.id) }}
-        onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick?.(node.id) }}
-        onPointerOver={handlePointerOver}
-        onPointerOut={handlePointerOut}
-      >
-        <planeGeometry args={[dim.width, dim.height]} />
-      </mesh>
-
-      {selected && (
-        <mesh position={[0, 0, -0.01]}>
-          <planeGeometry args={[dim.width + 0.25, dim.height + 0.25]} />
-          <meshBasicMaterial
-            color="#0081F2"
+      <group ref={groupRef}>
+        {/* Card background — transparent white */}
+        <RoundedBox
+          args={[dim.width, dim.height, 0.02]}
+          radius={0.15}
+          smoothness={4}
+          onClick={(e) => { e.stopPropagation(); onClick?.(node.id) }}
+          onDoubleClick={(e) => { e.stopPropagation(); onDoubleClick?.(node.id) }}
+          onPointerOver={handlePointerOver}
+          onPointerOut={handlePointerOut}
+        >
+          <meshStandardMaterial
+            ref={cardMaterialRef}
+            color="#ffffff"
             transparent
-            opacity={0.5}
+            opacity={node.deferred ? DEFERRED_OPACITY : CARD_OPACITY}
+            side={THREE.DoubleSide}
+            roughness={0.4}
+            metalness={0.02}
+          />
+        </RoundedBox>
+
+        {/* Colored left edge strip */}
+        <mesh position={[-dim.width / 2 + edgeWidth / 2, 0, 0.011]}>
+          <planeGeometry args={[edgeWidth, dim.height - 0.3]} />
+          <meshBasicMaterial
+            color={color}
+            transparent
+            opacity={node.deferred ? 0.6 : 1.0}
             side={THREE.DoubleSide}
             depthWrite={false}
           />
         </mesh>
-      )}
+
+        {/* Card name — always opaque */}
+        <Text
+          position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - 0.4, 0.015]}
+          fontSize={nameSize}
+          color="#1A1A1A"
+          anchorX="left"
+          anchorY="top"
+          maxWidth={dim.width - edgeWidth - 0.5}
+          font="/fonts/DMSans-Variable.ttf"
+          fontWeight={600}
+        >
+          {node.name}
+        </Text>
+
+        {/* Card stat — always opaque */}
+        {node.stat && (
+          <Text
+            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - statOffset, 0.015]}
+            fontSize={statSize}
+            color="#666666"
+            anchorX="left"
+            anchorY="top"
+            maxWidth={dim.width - edgeWidth - 0.5}
+            font="/fonts/DMSans-Variable.ttf"
+            fontWeight={400}
+          >
+            {node.stat}
+          </Text>
+        )}
+
+        {/* Selection border */}
+        {selected && (
+          <RoundedBox
+            args={[dim.width + 0.25, dim.height + 0.25, 0.02]}
+            radius={0.15}
+            smoothness={4}
+            position={[0, 0, -0.01]}
+          >
+            <meshBasicMaterial
+              color="#0081F2"
+              transparent
+              opacity={0.5}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+            />
+          </RoundedBox>
+        )}
+      </group>
     </Billboard>
   )
 }

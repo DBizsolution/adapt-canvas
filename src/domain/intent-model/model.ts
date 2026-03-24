@@ -4,7 +4,7 @@ export const intentModel: IntentModel = {
   meta: {
     version: '0.8.0',
     project: 'ACFS VBS Pickup Portal',
-    lastUpdated: '2026-03-23',
+    lastUpdated: '2026-03-24',
     status: 'draft',
   },
   actors: [
@@ -22,6 +22,7 @@ export const intentModel: IntentModel = {
         { id: 'lsp:r6', description: 'Upload Delivery Order for downstream enforcement.' },
         { id: 'lsp:r7', description: 'Flag an HBL as under-bond. Manually set in portal — not synced from Maximus.' },
         { id: 'lsp:r8', description: 'Modify booking before cutoff: change slot date/time and HBLs (add/remove) before booking cutoff. Change truck/driver at any time until shipment is collected. Cost-impacting changes after cutoff require ACFS (BR-015).' },
+        { id: 'lsp:r9', description: 'Search and view bookings using multiple search keys: booking reference number, HBL reference number, truck registration, or driver name. Booking reference becomes the primary identifier once HBLs are booked (alongside HBL reference). Both booking reference and HBL reference must be prominent (displayed side-by-side) in booked HBL table views.' },
       ],
     },
     {
@@ -107,6 +108,8 @@ export const intentModel: IntentModel = {
         { name: 'release_type', type: "'do_required' | 'free_release'", description: 'Determines DO requirements per tier. "do_required" (default — DO must be uploaded and validated) or "free_release" (no DO needed for that tier).' },
         { name: 'do_waived', type: 'boolean', description: 'Derived: true when release_type is "free_release" OR under_bond is true. Booking readiness checks this single field instead of inspecting release_type and under_bond separately.' },
         { name: 'assigned_lsp', type: 'string', description: 'LSP this HBL is allocated to. Set by ACFS during HBL/WFF assignment or auto-assigned from data.' },
+        { name: 'pickup_site', type: 'string', description: 'Physical site/warehouse where this HBL will be picked up (references site entity). Critical for LSP dispatch planning - determines which warehouse to send truck to. Sourced from Maximus or derived from container unpacking location. Must be visible in HBL list (FR-LSP-02) and filterable/searchable.' },
+        { name: 'related_booking_ids', type: 'string[]', description: 'Booking reference(s) this HBL has been included in. Array to support rebooking scenarios. Once HBL is booked, both HBL reference and booking reference become equally important for search/display (lsp:r9). BRD v1.5 Section 6.1 lists this as "Related Booking ID(s)".' },
       ],
       lifecycle: {
         states: ['on_vessel', 'at_wharf', 'in_yard', 'unpacked', 'collected'],
@@ -229,7 +232,7 @@ export const intentModel: IntentModel = {
     {
       id: 'delegation',
       name: 'Delegation',
-      description: 'Records the delegation of one or more HBLs from one party to another. Tracks the chain of custody. Can be revoked by ACFS.',
+      description: 'Records the delegation of one or more HBLs from one party to another. Tracks the chain of custody. Can be revoked by ACFS. Visibility follows hop-by-hop model (C-009): delegator sees immediate downstream only, not full multi-hop chain. ACFS sees full history for audit.',
       key_fields: [
         { name: 'delegation_id', type: 'string', description: 'System-generated unique ID.' },
         { name: 'delegator', type: 'string', description: 'LSP or P4TC who initiated the delegation.' },
@@ -248,7 +251,7 @@ export const intentModel: IntentModel = {
     {
       id: 'payment',
       name: 'Payment',
-      description: 'Records payment transactions for bookings. One payment per booking. Tracks gateway used, amount, and transaction status. Added from BRD v1.5 data model.',
+      description: 'Records payment transactions for bookings. One payment per booking. Tracks gateway used, amount, and transaction status. Payment gateway integration is abstracted (Stripe initially, potential migration to Compay) - implementation must use adapter pattern to isolate provider-specific logic from business logic. Added from BRD v1.5 data model.',
       key_fields: [
         { name: 'payment_id', type: 'string', description: 'System-generated unique payment reference.' },
         { name: 'booking_id', type: 'string', description: 'Booking this payment is for.' },
@@ -324,13 +327,13 @@ export const intentModel: IntentModel = {
       id: 'integration_ags',
       name: 'AGS Data Feed (Inbound)',
       is_integration: true,
-      description: 'Provides master HBL references, HBL hierarchy (parent-child relationships), and freight forwarder party data (name, account code). Data is consistent (unlike ICS which has variations across organisations). Matt and William are defining the exact data format and delivery mechanism. Note: BRD v1.5 does not reference AGS — only mentions Maximas. Needs confirmation from Roni/Matt whether AGS is still planned or manual assignment covers the gap for Phase 1.',
+      description: 'Provides master HBL references, HBL hierarchy (parent-child relationships), and freight forwarder party data (name, account code). Data is consistent (unlike ICS which has variations across organisations). Matt and William are defining the exact data format and delivery mechanism. CRITICAL GAP: BRD v1.5 Section 6.2 completely omits AGS — only lists Maximus integration. Delivery meeting 2026-03-24 confirmed AGS is required for accurate consignee data (Maximus "too inconsistent"). Data discovery blocked until this is resolved (OQ-034).',
       key_fields: [
         { name: 'direction', type: 'string', description: 'Inbound — AGS → Portal' },
         { name: 'frequency', type: 'string', description: 'TBD — Matt and William resolving (OQ-034).' },
         { name: 'data_provided', type: 'string', description: 'Master HBL references (500-prefix), HBL hierarchy (parent-child), freight forwarder party assignments (account name, account code), consignee at each level.' },
         { name: 'data_not_provided', type: 'string', description: 'Lowest-level HBL details (comes from Maximus instead).' },
-        { name: 'status', type: 'string', description: 'BLOCKER — exact data format, delivery mechanism, and frequency TBD. This is the single biggest technical risk.', warn: 'Cannot build auto-assignment or HBL hierarchy without this feed. Matt and William working on it.' },
+        { name: 'status', type: 'string', description: 'BLOCKER — exact data format, delivery mechanism, and frequency TBD. This is the single biggest technical risk. BRD v1.5 does NOT include AGS in integration section - must be corrected.', warn: 'Cannot build auto-assignment, HBL hierarchy, or consignee accuracy without this feed. Blocks data discovery (Anoop urgency 2026-03-24). Matt and William working on it (OQ-034).' },
       ],
       lifecycle: {
         states: ['active'],
@@ -432,7 +435,7 @@ export const intentModel: IntentModel = {
         'LSP has assigned HBLs visible in their list',
       ],
       steps: [
-        { order: 1, title: 'Select shipments', detail: 'LSP views list of assigned HBLs with shipment status. Selects one or multiple shipments to delegate.' },
+        { order: 1, title: 'Select shipments', detail: 'LSP views list of assigned HBLs with shipment status. Can filter by site, milestone, customs status, etc. Selects one or multiple shipments to delegate.' },
         { order: 2, title: 'Choose delegation target', detail: 'Either select an existing LSP (search and select from pre-populated registry — company name, email, branch code) or add a new one-off party (email only — creates a P4TC).' },
         { order: 3, title: 'System sends notification', detail: 'Email sent to the delegate with a message and secure link. No shipment data in the email body — all details visible after login/OTP.' },
       ],
@@ -448,7 +451,7 @@ export const intentModel: IntentModel = {
         'HBLs are not already delegated (BR-004)',
       ],
       steps: [
-        { order: 1, title: 'Select shipments', detail: 'LSP selects one or multiple HBLs from their assigned list to book for pickup.' },
+        { order: 1, title: 'Select shipments', detail: 'LSP selects one or multiple HBLs from their assigned list to book for pickup. Can filter by site to group shipments by warehouse location for dispatch planning.' },
         { order: 2, title: 'Validate booking readiness', detail: 'System checks: (1) HBL milestone is "unpacked" or later, (2) fully customs cleared (including quarantine), (3) all applicable DOs are present. If docs missing, LSP can upload them or request missing docs (aborts booking — offline process).' },
         { order: 3, title: 'Load calculation + pricing', detail: 'System calculates fee per HBL: chargeable_weight (max of weight vs volume) × rate. Individual HBL charges summed + minimum charge = total fee.' },
         { order: 4, title: 'Select slot', detail: 'LSP selects an available hourly slot. Density indicator shows booking volume per slot using opacity levels (no exact numbers). Does not block booking.' },
@@ -468,7 +471,7 @@ export const intentModel: IntentModel = {
         'Booking exists in "booked" state',
       ],
       steps: [
-        { order: 1, title: 'View booking details', detail: 'LSP opens an existing booking from their bookings list.' },
+        { order: 1, title: 'View booking details', detail: 'LSP searches for an existing booking using booking reference, HBL reference, truck registration, or driver name (lsp:r9). Opens the booking from search results or bookings list.' },
         { order: 2, title: 'Choose modification type', detail: 'LSP can: (a) change truck/driver details — allowed anytime until collection, (b) change slot date/time — allowed before change cutoff only, (c) add/remove HBLs — allowed before change cutoff only.' },
         { order: 3, title: 'System checks cutoff', detail: 'If change cutoff has passed: truck/driver changes proceed, but slot/HBL changes are blocked. Cost-impacting changes after cutoff require ACFS admin override (BR-015).' },
         { order: 4, title: 'Apply changes', detail: 'For truck/driver: update in-place. For slot: re-validate availability, recalculate fees if HBLs changed. For HBL removal: treated as partial cancellation with offline refund. For HBL addition: additional fee charged.' },
@@ -727,6 +730,30 @@ export const intentModel: IntentModel = {
       source: 'March 18 Miro board. Absorbs former C-002 (temporal constraint).',
     },
     {
+      id: 'BR-027',
+      description: 'HBLs track two orthogonal dimensions: (1) milestone — physical progress through the supply chain (on_vessel → at_wharf → in_yard → unpacked → collected), and (2) hbl_status — business/booking state (unassigned → assigned → delegated → booked). Both dimensions exist simultaneously and independently. An HBL can be "in_yard" (physical location) while "delegated" (business state). BRD v1.5 presents these as a flattened single lifecycle for UI simplicity, but the implementation must maintain both dimensions independently in the data model.',
+      applies_to: ['hbl'],
+      source: 'VBS Portal feedback meeting 2026-03-24 + BRD v1.5 clarification + logistics domain knowledge base',
+    },
+    {
+      id: 'BR-031',
+      description: 'HBL list views (FR-LSP-02) must display pickup site as a visible column and support filtering/searching by site. Critical for LSP dispatch planning — determines which warehouse to send truck to. BRD v1.5 omits this from FR-LSP-02 spec but field is present in data model and operationally required.',
+      applies_to: ['hbl', 'lsp'],
+      source: 'VBS Portal feedback meeting 2026-03-24 + logistics domain knowledge base Section 6.2',
+    },
+    {
+      id: 'BR-032',
+      description: 'Once an HBL is booked, both HBL reference and booking reference become equally important identifiers and must be displayed side-by-side in HBL table views. LSPs must be able to search by either identifier (lsp:r9). BRD FR-LSP-20 allows booking search but does not explicitly specify search keys — must support booking reference, HBL reference, truck registration, and driver name.',
+      applies_to: ['hbl', 'booking', 'lsp'],
+      source: 'VBS Portal feedback meeting 2026-03-24 (~26:40) + BRD v1.5 FR-LSP-20 + FR-ADM-07 (ACFS has multi-key search)',
+    },
+    {
+      id: 'BR-033',
+      description: 'HBL list views (FR-LSP-02) must support column show/hide customization with localStorage persistence. Default visible columns: HBL reference, booking reference (if booked), consignee, pickup site, milestone, customs status, chargeable weight. Hidden by default: container, ocean BL, quantity, pack type, description, volume, weight (individual). Rationale: 20+ column table is overwhelming (VBS Portal feedback meeting ~26:40). Different LSP workflows (delegation vs booking vs dispatch planning) require different column subsets. Column customization is high-value for usability and relatively low-effort (shadcn DataTable supports via ColumnDef visibility toggles).',
+      applies_to: ['hbl', 'lsp'],
+      source: 'VBS Portal feedback meeting 2026-03-24 (~26:40–28:00) + usability analysis',
+    },
+    {
       id: 'BR-028',
       description: 'Booking "collected" status is derived, not manually set. A booking becomes "collected" when all its HBLs reach the "collected" milestone. No manual status change needed.',
       applies_to: ['booking', 'hbl'],
@@ -771,13 +798,20 @@ export const intentModel: IntentModel = {
       constraint: 'Email is the primary notification channel. In-app notifications are available for logged-in users (LSPs, ACFS) but are not a Phase 1 blocker. P4TC (no login) receives email only.',
       type: 'notification',
     },
+    {
+      id: 'C-009',
+      constraint: 'Delegation chain visibility follows industry standard: hop-by-hop opacity. An LSP who delegates an HBL sees (1) who assigned it to them (upstream), (2) who they delegated it to (immediate downstream), and (3) whether the HBL reached "collected" milestone. They do NOT see multi-hop chains or booking details made by downstream parties. Exception: ACFS has full chain visibility for audit/operations. Rationale: commercial sensitivity, pricing confidentiality, liability boundaries (see knowledge base Section 5.2).',
+      type: 'visibility',
+    },
   ],
   open_questions: [
     {
       id: 'OQ-034',
-      question: 'What is the exact data source for HBL hierarchy relationships?',
-      reason: 'Maximus has both lowest-level and master HBL references but NOT the parent-child relationship between them. AGS can provide the hierarchy. Matt and William are working on this — need confirmed approach before building the data integration.',
+      question: 'What is the exact data source for HBL hierarchy relationships and consignee data? (BLOCKER)',
+      reason: 'Maximus provides individual HBL references but NOT parent-child relationships. AGS feed required for: (1) HBL hierarchy (Master HBL → House HBL chain), (2) Accurate consignee identification (account name/code) - Maximus consignee data is "too inconsistent" per Delivery meeting 2026-03-24. Current status: Matt and William resolving integration approach. Impact: Data discovery blocked - Anoop requested data model urgently but cannot proceed without AGS feed definition. Action needed: BRD v1.5 Section 6.2 must be updated to include AGS as integration source (currently only lists Maximus).',
       status: 'open',
+      priority: 'CRITICAL',
+      blocking: ['data_discovery', 'hbl_hierarchy', 'consignee_accuracy', 'auto_assignment'],
     },
   ],
 }

@@ -13,6 +13,31 @@ const SECTION_COLORS = {
   integrations: { bg: '#6B728018', color: '#6B7280', label: 'Integration' },
 } as const
 
+// Enhanced typography tokens for documentation/data UI context
+const TYPOGRAPHY_TOKENS = `
+  --text-xs: 0.75rem;      /* 12px - labels, metadata */
+  --text-sm: 0.875rem;     /* 14px - captions, small body */
+  --text-base: 1rem;       /* 16px - body text */
+  --text-md: 1.125rem;     /* 18px - large body */
+  --text-lg: 1.25rem;      /* 20px - H4 */
+  --text-xl: 1.5rem;       /* 24px - H3 */
+  --text-2xl: 1.75rem;     /* 28px - H2 */
+  --text-3xl: 2rem;        /* 32px - H1 */
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  --measure-narrow: 45ch;
+  --measure-base: 65ch;
+  --measure-wide: 75ch;
+
+  --baseline: 4px;
+  --space-section: 3rem;   /* 48px between major sections */
+  --space-card: 1rem;      /* 16px between cards */
+  --space-element: 0.75rem; /* 12px between elements */
+`
+
 type SectionKey = keyof typeof SECTION_COLORS
 
 function SectionBadge({ section }: { section: SectionKey }) {
@@ -40,9 +65,23 @@ function IdBadge({ children }: { children: React.ReactNode }) {
 
 function FieldRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-3 py-1.5">
-      <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--text-muted)', width: 100 }}>{label}</span>
-      <span className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{value}</span>
+    <div className="flex gap-4 py-2">
+      <span style={{
+        fontSize: 'var(--text-xs)',
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: 'var(--text-muted)',
+        width: 120,
+        flexShrink: 0,
+        lineHeight: 'var(--leading-normal)'
+      }}>{label}</span>
+      <span style={{
+        fontSize: 'var(--text-base)',
+        lineHeight: 'var(--leading-relaxed)',
+        color: 'var(--text-secondary)',
+        maxWidth: 'var(--measure-base)'
+      }}>{value}</span>
     </div>
   )
 }
@@ -50,10 +89,38 @@ function FieldRow({ label, value }: { label: string; value: string }) {
 function SectionHeading({ title, count, section }: { title: string; count: number; section: SectionKey }) {
   const { color } = SECTION_COLORS[section]
   return (
-    <div className="flex items-center gap-3 mb-4 pt-2">
-      <div className="h-5 w-1 rounded-full" style={{ background: color }} />
-      <h2 className="text-lg font-semibold m-0" style={{ color: 'var(--text-primary)' }}>{title}</h2>
-      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)' }}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      marginTop: 'var(--space-section)',
+      marginBottom: '1.5rem',
+      paddingTop: 'var(--space-section)',
+      borderTop: '1px solid var(--border-light)'
+    }}>
+      <div style={{
+        height: 24,
+        width: 3,
+        borderRadius: 2,
+        background: color,
+        flexShrink: 0
+      }} />
+      <h2 style={{
+        fontSize: 'var(--text-2xl)',
+        fontWeight: 600,
+        lineHeight: 'var(--leading-tight)',
+        color: 'var(--text-primary)',
+        margin: 0,
+        letterSpacing: '-0.01em'
+      }}>{title}</h2>
+      <span style={{
+        fontSize: 'var(--text-xs)',
+        fontWeight: 600,
+        padding: '4px 10px',
+        borderRadius: 12,
+        background: 'var(--bg-gray-subtle)',
+        color: 'var(--text-muted)'
+      }}>
         {count}
       </span>
     </div>
@@ -64,11 +131,14 @@ function Card({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
     <div
       id={id}
-      className="mb-3 rounded-xl p-4"
       style={{
+        marginBottom: 'var(--space-card)',
+        padding: '1.5rem',
         background: 'var(--bg-white)',
         border: '1px solid var(--border-default)',
-        boxShadow: 'var(--shadow-subtle)',
+        borderRadius: 12,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        transition: 'box-shadow 200ms ease',
       }}
     >
       {children}
@@ -100,30 +170,82 @@ export function ModelReader({ model }: { model: IntentModel }) {
   }
 
   return (
-    <div className="h-full overflow-y-auto custom-scroll" style={{ background: 'var(--bg-page)' }}>
-      <div className="max-w-3xl mx-auto px-6 py-8">
+    <div className="h-full overflow-y-auto custom-scroll" style={{
+      background: 'var(--bg-page)',
+      fontKerning: 'normal',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale'
+    }}>
+      <style dangerouslySetInnerHTML={{ __html: `:root { ${TYPOGRAPHY_TOKENS} }` }} />
+      <div style={{
+        maxWidth: 'var(--measure-wide)',
+        margin: '0 auto',
+        padding: '3rem 2rem'
+      }}>
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold m-0" style={{ color: 'var(--acfs-navy)' }}>
+        <div style={{ marginBottom: 'var(--space-section)' }}>
+          <h1 style={{
+            fontSize: 'var(--text-3xl)',
+            fontWeight: 600,
+            lineHeight: 'var(--leading-tight)',
+            color: 'var(--acfs-navy)',
+            margin: 0,
+            letterSpacing: '-0.02em'
+          }}>
             {model.meta.project}
           </h1>
-          <div className="flex items-center gap-3 mt-2">
-            <span className="text-sm font-medium" style={{ color: 'var(--accent-blue)' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            marginTop: '0.75rem',
+            fontSize: 'var(--text-sm)',
+            lineHeight: 'var(--leading-normal)'
+          }}>
+            <span style={{
+              fontWeight: 600,
+              color: 'var(--accent-blue)',
+              fontVariantNumeric: 'tabular-nums'
+            }}>
               v{model.meta.version}
             </span>
-            <span className="text-sm capitalize" style={{ color: 'var(--text-muted)' }}>
+            <span style={{
+              textTransform: 'capitalize',
+              color: 'var(--text-muted)'
+            }}>
               {model.meta.status}
             </span>
-            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            <span style={{
+              color: 'var(--text-muted)',
+              fontVariantNumeric: 'tabular-nums'
+            }}>
               Updated {model.meta.lastUpdated}
             </span>
           </div>
         </div>
 
         {/* Table of contents */}
-        <div className="mb-8 rounded-xl p-4" style={{ background: 'var(--bg-white)', border: '1px solid var(--border-default)' }}>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>Contents</p>
-          <div className="grid grid-cols-2 gap-2">
+        <div style={{
+          marginBottom: '2.5rem',
+          padding: '1.5rem',
+          background: 'var(--bg-white)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 12,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
+          <p style={{
+            fontSize: 'var(--text-xs)',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            marginBottom: '1rem',
+            color: 'var(--text-muted)'
+          }}>Contents</p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '0.5rem'
+          }}>
             {([
               ['actors', 'Actors', model.actors.length],
               ['entities', 'Entities', model.entities.filter(e => !e.is_integration).length],
@@ -136,12 +258,38 @@ export function ModelReader({ model }: { model: IntentModel }) {
               <a
                 key={key}
                 href={`#section-${key}`}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-colors duration-200"
-                style={{ color: 'var(--text-primary)', background: 'var(--bg-gray-subtle)' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.625rem 0.875rem',
+                  borderRadius: 8,
+                  fontSize: 'var(--text-sm)',
+                  fontWeight: 500,
+                  lineHeight: 'var(--leading-normal)',
+                  textDecoration: 'none',
+                  color: 'var(--text-primary)',
+                  background: 'var(--bg-gray-subtle)',
+                  transition: 'all 200ms ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--bg-blue-subtle)'
+                  e.currentTarget.style.color = 'var(--accent-blue)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'var(--bg-gray-subtle)'
+                  e.currentTarget.style.color = 'var(--text-primary)'
+                }}
               >
                 <SectionBadge section={key} />
                 {label}
-                <span className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>{count}</span>
+                <span style={{
+                  marginLeft: 'auto',
+                  fontSize: 'var(--text-xs)',
+                  fontWeight: 600,
+                  color: 'var(--text-muted)',
+                  fontVariantNumeric: 'tabular-nums'
+                }}>{count}</span>
               </a>
             ))}
           </div>
@@ -152,21 +300,60 @@ export function ModelReader({ model }: { model: IntentModel }) {
           <SectionHeading title="Actors" count={model.actors.length} section="actors" />
           {model.actors.map(actor => (
             <Card key={actor.id} id={`actor-${actor.id}`}>
-              <div className="flex items-center gap-2 mb-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <SectionBadge section="actors" />
-                <h3 className="text-sm font-bold m-0" style={{ color: 'var(--text-primary)' }}>{actor.name}</h3>
+                <h3 style={{
+                  fontSize: 'var(--text-lg)',
+                  fontWeight: 600,
+                  lineHeight: 'var(--leading-tight)',
+                  color: 'var(--text-primary)',
+                  margin: 0
+                }}>{actor.name}</h3>
               </div>
-              <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{actor.description}</p>
+              <p style={{
+                fontSize: 'var(--text-base)',
+                lineHeight: 'var(--leading-relaxed)',
+                color: 'var(--text-secondary)',
+                maxWidth: 'var(--measure-base)',
+                marginBottom: '1.25rem'
+              }}>{actor.description}</p>
               <FieldRow label="Auth" value={actor.auth} />
-              <div className="mt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>
+              <div style={{ marginTop: '1.25rem' }}>
+                <p style={{
+                  fontSize: 'var(--text-xs)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '0.75rem',
+                  color: 'var(--text-muted)'
+                }}>
                   Responsibilities ({actor.responsibilities.length})
                 </p>
                 {actor.responsibilities.map(r => (
-                  <div key={r.id} className="py-2" style={{ borderBottom: '1px solid var(--border-default)' }}>
+                  <div key={r.id} style={{
+                    paddingTop: '1rem',
+                    paddingBottom: '1rem',
+                    borderBottom: '1px solid var(--border-default)'
+                  }}>
                     <IdBadge>{r.id}</IdBadge>
-                    <p className="text-sm leading-relaxed mt-1 mb-0" style={{ color: 'var(--text-secondary)' }}>{r.description}</p>
-                    {r.warn && <p className="text-xs mt-1 mb-0 px-2 py-1 rounded" style={{ background: 'rgba(245,158,11,0.08)', color: '#92400E' }}>{r.warn}</p>}
+                    <p style={{
+                      fontSize: 'var(--text-base)',
+                      lineHeight: 'var(--leading-relaxed)',
+                      marginTop: '0.5rem',
+                      marginBottom: 0,
+                      color: 'var(--text-secondary)',
+                      maxWidth: 'var(--measure-base)'
+                    }}>{r.description}</p>
+                    {r.warn && <p style={{
+                      fontSize: 'var(--text-sm)',
+                      lineHeight: 'var(--leading-normal)',
+                      marginTop: '0.5rem',
+                      marginBottom: 0,
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: 6,
+                      background: 'rgba(245,158,11,0.08)',
+                      color: '#92400E'
+                    }}>{r.warn}</p>}
                   </div>
                 ))}
               </div>
@@ -181,14 +368,36 @@ export function ModelReader({ model }: { model: IntentModel }) {
             const isExpanded = expandedSections.has(entity.id)
             return (
               <Card key={entity.id} id={`entity-${entity.id}`}>
-                <div className="flex items-center gap-2 mb-2">
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  marginBottom: '0.75rem'
+                }}>
                   <SectionBadge section="entities" />
-                  <h3 className="text-sm font-bold m-0" style={{ color: 'var(--text-primary)' }}>{entity.name}</h3>
-                  <span className="text-xs ml-auto" style={{ color: 'var(--text-muted)' }}>
+                  <h3 style={{
+                    fontSize: 'var(--text-lg)',
+                    fontWeight: 600,
+                    lineHeight: 'var(--leading-tight)',
+                    color: 'var(--text-primary)',
+                    margin: 0
+                  }}>{entity.name}</h3>
+                  <span style={{
+                    fontSize: 'var(--text-xs)',
+                    marginLeft: 'auto',
+                    color: 'var(--text-muted)',
+                    fontVariantNumeric: 'tabular-nums'
+                  }}>
                     {entity.key_fields.length} fields · {entity.lifecycle.states.length} states
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-secondary)' }}>{entity.description}</p>
+                <p style={{
+                  fontSize: 'var(--text-base)',
+                  lineHeight: 'var(--leading-relaxed)',
+                  color: 'var(--text-secondary)',
+                  maxWidth: 'var(--measure-base)',
+                  marginBottom: '1rem'
+                }}>{entity.description}</p>
 
                 <button
                   type="button"
@@ -200,17 +409,55 @@ export function ModelReader({ model }: { model: IntentModel }) {
                 </button>
 
                 {isExpanded && (
-                  <div className="mt-2 space-y-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Fields</p>
+                  <div style={{ marginTop: '1rem' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <p style={{
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        marginBottom: '0.75rem',
+                        color: 'var(--text-muted)'
+                      }}>Fields</p>
                       {entity.key_fields.map(f => (
-                        <div key={f.name} className="py-2" style={{ borderBottom: '1px solid var(--border-default)' }}>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-mono text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{f.name}</span>
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-blue-subtle)', color: 'var(--accent-blue)' }}>{f.type}</span>
+                        <div key={f.name} style={{
+                          paddingTop: '1rem',
+                          paddingBottom: '1rem',
+                          borderBottom: '1px solid var(--border-default)'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' }}>
+                            <span style={{
+                              fontFamily: 'var(--font-mono)',
+                              fontSize: 'var(--text-sm)',
+                              fontWeight: 500,
+                              color: 'var(--text-primary)'
+                            }}>{f.name}</span>
+                            <span style={{
+                              fontSize: '0.6875rem',
+                              fontWeight: 500,
+                              padding: '2px 6px',
+                              borderRadius: 4,
+                              background: 'var(--bg-blue-subtle)',
+                              color: 'var(--accent-blue)'
+                            }}>{f.type}</span>
                           </div>
-                          <p className="text-xs leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>{f.description}</p>
-                          {f.warn && <p className="text-xs mt-1 mb-0 px-2 py-1 rounded" style={{ background: 'rgba(245,158,11,0.08)', color: '#92400E' }}>{f.warn}</p>}
+                          <p style={{
+                            fontSize: 'var(--text-base)',
+                            lineHeight: 'var(--leading-relaxed)',
+                            margin: 0,
+                            color: 'var(--text-secondary)',
+                            maxWidth: 'var(--measure-base)'
+                          }}>{f.description}</p>
+                          {f.warn && <p style={{
+                            fontSize: 'var(--text-sm)',
+                            lineHeight: 'var(--leading-normal)',
+                            marginTop: '0.5rem',
+                            marginBottom: 0,
+                            padding: '0.5rem 0.75rem',
+                            borderRadius: 6,
+                            background: 'rgba(245,158,11,0.08)',
+                            color: '#92400E'
+                          }}>{f.warn}</p>}
                         </div>
                       ))}
                     </div>
@@ -314,19 +561,50 @@ export function ModelReader({ model }: { model: IntentModel }) {
           <SectionHeading title="Business Rules" count={model.business_rules.length} section="business_rules" />
           {model.business_rules.map(rule => (
             <Card key={rule.id} id={`rule-${rule.id}`}>
-              <div className="flex items-center gap-2 mb-2">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '0.75rem'
+              }}>
                 <IdBadge>{rule.id}</IdBadge>
-                <span className="text-xs ml-auto" style={{ color: 'var(--text-muted)' }}>{rule.source}</span>
+                <span style={{
+                  fontSize: 'var(--text-xs)',
+                  marginLeft: 'auto',
+                  color: 'var(--text-muted)'
+                }}>{rule.source}</span>
               </div>
-              <p className="text-sm leading-relaxed mb-2" style={{ color: 'var(--text-primary)' }}>{rule.description}</p>
+              <p style={{
+                fontSize: 'var(--text-base)',
+                lineHeight: 'var(--leading-relaxed)',
+                marginBottom: '0.75rem',
+                color: 'var(--text-primary)',
+                maxWidth: 'var(--measure-base)'
+              }}>{rule.description}</p>
               {rule.applies_to.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
                   {rule.applies_to.map(ref => (
-                    <span key={ref} className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-gray-subtle)', color: 'var(--text-muted)' }}>{ref}</span>
+                    <span key={ref} style={{
+                      fontSize: '0.6875rem',
+                      fontWeight: 500,
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: 'var(--bg-gray-subtle)',
+                      color: 'var(--text-muted)'
+                    }}>{ref}</span>
                   ))}
                 </div>
               )}
-              {rule.warn && <p className="text-xs mt-2 mb-0 px-2 py-1 rounded" style={{ background: 'rgba(245,158,11,0.08)', color: '#92400E' }}>{rule.warn}</p>}
+              {rule.warn && <p style={{
+                fontSize: 'var(--text-sm)',
+                lineHeight: 'var(--leading-normal)',
+                marginTop: '0.75rem',
+                marginBottom: 0,
+                padding: '0.5rem 0.75rem',
+                borderRadius: 6,
+                background: 'rgba(245,158,11,0.08)',
+                color: '#92400E'
+              }}>{rule.warn}</p>}
             </Card>
           ))}
         </div>

@@ -8,9 +8,9 @@
 
 ## The problem
 
-ACFS needed a pickup booking portal for their warehouse. A BRD existed — 40-page PDF, dense, full of jargon. The client (Matt), the PM (Roni), and the engineering team needed to get on the same page about what exactly the system should do before anyone wrote a line of production code.
+ACFS needed a pickup booking portal for their warehouse. A BRD existed — 40-page PDF, dense, full of jargon. The client team, the PM, design, and dev all needed to get on the same page about what exactly the system should do before anyone wrote a line of production code.
 
-The usual approach: Jira tickets, Google Docs, Zoom calls, Miro boards. Things get lost, decisions get forgotten, nobody's sure what the current truth is.
+The usual approach: Jira tickets, shared docs, video calls, Miro boards. Things get lost, decisions get forgotten, nobody's sure what the current truth is.
 
 I wanted something different: **a single structured model** that everyone reviews together, in the same tool, with AI helping iterate on it in real time.
 
@@ -138,7 +138,7 @@ I built three Three.js visualizations:
 
 **Actor layers** — horizontal platforms per actor, with their responsibilities and connected entities floating above. Shows who owns what at a glance.
 
-These were fun to build but also legitimately useful — Matt (the client) immediately understood the model structure when he saw the 3D views, after struggling with the flat text version.
+These were fun to build but also legitimately useful — the client team immediately understood the model structure when they saw the 3D views, after struggling with the flat text version.
 
 ### The IA map
 

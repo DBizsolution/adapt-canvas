@@ -34,9 +34,13 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   const edgeWidth = 0.15
   const padding = 0.4
 
-  // Dynamic height based on text content
-  const contentHeight = Math.max(textHeight + statHeight + padding * 2, baseDim.height)
-  const dim = { width: baseDim.width, height: contentHeight }
+  // Dynamic height based on text content - ensure minimum height and add spacing
+  const spacing = node.stat ? 0.15 : 0
+  const contentHeight = textHeight + statHeight + spacing + padding * 2
+  const dim = {
+    width: baseDim.width,
+    height: Math.max(contentHeight || baseDim.height, baseDim.height)
+  }
 
   useFrame(() => {
     if (!groupRef.current || !cardMaterialRef.current) return
@@ -73,7 +77,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   return (
     <Billboard position={node.position} follow lockX={false} lockY={false} lockZ={false}>
       <group ref={groupRef}>
-        {/* Card background — transparent white */}
+        {/* Card background — colored tint per type */}
         <RoundedBox
           args={[dim.width, dim.height, 0.02]}
           radius={0.15}
@@ -85,6 +89,23 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
         >
           <meshStandardMaterial
             ref={cardMaterialRef}
+            color={color}
+            transparent
+            opacity={node.deferred ? 0.12 : 0.15}
+            side={THREE.DoubleSide}
+            roughness={0.4}
+            metalness={0.02}
+          />
+        </RoundedBox>
+
+        {/* White background layer behind color tint */}
+        <RoundedBox
+          args={[dim.width, dim.height, 0.01]}
+          radius={0.15}
+          smoothness={4}
+          position={[0, 0, -0.005]}
+        >
+          <meshStandardMaterial
             color="#ffffff"
             transparent
             opacity={node.deferred ? DEFERRED_OPACITY : CARD_OPACITY}
@@ -110,19 +131,22 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
         <Text
           position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding, 0.015]}
           fontSize={nameSize}
-          color="#1A1A1A"
+          color="#0A0A0A"
           anchorX="left"
           anchorY="top"
           maxWidth={dim.width - edgeWidth - 0.5}
           font="/fonts/DMSans-Variable.ttf"
           fontWeight={600}
+          whiteSpace="normal"
           onSync={(troika) => {
             if (troika.textRenderInfo) {
               const bounds = troika.textRenderInfo.blockBounds
               if (bounds) {
                 const height = Math.abs(bounds[3] - bounds[1])
-                setTextHeight(height)
-                invalidate()
+                if (height !== textHeight) {
+                  setTextHeight(height)
+                  invalidate()
+                }
               }
             }
           }}
@@ -133,9 +157,9 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
         {/* Card stat — always opaque */}
         {node.stat && (
           <Text
-            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding - textHeight - 0.1, 0.015]}
+            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding - textHeight - 0.15, 0.015]}
             fontSize={statSize}
-            color="#666666"
+            color="#525252"
             anchorX="left"
             anchorY="top"
             maxWidth={dim.width - edgeWidth - 0.5}
@@ -146,8 +170,10 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
                 const bounds = troika.textRenderInfo.blockBounds
                 if (bounds) {
                   const height = Math.abs(bounds[3] - bounds[1])
-                  setStatHeight(height)
-                  invalidate()
+                  if (height !== statHeight) {
+                    setStatHeight(height)
+                    invalidate()
+                  }
                 }
               }
             }}

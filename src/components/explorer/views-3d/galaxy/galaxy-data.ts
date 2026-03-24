@@ -180,8 +180,8 @@ export function buildGalaxyData(model: IntentModel): GalaxyData {
   const simLinks = edges.map(e => ({ source: e.from, target: e.to }))
 
   const sim = forceSimulation(nodes, 3)
-    .force('charge', forceManyBody().strength(-30))
-    .force('link', forceLink(simLinks).id((d: SimNode) => d.id).distance(12))
+    .force('charge', forceManyBody().strength(-80))
+    .force('link', forceLink(simLinks).id((d: SimNode) => d.id).distance(15))
     .force('center', forceCenter(0, 0, 0).strength(0.1))
 
   // Per-type radial forces toward zone centers

@@ -20,9 +20,11 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   const groupRef = useRef<THREE.Group>(null)
   const cardMaterialRef = useRef<THREE.MeshStandardMaterial>(null)
   const [hovered, setHovered] = useState(false)
+  const [textHeight, setTextHeight] = useState(0)
+  const [statHeight, setStatHeight] = useState(0)
   const invalidate = useThree(s => s.invalidate)
 
-  const dim = CARD_SIZES[node.size]
+  const baseDim = CARD_SIZES[node.size]
   const color = TYPE_COLORS[node.type] || '#999'
 
   // Typography sizing based on card size
@@ -30,6 +32,11 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   const statSize = node.size === 'small' ? 0.20 : node.size === 'medium' ? 0.22 : 0.24
   const statOffset = node.size === 'small' ? 0.35 : node.size === 'medium' ? 0.40 : 0.45
   const edgeWidth = 0.15
+  const padding = 0.4
+
+  // Dynamic height based on text content
+  const contentHeight = Math.max(textHeight + statHeight + padding * 2, baseDim.height)
+  const dim = { width: baseDim.width, height: contentHeight }
 
   useFrame(() => {
     if (!groupRef.current || !cardMaterialRef.current) return
@@ -101,7 +108,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
 
         {/* Card name — always opaque */}
         <Text
-          position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - 0.4, 0.015]}
+          position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding, 0.015]}
           fontSize={nameSize}
           color="#1A1A1A"
           anchorX="left"
@@ -109,6 +116,16 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
           maxWidth={dim.width - edgeWidth - 0.5}
           font="/fonts/DMSans-Variable.ttf"
           fontWeight={600}
+          onSync={(troika) => {
+            if (troika.textRenderInfo) {
+              const bounds = troika.textRenderInfo.blockBounds
+              if (bounds) {
+                const height = Math.abs(bounds[3] - bounds[1])
+                setTextHeight(height)
+                invalidate()
+              }
+            }
+          }}
         >
           {node.name}
         </Text>
@@ -116,7 +133,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
         {/* Card stat — always opaque */}
         {node.stat && (
           <Text
-            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - statOffset, 0.015]}
+            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding - textHeight - 0.1, 0.015]}
             fontSize={statSize}
             color="#666666"
             anchorX="left"
@@ -124,6 +141,16 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
             maxWidth={dim.width - edgeWidth - 0.5}
             font="/fonts/DMSans-Variable.ttf"
             fontWeight={400}
+            onSync={(troika) => {
+              if (troika.textRenderInfo) {
+                const bounds = troika.textRenderInfo.blockBounds
+                if (bounds) {
+                  const height = Math.abs(bounds[3] - bounds[1])
+                  setStatHeight(height)
+                  invalidate()
+                }
+              }
+            }}
           >
             {node.stat}
           </Text>

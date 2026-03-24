@@ -11,7 +11,7 @@ The intent model is the **single source of truth** for what the VBS Pickup Porta
 | Pillar | Count | What it captures | Example |
 |--------|-------|-----------------|---------|
 | **Actors** | 5 | Who uses the system, how they authenticate, what they can do | LSP logs in with username/password, can delegate or book |
-| **Entities** | 7 + 5 integrations | Data objects with fields and lifecycle states | HBL has milestone (on_vessel → collected) and hbl_status (unassigned → booked) |
+| **Entities** | 10 + 5 integrations | Data objects with fields and lifecycle states | HBL has milestone (on_vessel → collected) and hbl_status (unassigned → booked) |
 | **Journeys** | 14 | Step-by-step workflows from a specific actor's perspective | "LSP Books a Pickup" — 8 steps from selection to confirmation |
 | **Business Rules** | 21 | Hard constraints the system must enforce | BR-004: LSP can either delegate or book per HBL, never both |
 | **Constraints** | 5 | Platform-level limits (access, admin, platform, notification) | C-007: Desktop/laptop only, no mobile responsive design |
@@ -19,7 +19,7 @@ The intent model is the **single source of truth** for what the VBS Pickup Porta
 
 Everything downstream — state machines, TypeScript types, database schemas, screens, components — is derived from this model. If it's not in the model, it doesn't exist.
 
-> **Note on rule consolidation (v0.7.1):** Business rules were consolidated from 30 → 21 and constraints from 8 → 5. No logic was removed — related rules were merged into single, comprehensive rules. For example, the four DO-related rules (BR-002, BR-003, BR-021, BR-031) are now a single BR-002 "DO Policy" rule. See the Changelog for full details.
+> **Note on recent changes (v0.8.0):** Three new entities added (Payment, User, Booking-HBL Link) to support payment tracking and per-HBL fee breakdown. P4TC actor/journey, Driver Record entity, and Gatehouse actor marked as deferred (fast follow). See the Changelog for full details including v0.7.1 rule consolidation (30 → 21 rules, 8 → 5 constraints).
 
 ---
 

@@ -1,5 +1,60 @@
 # Intent Model Changelog
 
+## v0.8.0 — 2026-03-23
+
+**Source:** BRD v1.5 sync + 3D views redesign
+
+### New Entities (3 added)
+
+Three entities added to support payment tracking and per-HBL fee breakdown:
+
+| Entity | Key Fields | Purpose |
+|--------|-----------|---------|
+| **Payment** | payment_id, booking_id, amount, gateway, status, timestamp | Track payment lifecycle (pending → completed → refunded) |
+| **User** | user_id, username, role (LSP/Admin/User), linked_lsp_id, status | User account management (ACFS creates LSPs and internal users) |
+| **Booking–HBL Link** | booking_id, hbl_id, chargeable_weight, rate, per_hbl_fee | Per-HBL fee breakdown for multi-HBL bookings |
+
+### Deferred Items Marked
+
+Following BRD v1.5 alignment:
+- **P4TC actor** + journey ("P4TC Books a Pickup") → marked `deferred: true` (fast follow)
+- **Driver Record entity** → marked `deferred: true` (driver fields remain on Booking entity for Phase 1)
+- **Gatehouse actor** → marked `deferred: true` (pickup verification flow deferred)
+
+### Platform: 3D Views Redesign
+
+Complete overhaul of 3D explorer visualizations:
+
+**New views:**
+- **Galaxy** — all model items as glass cards in force-directed 3D space with filter bar and presentation mode
+- **Flows** — journey steps as connected glass cards, select journey to isolate
+- **Anatomy** — entity-centric view showing fields, relationships, and lifecycle
+- **Domains** — entities organized by domain layer (integration vs domain) on glass platforms
+
+**Technical:**
+- Replaced `3d-force-graph` with `@react-three/fiber` + `@react-three/drei` + `@react-three/postprocessing`
+- Added glass card system with hover/select/fade states
+- Added bezier connection lines with animated particles
+- Added SSAO post-processing, fog, dynamic lighting
+- Offscreen canvas texture rendering for card content
+
+**Restored legacy views as additional tabs:**
+- Force graph (original translucent sphere design)
+- Lifecycle view (HBL milestone spine)
+- Actor layers (horizontal platforms per actor)
+
+### Notes Added
+
+- **HBL entity**: Added mapping note explaining how two dimensions (milestone + hbl_status) map to BRD's single lifecycle view
+- **AGS integration**: Flagged that BRD v1.5 does not reference AGS — needs confirmation from Roni/Matt before OQ-034 can be resolved
+
+### Total Count Updates
+
+- Entities: 7 domain → 10 domain (added Payment, User, Booking–HBL Link)
+- Integration entities: 5 (unchanged)
+
+---
+
 ## v0.7.1 — 2026-03-22
 
 **Source:** Internal simplification review (Rahul). No new requirements — same logic, fewer items.

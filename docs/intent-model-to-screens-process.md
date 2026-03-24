@@ -2,6 +2,8 @@
 **Date:** 2026-03-19
 **Context:** Intent model v0.5.0 is stable. 3 screens already built. Team needs more screens. No Figma dependency — designing directly in code.
 
+> **For setup and role-specific workflows:** See **[Getting Started Guide](project/getting-started.md)** for complete setup instructions, cross-role workflows, and how the intent model connects to the portal code.
+
 ---
 
 ## Current state
@@ -150,3 +152,11 @@ These OQs should be checked before designing the relevant screens:
 3. For each screen, reference the model for fields, rules, and states
 4. Accept drift on implementation details, flag drift on business rules
 5. Stop actively maintaining the model once sprints are running — update only for major changes
+
+---
+
+## Related Documentation
+
+- **[Getting Started Guide](project/getting-started.md)** — Complete setup instructions for both `vbs-intent` and `vbs-portal`, role-specific workflows, and how to export the intent contract
+- **[Team Guide](project/team-guide.md)** — How to use the intent model platform for consensus review, AI editing, and cross-role collaboration
+- **[BRD to Engineering Process](project/brd-to-engineering-process.md)** — The full pipeline validation from BRD → Intent Model → Code

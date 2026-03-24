@@ -4,12 +4,12 @@ A structured review platform for the ACFS VBS Pickup Portal intent model — act
 
 Built with Next.js, React, TypeScript, TailwindCSS, and ShadCN.
 
-## Current model (v0.7.1)
+## Current model (v0.8.0)
 
 | Pillar | Count | Examples |
 |--------|-------|---------|
 | **Actors** | 5 | LSP, P4TC, Driver, ACFS Internal, Gatehouse |
-| **Entities** | 7 + 5 integrations | HBL, Booking, Pickup Slot, Site, Delivery Order, Delegation, Driver Record |
+| **Entities** | 10 + 5 integrations | HBL, Booking, Pickup Slot, Site, Delivery Order, Delegation, Driver Record, Payment, User, Booking-HBL Link |
 | **Journeys** | 14 | LSP Books a Pickup, ACFS Validates DOs, P4TC Books a Pickup |
 | **Business Rules** | 21 | Booking gates, DO policy, modification cutoffs, fee calculation |
 | **Constraints** | 5 | Desktop only, no persistent P4TC credentials, DB-seeded sites |
@@ -30,10 +30,25 @@ Built with Next.js, React, TypeScript, TailwindCSS, and ShadCN.
 
 ## Getting started
 
+### Quick start
+
 ```bash
 pnpm install
 pnpm dev        # starts on http://localhost:4444
 ```
+
+### For new team members
+
+If you're new to the project, see the **[Getting Started Guide](docs/project/getting-started.md)** for:
+- Complete setup instructions for both `vbs-intent` and `vbs-portal`
+- Role-specific workflows (Designer, PM, Engineer)
+- How the intent model connects to the frontend code
+- Common tasks and troubleshooting
+
+**Quick links:**
+- [Team Guide](docs/project/team-guide.md) — how to use the platform for reviews and collaboration
+- [BRD to Engineering Process](docs/project/brd-to-engineering-process.md) — the full pipeline from requirements to code
+- [How I Built This](docs/project/how-i-built-this.md) — Rahul's build log and design decisions
 
 ## Project structure
 

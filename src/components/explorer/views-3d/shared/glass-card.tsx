@@ -28,11 +28,11 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   const color = TYPE_COLORS[node.type] || '#999'
 
   // Typography sizing based on card size
-  const nameSize = node.size === 'small' ? 0.28 : node.size === 'medium' ? 0.32 : 0.38
-  const statSize = node.size === 'small' ? 0.20 : node.size === 'medium' ? 0.22 : 0.24
+  const nameSize = node.size === 'small' ? 0.26 : node.size === 'medium' ? 0.30 : 0.36
+  const statSize = node.size === 'small' ? 0.18 : node.size === 'medium' ? 0.20 : 0.22
   const statOffset = node.size === 'small' ? 0.35 : node.size === 'medium' ? 0.40 : 0.45
   const edgeWidth = 0.15
-  const padding = 0.4
+  const padding = 0.5
 
   // Dynamic height based on text content - ensure minimum height and add spacing
   const spacing = node.stat ? 0.15 : 0
@@ -77,7 +77,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
   return (
     <Billboard position={node.position} follow lockX={false} lockY={false} lockZ={false}>
       <group ref={groupRef}>
-        {/* Card background — colored tint per type */}
+        {/* White card background — main body */}
         <RoundedBox
           args={[dim.width, dim.height, 0.02]}
           radius={0.15}
@@ -89,29 +89,28 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
         >
           <meshStandardMaterial
             ref={cardMaterialRef}
-            color={color}
-            transparent
-            opacity={node.deferred ? 0.12 : 0.15}
-            side={THREE.DoubleSide}
-            roughness={0.4}
-            metalness={0.02}
-          />
-        </RoundedBox>
-
-        {/* White background layer behind color tint */}
-        <RoundedBox
-          args={[dim.width, dim.height, 0.01]}
-          radius={0.15}
-          smoothness={4}
-          position={[0, 0, -0.005]}
-        >
-          <meshStandardMaterial
             color="#ffffff"
             transparent
             opacity={node.deferred ? DEFERRED_OPACITY : CARD_OPACITY}
             side={THREE.DoubleSide}
             roughness={0.4}
             metalness={0.02}
+          />
+        </RoundedBox>
+
+        {/* Subtle colored tint overlay */}
+        <RoundedBox
+          args={[dim.width, dim.height, 0.01]}
+          radius={0.15}
+          smoothness={4}
+          position={[0, 0, 0.011]}
+        >
+          <meshBasicMaterial
+            color={color}
+            transparent
+            opacity={node.deferred ? 0.06 : 0.08}
+            side={THREE.DoubleSide}
+            depthWrite={false}
           />
         </RoundedBox>
 
@@ -129,7 +128,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
 
         {/* Card name — always opaque */}
         <Text
-          position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding, 0.015]}
+          position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding, 0.016]}
           fontSize={nameSize}
           color="#0A0A0A"
           anchorX="left"
@@ -137,6 +136,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
           maxWidth={dim.width - edgeWidth - 0.5}
           font="/fonts/DMSans-Variable.ttf"
           fontWeight={600}
+          overflowWrap="break-word"
           whiteSpace="normal"
           onSync={(troika) => {
             if (troika.textRenderInfo) {
@@ -157,7 +157,7 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
         {/* Card stat — always opaque */}
         {node.stat && (
           <Text
-            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding - textHeight - 0.15, 0.015]}
+            position={[-dim.width / 2 + edgeWidth + 0.25, dim.height / 2 - padding - textHeight - 0.15, 0.016]}
             fontSize={statSize}
             color="#525252"
             anchorX="left"
@@ -165,6 +165,8 @@ export function GlassCard({ node, selected, faded, onClick, onDoubleClick, onHov
             maxWidth={dim.width - edgeWidth - 0.5}
             font="/fonts/DMSans-Variable.ttf"
             fontWeight={400}
+            overflowWrap="break-word"
+            whiteSpace="normal"
             onSync={(troika) => {
               if (troika.textRenderInfo) {
                 const bounds = troika.textRenderInfo.blockBounds

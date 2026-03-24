@@ -19,6 +19,7 @@ const staticDocs: DocEntry[] = [
   // Project — team-facing docs
   { slug: 'brd', label: 'BRD (Final) V1.0', path: join(DOCS, 'project', 'VBS_Pickup_BRD(Final)_V1.0.pdf'), category: 'project', type: 'pdf' },
   { slug: 'team-guide', label: 'Team Guide — Designers, PMs & Engineers', path: join(DOCS, 'project', 'team-guide.md'), category: 'project' },
+  { slug: 'model-to-portal-workflow', label: 'Model → Portal Workflow', path: join(DOCS, 'project', 'model-to-portal-workflow.md'), category: 'project' },
   { slug: 'changelog', label: 'Intent Model Changelog', path: join(DOCS, 'project', 'CHANGELOG.md'), category: 'project' },
 
   // Rahul's Build Log — working docs, superseded notes, build specs

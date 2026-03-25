@@ -103,7 +103,7 @@ export function parseDbml(content: string): DbmlSchema {
 
     // Inside table
     if (currentTable && !inIndexes) {
-      const fieldMatch = line.match(/^(\w+)\s+([\w()]+)(?:\s+\[(.*?)\])?/)
+      const fieldMatch = line.match(/^(\w+)\s+([\w(),]+)(?:\s+\[(.*?)\])?/)
       if (fieldMatch) {
         const [, name, type, constraints = ''] = fieldMatch
 
@@ -158,13 +158,14 @@ export function parseDbml(content: string): DbmlSchema {
 
     // Inside indexes section
     if (currentTable && inIndexes) {
-      const indexMatch = line.match(/\((.*?)\)/)
+      const indexMatch = line.match(/\((.*?)\)(?:\s+\[(.*?)\])?/)
       if (indexMatch) {
         const fields = indexMatch[1].split(',').map(f => f.trim())
+        const attrs = indexMatch[2] || ''
         currentTable.indexes.push({
           fields,
-          isUnique: false,
-          isPrimaryKey: false,
+          isUnique: /\bunique\b/.test(attrs),
+          isPrimaryKey: /\bpk\b/.test(attrs),
         })
       } else {
         // Single field index

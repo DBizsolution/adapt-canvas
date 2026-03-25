@@ -1,18 +1,27 @@
+import { readFile } from 'fs/promises'
+import { join } from 'path'
 import { getCurrentModel } from '@/lib/model-store'
-import { DataModelCanvas } from '@/components/data-model/data-model-canvas'
 import { buildDataModelGraph } from '@/components/data-model/data-model-graph'
+import { buildDatabaseSchemaGraph } from '@/components/data-model/database-schema-graph'
+import { parseDbml } from '@/components/data-model/parse-dbml'
+import { DataModelPageClient } from './page-client'
 
 export default async function DataModelPage() {
-  const model = await getCurrentModel()
-  const { nodes, edges, stats } = buildDataModelGraph(model)
+  // Load intent model
+  const intentModel = await getCurrentModel()
+  const intentGraph = buildDataModelGraph(intentModel)
+
+  // Load database schema
+  const dbmlPath = join(process.cwd(), 'src/data/acfs-datamodel-corrected.dbml')
+  const dbmlContent = await readFile(dbmlPath, 'utf-8')
+  const dbmlSchema = parseDbml(dbmlContent)
+  const schemaGraph = buildDatabaseSchemaGraph(dbmlSchema)
 
   return (
-    <div className="h-full w-full overflow-hidden">
-      <DataModelCanvas
-        initialNodes={nodes}
-        initialEdges={edges}
-        stats={stats}
-      />
-    </div>
+    <DataModelPageClient
+      intentGraph={intentGraph}
+      schemaGraph={schemaGraph}
+      enums={dbmlSchema.enums}
+    />
   )
 }

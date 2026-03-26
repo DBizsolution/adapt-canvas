@@ -6,6 +6,7 @@ import { FileText, ChevronRight, Loader2, Link as LinkIcon, Upload, CheckCircle2
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { processAbbrInChildren } from '@/components/review/abbr-text'
+import { DocsSearch } from '@/components/docs-search'
 
 type DocMeta = { slug: string; label: string; category: string; type: 'md' | 'pdf' }
 
@@ -254,10 +255,23 @@ function DocsPageInner() {
       {/* Content area */}
       <div className="flex-1 overflow-y-auto custom-scroll">
         {!activeSlug && (
-          <div className="flex flex-col items-center justify-center h-full text-center" style={{ color: 'var(--text-muted)' }}>
-            <FileText size={40} className="mb-3 opacity-20" />
-            <p className="text-base font-medium">Select a document</p>
-            <p className="text-sm mt-1">Choose from the sidebar to view</p>
+          <div className="max-w-[780px] mx-auto px-10 py-8">
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                Documentation Search
+              </h2>
+              <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
+                Ask questions about VBS Intent documentation using AI-powered search
+              </p>
+              <DocsSearch />
+            </div>
+            <div className="pt-8 border-t" style={{ borderColor: 'var(--border-default)' }}>
+              <div className="flex flex-col items-center text-center" style={{ color: 'var(--text-muted)' }}>
+                <FileText size={40} className="mb-3 opacity-20" />
+                <p className="text-base font-medium">Or select a document</p>
+                <p className="text-sm mt-1">Choose from the sidebar to view</p>
+              </div>
+            </div>
           </div>
         )}
 

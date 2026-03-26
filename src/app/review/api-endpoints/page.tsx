@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { endpointsByDomain, endpointStats } from '@/lib/api-endpoints-data'
 import { UuidAlert } from './uuid-alert'
 import { Filters, type FilterState } from './filters'
@@ -16,14 +16,15 @@ export default function ApiEndpointsPage() {
     auth: [],
   })
 
-  const [collapsedDomains, setCollapsedDomains] = useState<Set<string>>(() => {
-    // Load from localStorage
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('api-endpoints-collapsed-domains')
-      return saved ? new Set(JSON.parse(saved)) : new Set()
+  const [collapsedDomains, setCollapsedDomains] = useState<Set<string>>(new Set())
+
+  // Load collapsed state from localStorage after mount (client-only)
+  useEffect(() => {
+    const saved = localStorage.getItem('api-endpoints-collapsed-domains')
+    if (saved) {
+      setCollapsedDomains(new Set(JSON.parse(saved)))
     }
-    return new Set()
-  })
+  }, [])
 
   const toggleDomain = (domain: string) => {
     const newCollapsed = new Set(collapsedDomains)

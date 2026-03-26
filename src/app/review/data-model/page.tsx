@@ -11,8 +11,8 @@ export default async function DataModelPage() {
   const intentModel = await getCurrentModel()
   const intentGraph = buildDataModelGraph(intentModel)
 
-  // Load database schema
-  const dbmlPath = join(process.cwd(), 'src/data/acfs-datamodel-corrected.dbml')
+  // Load production database schema (merged Intent Model v0.8.0 + VBS_DBML operational enhancements)
+  const dbmlPath = join(process.cwd(), 'src/data/acfs-production-schema.dbml')
   const dbmlContent = await readFile(dbmlPath, 'utf-8')
   const dbmlSchema = parseDbml(dbmlContent)
   const schemaGraph = buildDatabaseSchemaGraph(dbmlSchema)

@@ -1,15 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Sparkles, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
+
+const LOADING_MESSAGES = [
+  'Searching...',
+  'Reading through the docs...',
+  'This is harder than I thought...',
+  'Still looking...',
+  'Man, this is taking a while...',
+  'Digging deeper...',
+  'Almost there... maybe...',
+  'Ok seriously, where is it...',
+  'Found something! Processing...',
+  'Connecting the dots...',
+  'Making sense of it all...',
+  'Crafting the perfect answer...',
+]
 
 export function DocsSearch() {
   const [query, setQuery] = useState('')
   const [answer, setAnswer] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
+
+  // Rotate loading messages every 2 seconds
+  useEffect(() => {
+    if (!loading) {
+      setLoadingMessageIndex(0)
+      return
+    }
+
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length)
+    }, 2000)
+
+    return () => clearInterval(interval)
+  }, [loading])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,6 +149,23 @@ export function DocsSearch() {
           <div>
             <div className="font-medium" style={{ color: '#ef4444' }}>Error</div>
             <div className="mt-1 text-sm" style={{ color: '#ef4444e6' }}>{error}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="rounded-lg border p-6" style={{ borderColor: 'var(--accent-blue)33', background: 'var(--bg-blue-subtle)' }}>
+          <div className="flex items-center gap-3">
+            <Loader2 size={20} className="animate-spin shrink-0" style={{ color: 'var(--accent-blue)' }} />
+            <div>
+              <div className="text-sm font-medium mb-1" style={{ color: 'var(--accent-blue)' }}>
+                Thinking...
+              </div>
+              <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                {LOADING_MESSAGES[loadingMessageIndex]}
+              </div>
+            </div>
           </div>
         </div>
       )}

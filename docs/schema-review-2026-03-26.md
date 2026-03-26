@@ -280,12 +280,6 @@ Yes - schema has `alt_hbl_reference` + `consignee_*` fields; awaiting feed defin
 
 **Blockers:** None in schema. OQ-034 (AGS feed) is an integration blocker, not a schema blocker.
 
-**Next Steps:**
-1. Proceed with OutSystems/implementation using this schema
-2. Monitor AGS feed definition (Matt/William) for integration layer
-3. Validate schema with Anoop's data discovery requirements
-4. Consider adding sample seed data for local dev/testing
-
 ---
 
 ## Comparison: Original vs Corrected Schema

@@ -159,8 +159,8 @@ export function buildDatabaseSchemaGraph(schema: DbmlSchema): DatabaseSchemaGrap
       },
       label: rel.cardinality,
       labelStyle: {
-        fontSize: 10,
-        fontWeight: 500,
+        fontSize: 20,
+        fontWeight: 700,
         fill: '#9CA3AF',
         fontFamily: 'var(--font-sans)',
       },
@@ -168,8 +168,8 @@ export function buildDatabaseSchemaGraph(schema: DbmlSchema): DatabaseSchemaGrap
         fill: 'var(--bg-page)',
         fillOpacity: 0.9,
       },
-      labelBgPadding: [4, 6] as [number, number],
-      labelBgBorderRadius: 4,
+      labelBgPadding: [6, 10] as [number, number],
+      labelBgBorderRadius: 6,
     })
   })
 

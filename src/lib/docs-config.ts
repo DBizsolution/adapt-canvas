@@ -19,6 +19,9 @@ const staticDocs: DocEntry[] = [
   // Project — team-facing docs
   { slug: 'brd', label: 'BRD (Final) V1.5', path: join(DOCS, 'project', 'VBS_Pickup_BRD(Final)_V1.5.pdf'), category: 'project', type: 'pdf' },
   { slug: 'schema-review', label: 'Database Schema Review', path: join(DOCS, 'schema-review-2026-03-26.md'), category: 'project' },
+  { slug: 'quickstart-schema-fix', label: '🚀 Schema Fix Quick Start (for Devs)', path: join(DOCS, 'project', 'QUICKSTART-SCHEMA-FIX.md'), category: 'project' },
+  { slug: 'schema-fix-strategy', label: 'Schema Fix Implementation Strategy', path: join(DOCS, 'project', 'schema-fix-strategy.md'), category: 'project' },
+  { slug: 'api-endpoints-alignment', label: 'API Endpoints Schema Alignment', path: join(DOCS, 'project', 'API-ENDPOINTS-SCHEMA-ALIGNMENT.md'), category: 'project' },
   { slug: 'team-guide', label: 'Team Guide — Designers, PMs & Engineers', path: join(DOCS, 'project', 'team-guide.md'), category: 'project' },
   { slug: 'model-to-portal-workflow', label: 'Model → Portal Workflow', path: join(DOCS, 'project', 'model-to-portal-workflow.md'), category: 'project' },
   { slug: 'changelog', label: 'Intent Model Changelog', path: join(DOCS, 'project', 'CHANGELOG.md'), category: 'project' },

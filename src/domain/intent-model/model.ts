@@ -109,7 +109,8 @@ export const intentModel: IntentModel = {
         { name: 'do_waived', type: 'boolean', description: 'Derived: true when release_type is "free_release" OR under_bond is true. Booking readiness checks this single field instead of inspecting release_type and under_bond separately.' },
         { name: 'assigned_lsp', type: 'string', description: 'LSP this HBL is allocated to. Set by ACFS during HBL/WFF assignment or auto-assigned from data.' },
         { name: 'pickup_site', type: 'string', description: 'Physical site/warehouse where this HBL will be picked up (references site entity). Critical for LSP dispatch planning - determines which warehouse to send truck to. Sourced from Maximus or derived from container unpacking location. Must be visible in HBL list (FR-LSP-02) and filterable/searchable.' },
-        { name: 'related_booking_ids', type: 'string[]', description: 'Booking reference(s) this HBL has been included in. Array to support rebooking scenarios. Once HBL is booked, both HBL reference and booking reference become equally important for search/display (lsp:r9). BRD v1.5 Section 6.1 lists this as "Related Booking ID(s)".' },
+        { name: 'import_ref', type: 'string', description: 'Import reference from Maximus. Optional field for data matching and integration.' },
+        { name: 'related_bookings', type: 'Booking[]', description: 'Bookings this HBL has been included in. Many-to-many relationship via booking_hbls junction table supports rebooking scenarios with full fee history and per-HBL charge tracking (BR-019). Once HBL is booked, both HBL reference and booking reference become equally important for search/display (lsp:r9). BRD v1.5 Section 6.1 lists this as "Related Booking ID(s)" but implementation uses proper junction table pattern.' },
       ],
       lifecycle: {
         states: ['on_vessel', 'at_wharf', 'in_yard', 'unpacked', 'collected'],

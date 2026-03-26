@@ -11,7 +11,7 @@ type TocItem = {
 
 type ModelReaderTocProps = {
   model: IntentModel
-  containerRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>
 }
 
 export function ModelReaderToc({ model, containerRef }: ModelReaderTocProps) {

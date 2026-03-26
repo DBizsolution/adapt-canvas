@@ -801,17 +801,15 @@ export const intentModel: IntentModel = {
     {
       id: 'C-009',
       constraint: 'Delegation chain visibility follows industry standard: hop-by-hop opacity. An LSP who delegates an HBL sees (1) who assigned it to them (upstream), (2) who they delegated it to (immediate downstream), and (3) whether the HBL reached "collected" milestone. They do NOT see multi-hop chains or booking details made by downstream parties. Exception: ACFS has full chain visibility for audit/operations. Rationale: commercial sensitivity, pricing confidentiality, liability boundaries (see knowledge base Section 5.2).',
-      type: 'visibility',
+      type: 'access',
     },
   ],
   open_questions: [
     {
       id: 'OQ-034',
-      question: 'What is the exact data source for HBL hierarchy relationships and consignee data? (BLOCKER)',
-      reason: 'Maximus provides individual HBL references but NOT parent-child relationships. AGS feed required for: (1) HBL hierarchy (Master HBL → House HBL chain), (2) Accurate consignee identification (account name/code) - Maximus consignee data is "too inconsistent" per Delivery meeting 2026-03-24. Current status: Matt and William resolving integration approach. Impact: Data discovery blocked - Anoop requested data model urgently but cannot proceed without AGS feed definition. Action needed: BRD v1.5 Section 6.2 must be updated to include AGS as integration source (currently only lists Maximus).',
+      question: 'What is the exact data source for HBL hierarchy relationships and consignee data? (BLOCKER - CRITICAL)',
+      reason: 'Maximus provides individual HBL references but NOT parent-child relationships. AGS feed required for: (1) HBL hierarchy (Master HBL → House HBL chain), (2) Accurate consignee identification (account name/code) - Maximus consignee data is "too inconsistent" per Delivery meeting 2026-03-24. Current status: Matt and William resolving integration approach. Impact: Data discovery blocked - Anoop requested data model urgently but cannot proceed without AGS feed definition. Blocks: data_discovery, hbl_hierarchy, consignee_accuracy, auto_assignment. Action needed: BRD v1.5 Section 6.2 must be updated to include AGS as integration source (currently only lists Maximus).',
       status: 'open',
-      priority: 'CRITICAL',
-      blocking: ['data_discovery', 'hbl_hierarchy', 'consignee_accuracy', 'auto_assignment'],
     },
   ],
 }

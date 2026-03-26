@@ -148,7 +148,9 @@ This applies to:
 
 ## Data Model
 
-The page sources its data from a static TypeScript object (no API call needed). Structure:
+The page sources its data from a static TypeScript object (no API call needed). The 52 endpoints are defined in the earlier conversation context and will be transcribed into `src/lib/api-endpoints-data.ts`.
+
+Structure:
 
 ```typescript
 type ApiEndpoint = {
@@ -208,6 +210,8 @@ For each domain, show:
 1. Current count → Proposed count
 2. List of consolidation opportunities
 3. Rationale and trade-offs
+
+**Note:** The consolidation analysis will be written during implementation based on the actual 52 endpoint specifications. The example below illustrates the format and level of detail.
 
 Example:
 

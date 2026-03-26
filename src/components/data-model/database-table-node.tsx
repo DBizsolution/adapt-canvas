@@ -70,7 +70,7 @@ export const DatabaseTableNode = memo(function DatabaseTableNode({ data, selecte
         <div>
           {d.fields.map((field, idx) => (
             <div
-              key={field.name}
+              key={idx}
               className="relative flex items-center gap-2 px-3 py-1"
               style={{
                 background: idx % 2 === 0 ? 'transparent' : 'var(--bg-page)',

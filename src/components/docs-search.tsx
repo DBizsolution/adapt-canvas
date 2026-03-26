@@ -10,14 +10,14 @@ const LOADING_MESSAGES = [
   'Reading through the docs...',
   'This is harder than I thought...',
   'Still looking...',
-  'Man, this is taking a while...',
-  'Digging deeper...',
-  'Almost there... maybe...',
-  'Ok seriously, where is it...',
-  'Found something! Processing...',
-  'Connecting the dots...',
-  'Making sense of it all...',
-  'Crafting the perfect answer...',
+  'What if we don\'t find anything?',
+  'I\'m starting to panic a little...',
+  'Maybe it\'s not in here?',
+  'Wait, did I forget what\'s in these docs?',
+  'What do we do if I come up empty?',
+  'This is embarrassing...',
+  'Ok I\'m really worried now...',
+  'Just kidding! Found it. Processing...',
 ]
 
 export function DocsSearch() {

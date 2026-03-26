@@ -4,9 +4,9 @@ import dagre from '@dagrejs/dagre'
 import type { Node, Edge } from '@xyflow/react'
 import type { DbmlSchema, DbmlTable, DbmlField } from './parse-dbml'
 
-export const SCHEMA_TABLE_COLOR = '#14B8A6' // teal
+export const SCHEMA_TABLE_COLOR = '#0081F2' // blue
 export const SCHEMA_JUNCTION_COLOR = '#F59E0B' // amber
-export const SCHEMA_EDGE_COLOR = '#14B8A6'
+export const SCHEMA_EDGE_COLOR = '#0081F2'
 
 const TABLE_WIDTH = 380
 const TABLE_HEADER = 40

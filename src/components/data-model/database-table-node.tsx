@@ -55,11 +55,11 @@ export const DatabaseTableNode = memo(function DatabaseTableNode({ data, selecte
             borderLeft: `4px solid ${accentColor}`,
           }}
         >
-          <span className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
             {d.name}
           </span>
           <span
-            className="ml-2 shrink-0 text-[11px] font-medium"
+            className="ml-2 shrink-0 text-[12px] font-medium"
             style={{ color: 'var(--text-muted)' }}
           >
             {d.fields.length}↓
@@ -93,12 +93,12 @@ export const DatabaseTableNode = memo(function DatabaseTableNode({ data, selecte
               </div>
 
               {/* Field name */}
-              <span className="flex-1 font-mono text-[12px]" style={{ color: 'var(--text-primary)' }}>
+              <span className="flex-1 font-mono text-[13px]" style={{ color: 'var(--text-primary)' }}>
                 {field.name}
               </span>
 
               {/* Type */}
-              <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>
+              <span className="font-mono text-[12px]" style={{ color: 'var(--text-muted)' }}>
                 {field.type}
               </span>
 
@@ -158,7 +158,7 @@ export const DatabaseTableNode = memo(function DatabaseTableNode({ data, selecte
         {/* Indexes footer */}
         {d.indexes.length > 0 && (
           <div
-            className="px-3 py-1.5 text-[10px]"
+            className="px-3 py-1.5 text-[11px]"
             style={{
               borderTop: '1px solid var(--border-default)',
               color: 'var(--text-muted)',

@@ -22,6 +22,7 @@ export default async function DataModelPage() {
       intentGraph={intentGraph}
       schemaGraph={schemaGraph}
       enums={dbmlSchema.enums}
+      dbmlContent={dbmlContent}
     />
   )
 }

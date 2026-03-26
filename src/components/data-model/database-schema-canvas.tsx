@@ -76,7 +76,7 @@ function DatabaseSchemaCanvasInner({ initialNodes, initialEdges, enums, stats }:
         <button
           onClick={handleFitView}
           className="flex items-center gap-1 text-[12px] font-medium transition-colors hover:opacity-70"
-          style={{ color: SCHEMA_TABLE_COLOR, background: 'none', border: 'none', cursor: 'pointer' }}
+          style={{ color: '#0081F2', background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <Maximize2 size={13} />
           Fit

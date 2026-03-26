@@ -261,3 +261,58 @@ export const domainConsolidations: DomainConsolidation[] = [
     ],
   },
 ]
+
+export interface ConsolidationPrinciple {
+  title: string
+  description: string
+  examples: string[]
+}
+
+export const consolidationPrinciples: ConsolidationPrinciple[] = [
+  {
+    title: 'Search is a filtered list',
+    description: 'Use query parameters on list endpoints rather than separate /search routes',
+    examples: [
+      'GET /api/hbls?q=search-term',
+      'GET /api/bookings?status=pending&customer=acme',
+    ],
+  },
+  {
+    title: 'Property updates use PATCH',
+    description: 'Status changes and flag toggles are property updates, not separate actions',
+    examples: [
+      'PATCH /api/slots/:id { is_blocked: true }',
+      'PATCH /api/users/:id { is_active: false }',
+    ],
+  },
+  {
+    title: 'Soft delete over hard delete',
+    description: 'Preserve audit trail by deactivating records rather than removing them',
+    examples: [
+      'PATCH /api/drivers/:id { is_active: false }',
+      'PATCH /api/pricing-zones/:id { is_deleted: true }',
+    ],
+  },
+  {
+    title: 'Consolidate related actions',
+    description: 'Merge functionally similar endpoints that differ only in scope or minor behavior',
+    examples: [
+      'API-D827 (flagging) merged into API-D148 (validation)',
+    ],
+  },
+  {
+    title: 'Fill schema gaps',
+    description: 'Add missing CRUD operations for domains that exist but lack management endpoints',
+    examples: [
+      'PATCH /api/sites/:id (update site details)',
+      'GET /api/containers (list containers)',
+    ],
+  },
+  {
+    title: 'Defer non-MVP scope',
+    description: 'Push Phase 2 features to fast follow rather than bloating initial release',
+    examples: [
+      'P4TC authentication endpoints deferred to Phase 2',
+    ],
+  },
+]

@@ -1,27 +1,35 @@
 ---
 name: API Endpoints Documentation Page
-description: Documentation page for 52 VBS Portal API endpoints with consolidation analysis
+description: Documentation page for 48 VBS Portal API endpoints (validated against schema v1.0)
 type: design
+status: validated
 ---
 
 # API Endpoints Documentation Page Design
 
 ## Overview
 
-Create a documentation page at `/review/api-endpoints` that lists all 52 API endpoints for the VBS Pickup Portal, organized by domain, with detailed specs and a consolidation analysis section to help the team evaluate whether the API surface can be reduced.
+Create a documentation page at `/review/api-endpoints` that lists 48 validated API endpoints for the VBS Pickup Portal, organized by domain, with detailed specs and a consolidation analysis section.
+
+**Validation Status:** ✅ Endpoints validated against Production Schema v1.0 (2026-03-26)
+**See:** `api-endpoints-validation.md` for full validation report
 
 ## Context
 
-The team expressed concern that 52 endpoints is high. This page serves two purposes:
+The team expressed concern that 52 endpoints is high. After validation against the production database schema, we've consolidated to **48 endpoints** (10 removed, 8 added). This page serves two purposes:
 1. **Reference documentation** — comprehensive API specs for developers
-2. **Architecture review** — analysis of consolidation opportunities to reduce API count
+2. **Architecture review** — validated consolidation analysis with schema alignment
+
+## Critical Findings
+
+🚨 **BLOCKER:** Current schema uses sequential integer IDs (`int [pk, increment]`), but Ranjith requires **non-sequential UUIDs** to prevent enumeration attacks. Schema must be migrated to `uuid` type before implementation.
 
 ## Goals
 
-- Document all 52 endpoints with clear specs (method, route, params, auth, permissions)
-- Use non-sequential reference IDs (e.g., `API-H047`) for easy discussion
-- Note that all resource IDs in responses use UUIDs (not sequential integers)
-- Provide consolidation analysis showing which endpoints could be merged
+- Document all 48 validated endpoints with clear specs (method, route, params, auth, permissions)
+- Use non-sequential reference IDs (e.g., `API-H729`) for easy discussion
+- **Prominently note UUID requirement** — all resource IDs must use UUIDs after schema migration
+- Provide validated consolidation analysis (52 → 48 endpoints)
 - Match the existing review page aesthetic (warm minimal, Linear-inspired)
 
 ## Page Structure
@@ -39,13 +47,20 @@ Uses the existing `layout-shell` component with nav. Follows the same spacing, t
 │ Header                                      │
 │ • Title: "API Endpoints"                    │
 │ • Subtitle: "Portal API Reference & Analysis"│
-│ • Stats badge: "52 endpoints across 11..."  │
+│ • Stats badge: "48 endpoints | 13 domains"  │
+│ • 🚨 UUID requirement alert banner          │
 │ • Search/filter bar                         │
 └─────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
+│ UUID Requirement Alert (dismissible)        │
+│ ⚠️ Schema uses sequential IDs - must migrate│
+│ to UUIDs before implementation (see docs)   │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
 │ Quick Summary Stats                         │
-│ [Card: 52 total | 11 domains | ...]        │
+│ [Card: 48 total | 13 domains | validated]  │
 └─────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────┐
@@ -73,12 +88,19 @@ Uses the existing `layout-shell` component with nav. Follows the same spacing, t
 ┌─────────────────────────────────────────────┐
 │ Consolidation Analysis                      │
 │                                             │
-│ Summary: Potential reduction from 52 → ~35  │
+│ Validated: 52 initial → 48 endpoints        │
+│ • Removed: 10 (merged or deferred)          │
+│ • Added: 8 (schema gaps filled)             │
 │                                             │
 │ By domain:                                  │
-│ • HBLs/Shipments: 6 → 4 (merge search)     │
-│ • Bookings: 7 → 5 (merge search/calc)      │
-│ • ...                                       │
+│ • HBLs/Shipments: 6 → 4 endpoints           │
+│ • Bookings: 7 → 6 endpoints                 │
+│ • Slots: 6 → 4 endpoints                    │
+│ • Delivery Orders: 6 → 5 endpoints          │
+│ • Users: 5 → 4 endpoints                    │
+│ • Pricing Zones: 0 → 4 endpoints (NEW)      │
+│ • Containers: 0 → 2 endpoints (NEW)         │
+│ • P4TC: 2 → 0 (Phase 1 deferred)            │
 │                                             │
 │ Detailed recommendations with trade-offs    │
 └─────────────────────────────────────────────┘
@@ -193,14 +215,19 @@ This section appears after all endpoint cards. Structure:
 ### Summary card
 ```
 ┌─────────────────────────────────────────────┐
-│ Consolidation Potential                     │
+│ Consolidation Analysis (Validated)          │
 │                                             │
-│ Current: 52 endpoints                       │
-│ Proposed: ~35 endpoints                     │
-│ Reduction: 17 endpoints (33%)               │
+│ Initial proposal: 52 endpoints              │
+│ Validated & refined: 48 endpoints           │
+│ Net change: -4 endpoints (8% reduction)     │
 │                                             │
-│ Strategy: Merge similar operations, use     │
-│ query params for filtering/search           │
+│ Changes:                                    │
+│ • Removed: 10 endpoints (merged/deferred)   │
+│ • Added: 8 endpoints (schema gaps)          │
+│ • Kept: 42 endpoints (validated)            │
+│                                             │
+│ Strategy: RESTful patterns, fill schema     │
+│ gaps, defer P4TC to fast follow             │
 └─────────────────────────────────────────────┘
 ```
 
@@ -211,26 +238,47 @@ For each domain, show:
 2. List of consolidation opportunities
 3. Rationale and trade-offs
 
-**Note:** The consolidation analysis will be written during implementation based on the actual 52 endpoint specifications. The example below illustrates the format and level of detail.
+**Note:** The following examples are from the validated API endpoints (see `api-endpoints-validation.md` for full report).
 
-Example:
+Examples:
 
 ```markdown
-### HBLs/Shipments: 6 → 4 endpoints (-2)
+### HBLs/Shipments: 6 → 4 endpoints (-2) ✅
 
-**Opportunity 1: Merge search endpoints**
-- Current: `API-H047` (search) + `API-H291` (list with filter)
-- Proposed: Single `GET /api/hbls` with flexible query params
-- Rationale: Both perform filtering/searching. Combine into one endpoint with query params: `?q=`, `?status=`, `?site=`, `?milestone=`, `?lsp=`
-- Trade-off: Query param parsing slightly more complex, but standard REST pattern
-- **Recommendation: Merge**
+**Change 1: Merge search into list**
+- Removed: `API-H047 GET /api/hbls/search`
+- Kept: `API-H729 GET /api/hbls` with `?q=` search param
+- Rationale: Search is just filtered list — combine into one endpoint
+- Trade-off: None — standard REST pattern
+- Status: ✅ Validated against schema
 
-**Opportunity 2: Flag under-bond**
-- Current: `API-H582` (dedicated POST endpoint)
-- Proposed: Use `PATCH /api/hbls/:id` with `{ under_bond: true }`
+**Change 2: Remove dedicated flag endpoint**
+- Removed: `API-H931 POST /api/hbls/:id/flag-under-bond`
+- Alternative: Use `API-H518 PATCH /api/hbls/:id` with `{ under_bond: true }`
 - Rationale: Flagging is a property update, not a separate action
 - Trade-off: None — simpler and more RESTful
-- **Recommendation: Merge**
+- Status: ✅ Validated
+
+### Pricing Zones: 0 → 4 endpoints (+4) ✅ NEW
+
+**Gap: Missing ACFS admin configuration**
+- Schema has `pricing_zones` table but no API endpoints
+- Added:
+  - `GET /api/pricing-zones` - list zones
+  - `POST /api/pricing-zones` - create zone
+  - `PATCH /api/pricing-zones/:id` - update rate
+  - `DELETE /api/pricing-zones/:id` - deactivate zone
+- Rationale: ACFS admin must configure rates per site for fee calculation
+- Status: ✅ Required for schema completeness
+
+### P4TC: 2 → 0 endpoints (-2) ⏸️ DEFERRED
+
+**Phase 1 Scope Decision**
+- Removed: `API-T647 POST /api/p4tc/verify-otp`
+- Removed: `API-T392 GET /api/p4tc/session`
+- Rationale: P4TC actor deferred to fast follow per BRD v1.5
+- Trade-off: Phase 1 LSP-only, P4TC comes later
+- Status: ⏸️ Deferred, not deleted
 ```
 
 ### Consolidation principles
@@ -289,12 +337,32 @@ src/
 
 5. **Print-friendly** — consolidation analysis should print well (team may want to discuss offline).
 
+## Validation Report
+
+Full validation against Production Schema v1.0 available at:
+**`docs/superpowers/specs/api-endpoints-validation.md`**
+
+This report includes:
+- Endpoint-by-endpoint schema validation
+- UUID migration requirements
+- Missing endpoints identified and added
+- Consolidation decisions with rationale
+- REST API design pattern analysis
+- Implementation checklist
+
 ## Open Questions
 
-None — design is complete and approved.
+**BLOCKER:** UUID migration must be completed before API implementation. Options:
+1. Migrate schema to UUIDs first (recommended)
+2. Use UUIDs in API layer with int→uuid mapping (technical debt)
+3. Accept sequential IDs (security risk per Ranjith)
+
+**Recommendation:** Option 1 — migrate schema to UUIDs before starting API work.
 
 ## Success Metrics
 
-- Team can reference specific endpoints by ID during discussions
-- Clear visibility into consolidation opportunities
-- Decision made: keep 52, consolidate to ~35, or something in between
+- ✅ Team can reference specific endpoints by ID during discussions
+- ✅ Clear visibility into validated consolidation (52 → 48)
+- ✅ All endpoints validated against production schema
+- ⏳ Decision made on UUID migration approach
+- ⏳ Phase 1 scope confirmed (48 endpoints or subset)

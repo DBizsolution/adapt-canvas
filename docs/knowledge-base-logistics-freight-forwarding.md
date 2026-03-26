@@ -1,8 +1,42 @@
 # Logistics & Freight Forwarding: Domain Knowledge Base
 
 **Purpose**: Domain reference for VBS Pickup Portal project team
-**Last Updated**: 2026-03-24
+**Last Updated**: 2026-03-26
 **Sources**: Industry practice, ACFS context, international freight standards
+
+---
+
+## Quick Terminology Lookup
+
+**Common Search Terms** (alternative names and variations):
+
+- **Underbond / Under Bond / Under-bond / U-bond / Bonded cargo**: Goods where customs duties not yet paid, stored in bonded warehouse. See section 7.2 for details. Can move between bonded facilities without clearing customs. Requires customs bond movement permit instead of DO.
+
+- **DO / Delivery Order / Release Order**: Authorization to release cargo from warehouse. See section 3.3. Required for pickup unless under-bond movement.
+
+- **HBL / House Bill / House B/L / Sea Waybill**: Shipment tracking document issued by freight forwarder. See section 3.2. The core tracking unit in VBS.
+
+- **WFF / Wholesale Freight Forwarder / NVOCC**: Top-level logistics company in delegation chain. See section 2.1.
+
+- **FF / Freight Forwarder / Forwarder**: Arranges transportation, handles documentation. See section 2.2.
+
+- **LSP / Logistics Service Provider**: Umbrella term for all commercial users (FF, WFF, carrier, transporter). See section 2.
+
+- **Unpacked / Unpacking / De-van / Devanning / Unstuffing**: When container is opened and goods separated by HBL. See section 4.2. Critical milestone for booking eligibility.
+
+- **Slot / Booking / Time slot / Pickup window**: Reserved time for truck arrival at warehouse. See section 6.2.
+
+- **Delegation / Subcontracting / Downstream assignment**: When one LSP assigns HBL handling to another LSP. See section 5.
+
+- **Customs cleared / Cleared / Customs clearance**: Import duties paid, permits obtained, goods can enter domestic commerce. See section 7.1.
+
+- **Container / TEU / FEU / 20ft / 40ft**: Physical metal box for shipping. See section 3.4.
+
+- **OBL / Ocean Bill / Master BL / MBL**: Issued by shipping line, covers entire container voyage. See section 3.1.
+
+- **Chargeable weight / Volumetric weight / Billable weight**: Max of actual weight vs volume-based weight. See section 8.1.
+
+- **Site / Pickup site / Warehouse / Branch / Location**: Physical ACFS facility where goods are stored. See section 10.1.
 
 ---
 

@@ -59,6 +59,19 @@ export function parseDbml(content: string): DbmlSchema {
     // Skip empty lines and comments
     if (!line || line.startsWith('//')) continue
 
+    // Standalone relationship
+    const standaloneRefMatch = line.match(/^Ref:\s*(\w+)\.(\w+)\s*>\s*(\w+)\.(\w+)/)
+    if (standaloneRefMatch) {
+      relationships.push({
+        fromTable: standaloneRefMatch[1],
+        fromField: standaloneRefMatch[2],
+        toTable: standaloneRefMatch[3],
+        toField: standaloneRefMatch[4],
+        cardinality: '*:1',
+      })
+      continue
+    }
+
     // Table start
     const tableMatch = line.match(/^Table\s+(\w+)\s*{/)
     if (tableMatch) {

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Database, Table, Code, Copy, Check } from 'lucide-react'
 import { DataModelCanvas } from '@/components/data-model/data-model-canvas'
 import { DatabaseSchemaCanvas } from '@/components/data-model/database-schema-canvas'
+import { DbmlHighlighter } from '@/components/data-model/dbml-highlighter'
 import type { DataModelGraphData } from '@/components/data-model/data-model-graph'
 import type { DatabaseSchemaGraphData } from '@/components/data-model/database-schema-graph'
 import type { DbmlEnum } from '@/components/data-model/parse-dbml'
@@ -133,7 +134,7 @@ export function DataModelPageClient({ intentGraph, schemaGraph, enums, dbmlConte
               }}
             >
               <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                acfs-datamodel-corrected.dbml
+                acfs-production-schema.dbml
               </span>
               <button
                 type="button"
@@ -152,18 +153,7 @@ export function DataModelPageClient({ intentGraph, schemaGraph, enums, dbmlConte
 
             {/* Code content */}
             <div className="flex-1 overflow-auto p-4">
-              <pre
-                className="font-mono text-sm leading-relaxed"
-                style={{
-                  color: 'var(--text-primary)',
-                  background: 'var(--bg-white)',
-                  border: '1px solid var(--border-default)',
-                  borderRadius: 12,
-                  padding: '16px 20px',
-                }}
-              >
-                {dbmlContent}
-              </pre>
+              <DbmlHighlighter content={dbmlContent} />
             </div>
           </div>
         )}

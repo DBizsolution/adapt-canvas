@@ -83,6 +83,34 @@ function DatabaseSchemaCanvasInner({ initialNodes, initialEdges, enums, stats }:
         </button>
       </div>
 
+      {/* Constraint legend */}
+      <div
+        className="absolute left-4 top-20 z-10 rounded-lg px-3 py-2"
+        style={{
+          background: 'var(--bg-white)',
+          border: '1px solid var(--border-default)',
+          boxShadow: 'var(--shadow-subtle)',
+        }}
+      >
+        <div className="text-[11px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
+          Constraints
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block h-1.5 w-1.5 rounded-full shrink-0" style={{ background: '#EF4444' }} />
+            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>NOT NULL</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block h-1.5 w-1.5 rounded-full shrink-0" style={{ background: '#8B5CF6' }} />
+            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>UNIQUE</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block h-1.5 w-1.5 rounded-full shrink-0" style={{ background: '#10B981' }} />
+            <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>HAS DEFAULT</span>
+          </div>
+        </div>
+      </div>
+
       {/* Enum panel */}
       <DatabaseEnumPanel enums={enums} />
 

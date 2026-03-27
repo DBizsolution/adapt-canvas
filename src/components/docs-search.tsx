@@ -20,9 +20,14 @@ const LOADING_MESSAGES = [
   'Just kidding! Found it. Processing...',
 ]
 
+type Message = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 export function DocsSearch() {
   const [query, setQuery] = useState('')
-  const [answer, setAnswer] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
@@ -54,9 +59,13 @@ export function DocsSearch() {
       return
     }
 
+    const userMessage: Message = { role: 'user', content: query.trim() }
+    const newMessages = [...messages, userMessage]
+
+    setMessages(newMessages)
     setLoading(true)
     setError('')
-    setAnswer('')
+    setQuery('')
 
     try {
       const response = await fetch('/api/docs-search', {
@@ -64,7 +73,7 @@ export function DocsSearch() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: query.trim() }),
+        body: JSON.stringify({ messages: newMessages }),
       })
 
       const data = await response.json()
@@ -73,16 +82,83 @@ export function DocsSearch() {
         throw new Error(data.error || 'Failed to search')
       }
 
-      setAnswer(data.answer)
+      const assistantMessage: Message = { role: 'assistant', content: data.answer }
+      setMessages([...newMessages, assistantMessage])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
+      // Remove the user message if request failed
+      setMessages(messages)
     } finally {
       setLoading(false)
     }
   }
 
+  const clearConversation = () => {
+    setMessages([])
+    setQuery('')
+    setError('')
+  }
+
   return (
     <div className="space-y-4">
+      {/* Conversation Thread */}
+      {messages.length > 0 && (
+        <div className="space-y-4">
+          {messages.map((message, idx) => (
+            <div
+              key={idx}
+              className={cn(
+                'rounded-lg border p-4',
+                message.role === 'user'
+                  ? 'bg-blue-50/50'
+                  : ''
+              )}
+              style={{
+                borderColor: message.role === 'user' ? 'var(--accent-blue)33' : 'var(--border-default)',
+                background: message.role === 'user' ? 'var(--bg-blue-subtle)' : 'var(--bg-default)',
+              }}
+            >
+              {message.role === 'user' ? (
+                <div>
+                  <div className="text-xs font-medium mb-2" style={{ color: 'var(--accent-blue)' }}>
+                    You asked:
+                  </div>
+                  <div className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                    {message.content}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-3 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accent-blue)' }}>
+                    <Sparkles size={16} />
+                    <span>AI Answer</span>
+                  </div>
+                  <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        h1: ({ ...props }) => <h3 className="text-lg font-semibold mt-4 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        h2: ({ ...props }) => <h4 className="text-base font-semibold mt-3 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        h3: ({ ...props }) => <h5 className="text-sm font-semibold mt-2 mb-1" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        p: ({ ...props }) => <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        ul: ({ ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
+                        ol: ({ ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
+                        li: ({ ...props }) => <li className="text-sm" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        code: ({ ...props }) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'var(--bg-muted)', color: 'var(--text-primary)' }} {...props} />,
+                        strong: ({ ...props }) => <strong className="font-semibold" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        em: ({ ...props }) => <em className="italic" {...props} />,
+                        blockquote: ({ ...props }) => <blockquote className="border-l-4 pl-4 italic my-3" style={{ borderColor: 'var(--accent-blue)33', color: 'var(--text-muted)' }} {...props} />,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Search Input */}
       <form onSubmit={handleSearch} className="relative">
         <div className="relative">
@@ -95,7 +171,7 @@ export function DocsSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask about VBS Intent documentation..."
+            placeholder={messages.length > 0 ? 'Ask a follow-up question...' : 'Ask about VBS Intent documentation or API endpoints...'}
             className={cn(
               'w-full rounded-lg border pl-12 pr-32 py-3.5',
               'text-sm outline-none transition-all',
@@ -137,8 +213,18 @@ export function DocsSearch() {
             )}
           </button>
         </div>
-        <div className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-          {query.length}/500 characters
+        <div className="mt-1 flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
+          <span>{query.length}/500 characters</span>
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={clearConversation}
+              className="text-xs hover:underline"
+              style={{ color: 'var(--accent-blue)' }}
+            >
+              Clear conversation
+            </button>
+          )}
         </div>
       </form>
 
@@ -170,53 +256,27 @@ export function DocsSearch() {
         </div>
       )}
 
-      {/* Answer */}
-      {answer && (
-        <div className="rounded-lg border p-6" style={{ borderColor: 'var(--border-default)', background: 'var(--bg-default)' }}>
-          <div className="mb-3 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accent-blue)' }}>
-            <Sparkles size={16} />
-            <span>AI Answer</span>
-          </div>
-          <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none">
-            <ReactMarkdown
-              components={{
-                h1: ({ ...props }) => <h3 className="text-lg font-semibold mt-4 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
-                h2: ({ ...props }) => <h4 className="text-base font-semibold mt-3 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
-                h3: ({ ...props }) => <h5 className="text-sm font-semibold mt-2 mb-1" style={{ color: 'var(--text-primary)' }} {...props} />,
-                p: ({ ...props }) => <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }} {...props} />,
-                ul: ({ ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
-                ol: ({ ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
-                li: ({ ...props }) => <li className="text-sm" style={{ color: 'var(--text-primary)' }} {...props} />,
-                code: ({ ...props }) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'var(--bg-muted)', color: 'var(--text-primary)' }} {...props} />,
-                strong: ({ ...props }) => <strong className="font-semibold" style={{ color: 'var(--text-primary)' }} {...props} />,
-                em: ({ ...props }) => <em className="italic" {...props} />,
-                blockquote: ({ ...props }) => <blockquote className="border-l-4 pl-4 italic my-3" style={{ borderColor: 'var(--accent-blue)33', color: 'var(--text-muted)' }} {...props} />,
-              }}
-            >
-              {answer}
-            </ReactMarkdown>
-          </div>
-          <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border-default)' }}>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              ✨ Generated by AI • Always verify critical information
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Help Text */}
-      {!answer && !loading && !error && (
+      {messages.length === 0 && !loading && !error && (
         <div className="rounded-lg border p-4" style={{ borderColor: 'var(--border-default)', background: 'var(--bg-subtle)' }}>
           <div className="text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
             💡 Try asking about:
           </div>
           <ul className="space-y-1 text-sm" style={{ color: 'var(--text-muted)' }}>
             <li>• "What is the intent model?"</li>
-            <li>• "Explain the slot allocation process"</li>
+            <li>• "Show me all HBL endpoints"</li>
+            <li>• "Which API endpoints use UUIDs?"</li>
             <li>• "How does delegation work?"</li>
-            <li>• "What are the validation rules?"</li>
+            <li>• "What's the endpoint for booking slots?"</li>
             <li>• "Explain the schema design"</li>
           </ul>
+        </div>
+      )}
+
+      {/* Conversation footer */}
+      {messages.length > 0 && !loading && (
+        <div className="text-xs text-center pt-2" style={{ color: 'var(--text-muted)' }}>
+          ✨ Generated by AI • Always verify critical information
         </div>
       )}
     </div>

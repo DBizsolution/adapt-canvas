@@ -1,18 +1,27 @@
-export const dynamic = 'force-dynamic'
+'use client'
 
-import { getCurrentModel, getLatestVersionId } from '@/lib/model-store'
+import { usePathname } from 'next/navigation'
 import { NavSidebar } from '@/components/review/nav-links'
 import { ChatPanel } from '@/components/ai/prompt-drawer'
 import { PageLoading } from '@/components/review/page-loading'
 import { ChatPanelWrapper, ModelToolbar, ContentWrapper, ContentCard } from '@/components/review/layout-shell'
 
-export default async function ReviewLayout({
+export default function ReviewLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const model = await getCurrentModel()
-  const latestVersionId = await getLatestVersionId()
+  const pathname = usePathname()
+
+  // Show AI editor only on Intent Model pages
+  const showAIEditor = pathname === '/review' ||
+                       pathname === '/review/ia' ||
+                       pathname === '/review/data-model' ||
+                       pathname.startsWith('/review/') &&
+                       !pathname.includes('/api-endpoints') &&
+                       !pathname.includes('/brd') &&
+                       !pathname.includes('/docs') &&
+                       !pathname.includes('/diff')
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
@@ -37,9 +46,11 @@ export default async function ReviewLayout({
           <div className="h-3 shrink-0" />
         </ContentWrapper>
 
-        <ChatPanelWrapper>
-          <ChatPanel model={model} latestVersionId={latestVersionId} />
-        </ChatPanelWrapper>
+        {showAIEditor && (
+          <ChatPanelWrapper>
+            <ChatPanel />
+          </ChatPanelWrapper>
+        )}
       </div>
     </div>
   )

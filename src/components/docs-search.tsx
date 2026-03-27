@@ -5,7 +5,7 @@ import { Search, Sparkles, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
-const LOADING_MESSAGES = [
+const LOADING_MESSAGES_POOL = [
   'Yo, digging through the docs...',
   'Scanning 100+ endpoints... this better be worth it',
   'Reading faster than you can type tbh',
@@ -21,6 +21,16 @@ const LOADING_MESSAGES = [
   'Putting the pieces together... standby',
 ]
 
+// Helper to shuffle array
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 type Message = {
   role: 'user' | 'assistant'
   content: string
@@ -32,20 +42,23 @@ export function DocsSearch() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
+  const [loadingMessages, setLoadingMessages] = useState<string[]>(['Searching...', ...shuffleArray(LOADING_MESSAGES_POOL)])
 
   // Rotate loading messages every 1.8 seconds
   useEffect(() => {
     if (!loading) {
       setLoadingMessageIndex(0)
+      // Reshuffle for next time
+      setLoadingMessages(['Searching...', ...shuffleArray(LOADING_MESSAGES_POOL)])
       return
     }
 
     const interval = setInterval(() => {
-      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length)
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length)
     }, 1800)
 
     return () => clearInterval(interval)
-  }, [loading])
+  }, [loading, loadingMessages])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -337,7 +350,7 @@ export function DocsSearch() {
                 Thinking...
               </div>
               <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                {LOADING_MESSAGES[loadingMessageIndex]}
+                {loadingMessages[loadingMessageIndex]}
               </div>
             </div>
           </div>

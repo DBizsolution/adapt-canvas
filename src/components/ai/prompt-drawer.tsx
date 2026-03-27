@@ -41,6 +41,7 @@ export function ChatPanel() {
 
   const [model, setModel] = useState<IntentModel | null>(null)
   const [latestVersionId, setLatestVersionId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [prompt, setPrompt] = useState('')
   const [versions, setVersions] = useState<VersionMeta[]>([])
   const [isStale, setIsStale] = useState(false)
@@ -55,15 +56,26 @@ export function ChatPanel() {
 
   // Fetch model data on mount
   useEffect(() => {
+    let mounted = true
+
     fetch('/api/model/current')
       .then(r => r.json())
       .then(data => {
-        setModel(data.model)
-        setLatestVersionId(data.latestVersionId)
+        if (mounted) {
+          setModel(data.model)
+          setLatestVersionId(data.latestVersionId)
+        }
       })
-      .catch(() => {
-        // Silent fail - will show loading state
+      .catch((err) => {
+        if (mounted) {
+          setError('Failed to load model data')
+          console.error('Failed to fetch model data:', err)
+        }
       })
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   // Drag resize handler
@@ -279,6 +291,51 @@ export function ChatPanel() {
 
   // Hide chat panel on diff page — full width for side-by-side diff
   if (isDiffPage) return null
+
+  // Show error state with retry button
+  if (error) {
+    return (
+      <div className="flex shrink-0" style={{ width: panelWidth }}>
+        <div className="flex w-1.5" />
+        <div className="flex flex-1 flex-col overflow-hidden" style={{ background: 'var(--bg-page)' }}>
+          <header
+            className="flex h-[56px] shrink-0 items-center gap-3 px-4"
+            style={{ background: 'var(--bg-page)' }}
+          >
+            <Cog size={18} style={{ color: 'var(--acfs-navy)' }} />
+            <span className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
+              Intent Model Editor
+            </span>
+          </header>
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6">
+            <p className="text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
+              {error}
+            </p>
+            <button
+              onClick={() => {
+                setError(null)
+                fetch('/api/model/current')
+                  .then(r => r.json())
+                  .then(data => {
+                    setModel(data.model)
+                    setLatestVersionId(data.latestVersionId)
+                  })
+                  .catch(() => setError('Failed to load model data'))
+              }}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
+              style={{
+                color: '#0081F2',
+                background: 'rgba(0, 129, 242, 0.08)',
+                border: '1px solid rgba(0, 129, 242, 0.2)',
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // Show loading state while model data is being fetched
   if (!model || !latestVersionId) {

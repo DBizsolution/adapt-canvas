@@ -6,7 +6,14 @@ export async function GET() {
     const model = await getCurrentModel()
     const latestVersionId = await getLatestVersionId()
 
-    return NextResponse.json({ model, latestVersionId })
+    return NextResponse.json(
+      { model, latestVersionId },
+      {
+        headers: {
+          'Cache-Control': 'no-store, must-revalidate',
+        },
+      }
+    )
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(

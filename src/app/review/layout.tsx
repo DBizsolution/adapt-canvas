@@ -14,14 +14,16 @@ export default function ReviewLayout({
   const pathname = usePathname()
 
   // Show AI editor only on Intent Model pages
-  const showAIEditor = pathname === '/review' ||
-                       pathname === '/review/ia' ||
-                       pathname === '/review/data-model' ||
-                       pathname.startsWith('/review/') &&
-                       !pathname.includes('/api-endpoints') &&
-                       !pathname.includes('/brd') &&
-                       !pathname.includes('/docs') &&
-                       !pathname.includes('/diff')
+  const showAIEditor = (
+    pathname === '/review' ||
+    pathname === '/review/ia' ||
+    pathname === '/review/data-model' ||
+    (pathname.startsWith('/review/') &&
+     !pathname.includes('/api-endpoints') &&
+     !pathname.includes('/brd') &&
+     !pathname.includes('/docs') &&
+     !pathname.includes('/diff'))
+  )
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>

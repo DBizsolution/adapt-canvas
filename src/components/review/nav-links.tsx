@@ -12,12 +12,14 @@ import {
   ClipboardList,
   Network,
   TableProperties,
+  Code,
 } from 'lucide-react'
 
 const navItems = [
   { label: 'Explorer', href: '/', icon: Network },
   { label: 'Consensus', href: '/review', icon: LayoutDashboard },
   { label: 'BRD', href: '/review/brd', icon: ClipboardList },
+  { label: 'API Endpoints', href: '/review/api-endpoints', icon: Code },
   { label: 'IA Map', href: '/review/ia', icon: Map },
   { label: 'Data Model', href: '/review/data-model', icon: TableProperties },
   { label: 'Diff', href: '/review/diff', icon: GitCompare },
@@ -46,7 +48,7 @@ export function NavSidebar() {
           const isActive = item.href === '/'
             ? pathname === '/'
             : item.href === '/review'
-              ? pathname.startsWith('/review') && !pathname.startsWith('/review/brd') && !pathname.startsWith('/review/ia') && !pathname.startsWith('/review/diff') && !pathname.startsWith('/review/docs') && !pathname.startsWith('/review/data-model')
+              ? pathname.startsWith('/review') && !pathname.startsWith('/review/brd') && !pathname.startsWith('/review/api-endpoints') && !pathname.startsWith('/review/ia') && !pathname.startsWith('/review/diff') && !pathname.startsWith('/review/docs') && !pathname.startsWith('/review/data-model')
               : pathname.startsWith(item.href)
 
           return (

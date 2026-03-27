@@ -127,7 +127,7 @@ export default function ApiEndpointsPage() {
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto custom-scroll">
-        <div className="max-w-[1400px] mx-auto px-6 py-8">
+        <div className="px-6 py-8">
 
           {/* Showing N of M message */}
           {filters.search || filters.methods.length > 0 || filters.auth.length > 0 ? (
@@ -166,7 +166,7 @@ export default function ApiEndpointsPage() {
 
                 {/* Endpoint cards */}
                 {!collapsedDomains.has(domain.domain) && (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
                     {domain.endpoints.map(endpoint => (
                       <EndpointCard key={endpoint.id} endpoint={endpoint} />
                     ))}

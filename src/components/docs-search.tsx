@@ -140,10 +140,11 @@ export function DocsSearch() {
                         h2: ({ ...props }) => <h4 className="text-base font-semibold mt-3 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
                         h3: ({ ...props }) => <h5 className="text-sm font-semibold mt-2 mb-1" style={{ color: 'var(--text-primary)' }} {...props} />,
                         p: ({ children, ...props }) => {
-                          // Convert .md file mentions to clickable links
+                          // Convert .md file mentions and API references to clickable links
                           const processedChildren = React.Children.map(children, (child) => {
                             if (typeof child === 'string') {
-                              const parts = child.split(/(\S+\.md)/g)
+                              // Split by both .md files and API endpoint references
+                              const parts = child.split(/(\S+\.md|API endpoints? (?:reference|page|section|catalog))/gi)
                               return parts.map((part, idx) => {
                                 if (part.endsWith('.md')) {
                                   const slug = part.replace('.md', '')
@@ -161,6 +162,21 @@ export function DocsSearch() {
                                     </a>
                                   )
                                 }
+                                if (/API endpoints? (?:reference|page|section|catalog)/i.test(part)) {
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href="/review/api-endpoints"
+                                      className="text-blue-600 hover:underline font-medium"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        window.location.href = '/review/api-endpoints'
+                                      }}
+                                    >
+                                      {part}
+                                    </a>
+                                  )
+                                }
                                 return part
                               })
                             }
@@ -171,10 +187,10 @@ export function DocsSearch() {
                         ul: ({ ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
                         ol: ({ ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
                         li: ({ children, ...props }) => {
-                          // Convert .md file mentions to clickable links in list items too
+                          // Convert .md file mentions and API references to clickable links in list items too
                           const processedChildren = React.Children.map(children, (child) => {
                             if (typeof child === 'string') {
-                              const parts = child.split(/(\S+\.md)/g)
+                              const parts = child.split(/(\S+\.md|API endpoints? (?:reference|page|section|catalog))/gi)
                               return parts.map((part, idx) => {
                                 if (part.endsWith('.md')) {
                                   const slug = part.replace('.md', '')
@@ -186,6 +202,21 @@ export function DocsSearch() {
                                       onClick={(e) => {
                                         e.preventDefault()
                                         window.location.href = `/review/docs?doc=${slug}`
+                                      }}
+                                    >
+                                      {part}
+                                    </a>
+                                  )
+                                }
+                                if (/API endpoints? (?:reference|page|section|catalog)/i.test(part)) {
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href="/review/api-endpoints"
+                                      className="text-blue-600 hover:underline font-medium"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        window.location.href = '/review/api-endpoints'
                                       }}
                                     >
                                       {part}

@@ -49,17 +49,28 @@ export function ChatPanel() {
   const [isDragging, setIsDragging] = useState(false)
   const [panelWidth, setPanelWidth] = useState(460)
   const dragRef = useRef<{ startX: number; startWidth: number } | null>(null)
+  const mountedRef = useRef(true)
 
   const sectionType = getSectionTypeFromPath(pathname)
   const sectionLabel = sectionType ? SECTION_LABELS[sectionType] ?? sectionType : null
   const isDiffPage = pathname.includes('/diff')
 
+  // Shared fetch function with response status check
+  const fetchModelData = useCallback(() => {
+    return fetch('/api/model/current')
+      .then(r => {
+        if (!r.ok) {
+          throw new Error(`HTTP ${r.status}: ${r.statusText}`)
+        }
+        return r.json()
+      })
+  }, [])
+
   // Fetch model data on mount
   useEffect(() => {
     let mounted = true
 
-    fetch('/api/model/current')
-      .then(r => r.json())
+    fetchModelData()
       .then(data => {
         if (mounted) {
           setModel(data.model)
@@ -75,8 +86,9 @@ export function ChatPanel() {
 
     return () => {
       mounted = false
+      mountedRef.current = false
     }
-  }, [])
+  }, [fetchModelData])
 
   // Drag resize handler
   useEffect(() => {
@@ -314,13 +326,18 @@ export function ChatPanel() {
             <button
               onClick={() => {
                 setError(null)
-                fetch('/api/model/current')
-                  .then(r => r.json())
+                fetchModelData()
                   .then(data => {
-                    setModel(data.model)
-                    setLatestVersionId(data.latestVersionId)
+                    if (mountedRef.current) {
+                      setModel(data.model)
+                      setLatestVersionId(data.latestVersionId)
+                    }
                   })
-                  .catch(() => setError('Failed to load model data'))
+                  .catch(() => {
+                    if (mountedRef.current) {
+                      setError('Failed to load model data')
+                    }
+                  })
               }}
               className="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
               style={{

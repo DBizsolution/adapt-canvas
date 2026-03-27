@@ -6,18 +6,19 @@ import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
 const LOADING_MESSAGES = [
-  'Searching...',
-  'Reading through the docs...',
-  'This is harder than I thought...',
-  'Still looking...',
-  'What if we don\'t find anything?',
-  'I\'m starting to panic a little...',
-  'Maybe it\'s not in here?',
-  'Wait, did I forget what\'s in these docs?',
-  'What do we do if I come up empty?',
-  'This is embarrassing...',
-  'Ok I\'m really worried now...',
-  'Just kidding! Found it. Processing...',
+  'Yo, digging through the docs...',
+  'Scanning 100+ endpoints... this better be worth it',
+  'Reading faster than you can type tbh',
+  'Found something... wait, nope, wrong file',
+  'Ctrl+F on steroids right now',
+  'Checking API endpoints... so many UUIDs',
+  'Your question is making me work harder than I wanted',
+  'Skimming through logistics docs like it\'s my day job',
+  'This is taking longer than expected, my bad',
+  'Almost there... I think... maybe',
+  'Ok I lied, still searching, hold tight',
+  'Found it. Cooking up an answer...',
+  'Putting the pieces together... standby',
 ]
 
 type Message = {
@@ -32,7 +33,7 @@ export function DocsSearch() {
   const [error, setError] = useState('')
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
 
-  // Rotate loading messages every 2 seconds
+  // Rotate loading messages every 1.8 seconds
   useEffect(() => {
     if (!loading) {
       setLoadingMessageIndex(0)
@@ -41,7 +42,7 @@ export function DocsSearch() {
 
     const interval = setInterval(() => {
       setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length)
-    }, 2000)
+    }, 1800)
 
     return () => clearInterval(interval)
   }, [loading])

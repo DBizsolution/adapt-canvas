@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, Sparkles, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
@@ -139,10 +139,66 @@ export function DocsSearch() {
                         h1: ({ ...props }) => <h3 className="text-lg font-semibold mt-4 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
                         h2: ({ ...props }) => <h4 className="text-base font-semibold mt-3 mb-2" style={{ color: 'var(--text-primary)' }} {...props} />,
                         h3: ({ ...props }) => <h5 className="text-sm font-semibold mt-2 mb-1" style={{ color: 'var(--text-primary)' }} {...props} />,
-                        p: ({ ...props }) => <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        p: ({ children, ...props }) => {
+                          // Convert .md file mentions to clickable links
+                          const processedChildren = React.Children.map(children, (child) => {
+                            if (typeof child === 'string') {
+                              const parts = child.split(/(\S+\.md)/g)
+                              return parts.map((part, idx) => {
+                                if (part.endsWith('.md')) {
+                                  const slug = part.replace('.md', '')
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href={`/review/docs?doc=${slug}`}
+                                      className="text-blue-600 hover:underline font-medium"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        window.location.href = `/review/docs?doc=${slug}`
+                                      }}
+                                    >
+                                      {part}
+                                    </a>
+                                  )
+                                }
+                                return part
+                              })
+                            }
+                            return child
+                          })
+                          return <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-primary)' }} {...props}>{processedChildren}</p>
+                        },
                         ul: ({ ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props} />,
                         ol: ({ ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props} />,
-                        li: ({ ...props }) => <li className="text-sm" style={{ color: 'var(--text-primary)' }} {...props} />,
+                        li: ({ children, ...props }) => {
+                          // Convert .md file mentions to clickable links in list items too
+                          const processedChildren = React.Children.map(children, (child) => {
+                            if (typeof child === 'string') {
+                              const parts = child.split(/(\S+\.md)/g)
+                              return parts.map((part, idx) => {
+                                if (part.endsWith('.md')) {
+                                  const slug = part.replace('.md', '')
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href={`/review/docs?doc=${slug}`}
+                                      className="text-blue-600 hover:underline font-medium"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        window.location.href = `/review/docs?doc=${slug}`
+                                      }}
+                                    >
+                                      {part}
+                                    </a>
+                                  )
+                                }
+                                return part
+                              })
+                            }
+                            return child
+                          })
+                          return <li className="text-sm" style={{ color: 'var(--text-primary)' }} {...props}>{processedChildren}</li>
+                        },
                         code: ({ ...props }) => <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ background: 'var(--bg-muted)', color: 'var(--text-primary)' }} {...props} />,
                         strong: ({ ...props }) => <strong className="font-semibold" style={{ color: 'var(--text-primary)' }} {...props} />,
                         em: ({ ...props }) => <em className="italic" {...props} />,

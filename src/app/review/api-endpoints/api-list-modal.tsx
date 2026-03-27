@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { X, Copy, Check } from 'lucide-react'
 import { endpointsByDomain } from '@/lib/api-endpoints-data'
 import { formatEndpointsList } from '@/lib/format-endpoints-list'
@@ -12,13 +12,13 @@ interface ApiListModalProps {
 
 export function ApiListModal({ open, onClose }: ApiListModalProps) {
   const [copied, setCopied] = useState(false)
-  const [formattedList, setFormattedList] = useState('')
+  const copyButtonRef = useRef<HTMLButtonElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
-    if (open) {
-      setFormattedList(formatEndpointsList(endpointsByDomain))
-    }
-  }, [open])
+  const formattedList = useMemo(
+    () => formatEndpointsList(endpointsByDomain),
+    []
+  )
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -38,6 +38,12 @@ export function ApiListModal({ open, onClose }: ApiListModalProps) {
     }
   }, [open, onClose])
 
+  useEffect(() => {
+    if (open && copyButtonRef.current) {
+      copyButtonRef.current.focus()
+    }
+  }, [open])
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(formattedList)
@@ -45,6 +51,29 @@ export function ApiListModal({ open, onClose }: ApiListModalProps) {
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab') return
+
+    const copyButton = copyButtonRef.current
+    const closeButton = closeButtonRef.current
+
+    if (!copyButton || !closeButton) return
+
+    if (e.shiftKey) {
+      // Shift+Tab: if on copy button, move to close button
+      if (document.activeElement === copyButton) {
+        e.preventDefault()
+        closeButton.focus()
+      }
+    } else {
+      // Tab: if on close button, move to copy button
+      if (document.activeElement === closeButton) {
+        e.preventDefault()
+        copyButton.focus()
+      }
     }
   }
 
@@ -56,7 +85,6 @@ export function ApiListModal({ open, onClose }: ApiListModalProps) {
       <div
         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
         onClick={onClose}
-        style={{ backdropFilter: 'blur(4px)' }}
       />
 
       {/* Modal */}
@@ -72,6 +100,7 @@ export function ApiListModal({ open, onClose }: ApiListModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
+        onKeyDown={handleKeyDown}
       >
         {/* Header */}
         <div
@@ -96,6 +125,7 @@ export function ApiListModal({ open, onClose }: ApiListModalProps) {
           <div className="flex items-center gap-3">
             {/* Copy button */}
             <button
+              ref={copyButtonRef}
               type="button"
               onClick={handleCopy}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[14px] font-medium transition-all duration-200"
@@ -111,6 +141,7 @@ export function ApiListModal({ open, onClose }: ApiListModalProps) {
 
             {/* Close button */}
             <button
+              ref={closeButtonRef}
               type="button"
               onClick={onClose}
               className="p-1 rounded-lg transition-colors"

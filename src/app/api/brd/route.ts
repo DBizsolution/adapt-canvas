@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getCurrentModel } from '@/lib/model-store'
+import { projectRequirements } from '@/domain/project-requirements/requirements'
 import { generateBRD } from '@/lib/brd-generator'
 
 export async function GET(request: Request) {
   try {
     const model = await getCurrentModel()
-    const markdown = generateBRD(model)
+    const markdown = generateBRD(model, projectRequirements)
 
     const { searchParams } = new URL(request.url)
     if (searchParams.get('format') === 'json') {

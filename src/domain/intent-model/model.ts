@@ -2,9 +2,9 @@ import type { IntentModel } from './types'
 
 export const intentModel: IntentModel = {
   meta: {
-    version: '0.8.0',
+    version: '0.9.0',
     project: 'ACFS VBS Pickup Portal',
-    lastUpdated: '2026-03-24',
+    lastUpdated: '2026-03-28',
     status: 'draft',
   },
   actors: [
@@ -17,12 +17,13 @@ export const intentModel: IntentModel = {
         { id: 'lsp:r1', description: 'View list of assigned HBLs with shipment status, milestone, payment, delegation, and booking info. Data auto-synced on login and on subsequent integration layer calls.' },
         { id: 'lsp:r2', description: 'Select one or multiple shipments to take action on (delegate or book).' },
         { id: 'lsp:r3', description: 'Delegate shipments to an existing LSP (search and select) or add a new one-off LSP, which creates a P4TC with email + secure link. Per HBL — if delegated, LSP cannot also book directly on that same HBL (BR-004).' },
-        { id: 'lsp:r4', description: 'Book pickup directly: system validates booking readiness (unpacked + customs cleared + DOs present) → upload missing docs → load calculation + pricing → select slot → enter truck and driver details (select existing or add new, scoped to account) → accept T&Cs + site induction → make payment (Stripe/Compay) → receive booking confirmation with reference number. Requires HBL milestone "unpacked" or later (BR-001).' },
+        { id: 'lsp:r4', description: 'Book pickup directly: system validates booking readiness (unpacked + customs cleared + DOs present) → upload missing docs → load calculation + pricing → select slot → enter truck and driver details (name, license, truck registration entered fresh each booking) → accept T&Cs + site induction → make payment (Stripe/Compay) → receive booking confirmation with reference number. Requires HBL milestone "unpacked" or later (BR-001). Driver reuse deferred to Phase 2 (A-025).' },
         { id: 'lsp:r5', description: 'Request missing docs when DOs are unavailable. Booking process is aborted (offline) until DO is received.' },
         { id: 'lsp:r6', description: 'Upload Delivery Order for downstream enforcement.' },
         { id: 'lsp:r7', description: 'Flag an HBL as under-bond. Manually set in portal — not synced from Maximus.' },
         { id: 'lsp:r8', description: 'Modify booking before cutoff: change slot date/time and HBLs (add/remove) before booking cutoff. Change truck/driver at any time until shipment is collected. Cost-impacting changes after cutoff require ACFS (BR-015).' },
         { id: 'lsp:r9', description: 'Search and view bookings using multiple search keys: booking reference number, HBL reference number, truck registration, or driver name. Booking reference becomes the primary identifier once HBLs are booked (alongside HBL reference). Both booking reference and HBL reference must be prominent (displayed side-by-side) in booked HBL table views.' },
+        { id: 'lsp:r10', description: 'Cancel bookings within defined rules. Upon cancellation, HBLs in that booking become available for rebooking. Financial refunds and fee adjustments are handled outside VBS by ACFS (BR-022, C-003).' },
       ],
     },
     {
@@ -56,7 +57,7 @@ export const intentModel: IntentModel = {
       auth: 'SSO-based access. Admin and User sub-roles with predefined privileges.',
       responsibilities: [
         { id: 'acfs:r1', description: 'HBL Assignment (remedial/optional): manually assign or reassign HBLs to LSPs via searchable dropdown (search LSP by name → assign). Same UX for reassignment — search and select a different LSP. System lists unassigned FAK shipments. Low priority for Phase 1 — data fix preferred over UI.' },
-        { id: 'acfs:r2', description: 'ECST Assignment: assign ECST to shipments. Parked for Phase 1 — flow details to be defined later.' },
+        { id: 'acfs:r2', description: 'ECST Assignment (DEFERRED to Phase 2): assign ECST to shipments. Flow details to be defined in Phase 2.' },
         { id: 'acfs:r3', description: 'Slot Configuration: select site → select days of week → set start/end time per slot (flexible, overlapping allowed) → configure booking cutoff and change cutoff (relative day + time, e.g. "previous working day, 4 PM") → optionally set heat map threshold value (nice-to-have) → block holidays via calendar overlay → save/update slots.' },
         { id: 'acfs:r4', description: 'Manage Booking: search bookings by booking ref# or by truck/driver details → view details (slot date/time, booking party, HBLs, fees paid, driver/truck) → inline edit: change pickup slot, change driver/truck, add/remove HBLs. All edits available on non-cancelled/non-collected bookings. Admin can override cutoffs. When HBLs are added/removed, fee total recalculates but no additional payment is collected (fee-free modifications for Phase 1). No truck capacity validation — that is the carrier\'s responsibility. Booking update notification sent via email to booking party.' },
         { id: 'acfs:r5', description: 'DO Validation (separate from pickup verification): view list of bookings with unvalidated DOs → validate DO against lowest-level HBL details → mark as validated. HBL-centric, not booking-centric. Can be done by offshore team. Prioritise by slot date/time.' },
@@ -426,6 +427,7 @@ export const intentModel: IntentModel = {
         { order: 6, title: 'Save', detail: 'Save/update slot configuration.' },
       ],
       success_outcome: 'Pickup slots are configured and available for LSP/P4TC booking.',
+      warn: 'Phase 1 implementation: Slot and site configuration is via backend/database (SQL/migrations) per C-006 and FR-ADM-02. UI steps described here are for Phase 2 reference.',
     },
     {
       id: 'lsp-delegates-shipments',
@@ -438,7 +440,8 @@ export const intentModel: IntentModel = {
       steps: [
         { order: 1, title: 'Select shipments', detail: 'LSP views list of assigned HBLs with shipment status. Can filter by site, milestone, customs status, etc. Selects one or multiple shipments to delegate.' },
         { order: 2, title: 'Choose delegation target', detail: 'Either select an existing LSP (search and select from pre-populated registry — company name, email, branch code) or add a new one-off party (email only — creates a P4TC).' },
-        { order: 3, title: 'System sends notification', detail: 'Email sent to the delegate with a message and secure link. No shipment data in the email body — all details visible after login/OTP.' },
+        { order: 3, title: 'Attach DOs or mark free release', detail: 'For each HBL in the delegation, LSP can upload DO document(s) or mark HBL as free release where applicable. Delegation can proceed regardless of DO status — DOs can be uploaded later if needed.' },
+        { order: 4, title: 'System sends notification', detail: 'Email sent to the delegate with a message and secure link. No shipment data in the email body — all details visible after login/OTP.' },
       ],
       success_outcome: 'Shipments are delegated. Target LSP or P4TC receives email with secure access link. HBL status moves to "delegated".',
     },
@@ -456,8 +459,8 @@ export const intentModel: IntentModel = {
         { order: 2, title: 'Validate booking readiness', detail: 'System checks: (1) HBL milestone is "unpacked" or later, (2) fully customs cleared (including quarantine), (3) all applicable DOs are present. If docs missing, LSP can upload them or request missing docs (aborts booking — offline process).' },
         { order: 3, title: 'Load calculation + pricing', detail: 'System calculates fee per HBL: chargeable_weight (max of weight vs volume) × rate. Individual HBL charges summed + minimum charge = total fee.' },
         { order: 4, title: 'Select slot', detail: 'LSP selects an available hourly slot. Density indicator shows booking volume per slot using opacity levels (no exact numbers). Does not block booking.' },
-        { order: 5, title: 'Enter truck and driver details', detail: 'Select existing driver from account-scoped list (search/dropdown) or enter new driver details (name, license, truck rego). New drivers are saved to the account for future reuse. P4TC users always enter fresh details.' },
-        { order: 6, title: 'Accept T&Cs and site induction', detail: 'Booking party must accept: (1) booking terms and conditions (legal document), (2) driver site induction acknowledgement (document). If driver already has site_induction = true, the second acceptance is skipped.' },
+        { order: 5, title: 'Enter truck and driver details', detail: 'Enter driver details fresh for each booking: driver name, license number, and truck registration. Driver reuse functionality is deferred to Phase 2 per assumption A-025.' },
+        { order: 6, title: 'Accept T&Cs and site induction', detail: 'Booking party must accept: (1) booking terms and conditions (legal document), (2) driver site induction acknowledgement (document).' },
         { order: 7, title: 'Make payment', detail: 'Payment via Stripe embedded checkout. Redirects to payment interface.' },
         { order: 8, title: 'Confirmation', detail: 'Booking confirmation with booking reference sent to the account email. No email sent to driver — booking party forwards details externally.' },
       ],
@@ -592,6 +595,23 @@ export const intentModel: IntentModel = {
       success_outcome: 'User account is created and active. User can log in.',
     },
     {
+      id: 'acfs-manages-user-accounts',
+      name: 'ACFS Manages User Accounts',
+      primary_actor: 'acfs',
+      preconditions: [
+        'ACFS admin is logged in',
+        'User account exists',
+      ],
+      steps: [
+        { order: 1, title: 'Search user', detail: 'ACFS searches for existing user account by name, email, company name, or user ID.' },
+        { order: 2, title: 'View user details', detail: 'ACFS views current user details including: role, company association (for LSP users), permissions, and account status.' },
+        { order: 3, title: 'Update user', detail: 'ACFS can: (a) update user details (name, email, company information), (b) change role (LSP, ACFS Admin, ACFS User), (c) adjust permissions/feature access.' },
+        { order: 4, title: 'Deactivate or reactivate', detail: 'ACFS can deactivate an LSP account or ACFS user account (prevents login). Can reactivate later if needed. Deactivated accounts retain all historical data.' },
+        { order: 5, title: 'Confirmation', detail: 'User account updated. Email notification sent to user if contact details changed or account status changed.' },
+      ],
+      success_outcome: 'User account is updated with new details or status. User notified if applicable.',
+    },
+    {
       id: 'acfs-updates-user',
       name: 'ACFS Updates a User',
       primary_actor: 'acfs',
@@ -696,9 +716,10 @@ export const intentModel: IntentModel = {
     },
     {
       id: 'BR-016',
-      description: 'Driver records are scoped per LSP account. Drivers added by one LSP user are visible to all users within that same account, but NOT visible to other accounts. P4TC users do not have saved driver records.',
-      applies_to: ['lsp', 'driver_record'],
-      source: 'discussion between Roni and Matt on 2026-03-18',
+      description: 'Driver record scoping (DEFERRED to Phase 2): Driver records will be scoped per LSP account when driver reuse is implemented. Phase 1 treats driver details as booking attributes entered fresh each time per assumption A-025.',
+      applies_to: ['driver_record'],
+      source: 'Assumption A-023 (deferred per A-025)',
+      warn: 'Driver reuse functionality deferred to Phase 2/fast follow',
     },
     {
       id: 'BR-017',

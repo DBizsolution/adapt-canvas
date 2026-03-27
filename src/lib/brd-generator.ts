@@ -1,4 +1,6 @@
 import type { IntentModel, OpenQuestion } from '@/domain/intent-model/types'
+import type { ProjectRequirements } from '@/domain/project-requirements/types'
+import { generateFunctionalRequirements, groupFunctionalRequirements } from './fr-generator'
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { BRD_OUTPUT_PATH } from './paths'
@@ -54,7 +56,7 @@ export function matchDecisionsToSections(model: IntentModel): DecisionMatch[] {
   })
 }
 
-export function generateBRD(model: IntentModel): string {
+export function generateBRD(model: IntentModel, requirements: ProjectRequirements): string {
   const decisions = matchDecisionsToSections(model)
   const lines: string[] = []
 
@@ -269,6 +271,102 @@ export function generateBRD(model: IntentModel): string {
     }
   }
 
+  // --- 8. Functional Requirements (Auto-Generated) ---
+  push('## 8. Functional Requirements')
+  blank()
+  push('*Functional requirements are auto-generated from actor responsibilities for traceability.*')
+  blank()
+
+  const frs = generateFunctionalRequirements(model)
+  const grouped = groupFunctionalRequirements(frs)
+
+  if (grouped.lsp.length > 0) {
+    push('### 8.1 LSP Functional Requirements')
+    blank()
+    for (const fr of grouped.lsp) {
+      push(`**${fr.id}:** ${fr.description}`)
+      push(`  - *Derived from:* ${fr.mapped_to.join(', ')}`)
+      blank()
+    }
+  }
+
+  if (grouped.admin.length > 0) {
+    push('### 8.2 ACFS Admin Functional Requirements')
+    blank()
+    for (const fr of grouped.admin) {
+      push(`**${fr.id}:** ${fr.description}`)
+      push(`  - *Derived from:* ${fr.mapped_to.join(', ')}`)
+      blank()
+    }
+  }
+
+  // --- 9. Assumptions ---
+  push('## 9. Assumptions')
+  blank()
+
+  const assumptionsByCategory = new Map<string, typeof requirements.assumptions>()
+  for (const assumption of requirements.assumptions) {
+    const group = assumptionsByCategory.get(assumption.category) ?? []
+    group.push(assumption)
+    assumptionsByCategory.set(assumption.category, group)
+  }
+
+  for (const [category, assumptions] of assumptionsByCategory) {
+    push(`### ${category}`)
+    blank()
+    for (const a of assumptions) {
+      push(`**${a.id}:** ${a.assumption}`)
+      if (a.rationale) {
+        push(`  - *Rationale:* ${a.rationale}`)
+      }
+      blank()
+    }
+  }
+
+  // --- 10. Dependencies and Ownership ---
+  push('## 10. Dependencies and Ownership')
+  blank()
+
+  for (const dep of requirements.dependencies) {
+    push(`### ${dep.name}`)
+    blank()
+    push(`**Dependency:** ${dep.description}`)
+    blank()
+    push(`**Owner:** ${dep.owner}`)
+    blank()
+    if (dep.status) {
+      push(`**Status:** ${dep.status}`)
+      blank()
+    }
+    if (dep.risk) {
+      push(`**Risk:** ${dep.risk}`)
+      blank()
+    }
+  }
+
+  // --- 11. Non-Functional Requirements ---
+  push('## 11. High-Level Non-Functional Expectations')
+  blank()
+
+  const nfrsByCategory = new Map<string, typeof requirements.nfrs>()
+  for (const nfr of requirements.nfrs) {
+    const group = nfrsByCategory.get(nfr.category) ?? []
+    group.push(nfr)
+    nfrsByCategory.set(nfr.category, group)
+  }
+
+  for (const [category, nfrs] of nfrsByCategory) {
+    push(`### ${category.charAt(0).toUpperCase() + category.slice(1)}`)
+    blank()
+    for (const nfr of nfrs) {
+      push(`**${nfr.id}:** ${nfr.requirement}`)
+      if (nfr.target) {
+        push(`  - *Target:* ${nfr.target}`)
+      }
+      blank()
+    }
+  }
+
   push('---')
   blank()
   push(`*Generated from Intent Model v${model.meta.version} on ${new Date().toISOString().split('T')[0]}*`)
@@ -276,8 +374,8 @@ export function generateBRD(model: IntentModel): string {
   return lines.join('\n')
 }
 
-export async function writeBRD(model: IntentModel): Promise<void> {
-  const markdown = generateBRD(model)
+export async function writeBRD(model: IntentModel, requirements: ProjectRequirements): Promise<void> {
+  const markdown = generateBRD(model, requirements)
   await mkdir(dirname(BRD_OUTPUT_PATH), { recursive: true })
   await writeFile(BRD_OUTPUT_PATH, markdown, 'utf-8')
 }

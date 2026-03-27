@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { getCurrentModel } from '@/lib/model-store'
@@ -18,11 +19,13 @@ export default async function DataModelPage() {
   const schemaGraph = buildDatabaseSchemaGraph(dbmlSchema)
 
   return (
-    <DataModelPageClient
-      intentGraph={intentGraph}
-      schemaGraph={schemaGraph}
-      enums={dbmlSchema.enums}
-      dbmlContent={dbmlContent}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <DataModelPageClient
+        intentGraph={intentGraph}
+        schemaGraph={schemaGraph}
+        enums={dbmlSchema.enums}
+        dbmlContent={dbmlContent}
+      />
+    </Suspense>
   )
 }

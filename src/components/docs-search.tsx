@@ -60,20 +60,22 @@ export function DocsSearch() {
     return () => clearInterval(interval)
   }, [loading, loadingMessages])
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent, presetQuery?: string) => {
     e.preventDefault()
 
-    if (!query.trim() || query.trim().length < 3) {
+    const searchQuery = presetQuery || query
+
+    if (!searchQuery.trim() || searchQuery.trim().length < 3) {
       setError('Please enter at least 3 characters')
       return
     }
 
-    if (query.length > 500) {
+    if (searchQuery.length > 500) {
       setError('Query is too long (max 500 characters)')
       return
     }
 
-    const userMessage: Message = { role: 'user', content: query.trim() }
+    const userMessage: Message = { role: 'user', content: searchQuery.trim() }
     const newMessages = [...messages, userMessage]
 
     setMessages(newMessages)
@@ -111,6 +113,11 @@ export function DocsSearch() {
     setMessages([])
     setQuery('')
     setError('')
+  }
+
+  const handlePresetQuestion = (question: string) => {
+    const syntheticEvent = { preventDefault: () => {} } as React.FormEvent
+    handleSearch(syntheticEvent, question)
   }
 
   return (
@@ -360,17 +367,43 @@ export function DocsSearch() {
       {/* Help Text */}
       {messages.length === 0 && !loading && !error && (
         <div className="rounded-lg border p-4" style={{ borderColor: 'var(--border-default)', background: 'var(--bg-subtle)' }}>
-          <div className="text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-            💡 Try asking about:
+          <div className="flex items-center gap-2 text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-lg">💡</span>
+            <span>Try asking about:</span>
           </div>
-          <ul className="space-y-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-            <li>• "What is the intent model?"</li>
-            <li>• "Show me all HBL endpoints"</li>
-            <li>• "Which API endpoints use UUIDs?"</li>
-            <li>• "How does delegation work?"</li>
-            <li>• "What's the endpoint for booking slots?"</li>
-            <li>• "Explain the schema design"</li>
-          </ul>
+          <div className="flex flex-wrap gap-2">
+            {[
+              'What is the intent model?',
+              'Show me all HBL endpoints',
+              'Which API endpoints use UUIDs?',
+              'How does delegation work?',
+              'What\'s the endpoint for booking slots?',
+              'Explain the schema design'
+            ].map((question, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handlePresetQuestion(question)}
+                disabled={loading}
+                className="px-3 py-1.5 text-sm rounded-lg transition-all duration-200 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'var(--bg-white)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-secondary)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--accent-blue)'
+                  e.currentTarget.style.color = 'var(--accent-blue)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border-default)'
+                  e.currentTarget.style.color = 'var(--text-secondary)'
+                }}
+              >
+                {question}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

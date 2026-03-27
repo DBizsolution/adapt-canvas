@@ -6,7 +6,8 @@ import { UuidAlert } from './uuid-alert'
 import { Filters, type FilterState } from './filters'
 import { EndpointCard } from './endpoint-card'
 import { ConsolidationAnalysis } from './consolidation-analysis'
-import { ChevronDown, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronRight, List } from 'lucide-react'
+import { ApiListModal } from './api-list-modal'
 
 export default function ApiEndpointsPage() {
   const [filters, setFilters] = useState<FilterState>({
@@ -17,6 +18,7 @@ export default function ApiEndpointsPage() {
   })
 
   const [collapsedDomains, setCollapsedDomains] = useState<Set<string>>(new Set())
+  const [showListModal, setShowListModal] = useState(false)
 
   // Load collapsed state from localStorage after mount (client-only)
   useEffect(() => {
@@ -87,14 +89,29 @@ export default function ApiEndpointsPage() {
         className="flex h-[54px] shrink-0 items-center justify-between border-b px-6"
         style={{ borderColor: 'var(--border-default)' }}
       >
-        <div>
-          <h2 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
-            API Endpoints
-          </h2>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Portal API Reference & Analysis
-          </p>
+        <div className="flex items-center gap-4">
+          <div>
+            <h2 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
+              API Endpoints
+            </h2>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Portal API Reference & Analysis
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowListModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-[14px] font-medium rounded-lg transition-all duration-200 hover:bg-blue-50"
+            style={{
+              color: '#0081F2',
+            }}
+          >
+            <List size={16} />
+            Show All
+          </button>
         </div>
+
         <div className="flex gap-4 text-[13px]" style={{ color: 'var(--text-muted)' }}>
           <span><strong>{endpointStats.total}</strong> endpoints</span>
           <span><strong>{endpointsByDomain.length}</strong> domains</span>
@@ -168,6 +185,9 @@ export default function ApiEndpointsPage() {
           </div>
         </div>
       </div>
+
+      {/* API List Modal */}
+      <ApiListModal open={showListModal} onClose={() => setShowListModal(false)} />
     </div>
   )
 }

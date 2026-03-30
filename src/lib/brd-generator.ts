@@ -374,7 +374,10 @@ export function generateBRD(model: IntentModel, requirements: ProjectRequirement
   return lines.join('\n')
 }
 
-export async function writeBRD(model: IntentModel, requirements: ProjectRequirements): Promise<void> {
+export async function writeBRD(
+  model: IntentModel,
+  requirements: ProjectRequirements = { assumptions: [], dependencies: [], nfrs: [] }
+): Promise<void> {
   const markdown = generateBRD(model, requirements)
   await mkdir(dirname(BRD_OUTPUT_PATH), { recursive: true })
   await writeFile(BRD_OUTPUT_PATH, markdown, 'utf-8')

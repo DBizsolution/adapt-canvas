@@ -3,6 +3,7 @@ import { kv } from '@vercel/kv'
 import { MODEL_HISTORY_PATH } from './paths'
 import { intentModel } from '@/domain/intent-model/model'
 import type { IntentModel } from '@/domain/intent-model/types'
+import { quickValidate } from './model-sync-validator'
 
 const isVercel = !!process.env.KV_REST_API_URL
 
@@ -110,6 +111,12 @@ export async function getLatestVersionId(): Promise<string> {
 }
 
 export async function addVersion(version: ModelVersion): Promise<void> {
+  // Quick validation check before saving
+  const validation = await quickValidate(version.model)
+  if (!validation.valid) {
+    throw new Error(`Model validation failed: ${validation.error}`)
+  }
+
   if (isVercel) {
     await kv.set(`${KV_VERSION_PREFIX}${version.id}`, version)
     const index = await getKvIndex()

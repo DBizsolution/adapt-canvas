@@ -1,24 +1,76 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Search, Sparkles, Loader2, AlertCircle } from 'lucide-react'
+import { Search, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 
 const LOADING_MESSAGES_POOL = [
-  'Yo, digging through the docs...',
-  'Scanning 100+ endpoints... this better be worth it',
-  'Reading faster than you can type tbh',
-  'Found something... wait, nope, wrong file',
-  'Ctrl+F on steroids right now',
-  'Checking API endpoints... so many UUIDs',
-  'Your question is making me work harder than I wanted',
-  'Skimming through logistics docs like it\'s my day job',
-  'This is taking longer than expected, my bad',
-  'Almost there... I think... maybe',
-  'Ok I lied, still searching, hold tight',
-  'Found it. Cooking up an answer...',
-  'Putting the pieces together... standby',
+  'Audio cassettes have more fidelity than YouTube streaming',
+  'The first computer mouse was made of wood',
+  'CAPTCHA stands for "Completely Automated Public Turing test"',
+  'The first 1GB hard drive weighed over 500 pounds',
+  'The first domain ever registered was symbolics.com in 1985',
+  'Email existed before the World Wide Web',
+  'The first computer bug was an actual moth trapped in a relay',
+  'QWERTY keyboards were designed to slow typists down',
+  'The average person blinks 15-20 times per minute, except when reading a screen',
+  'The "@" symbol was chosen for email because it wasn\'t used in names',
+  'The first webcam was created to monitor a coffee pot at Cambridge',
+  'Nintendo was founded in 1889 as a playing card company',
+  'The first computer programmer was Ada Lovelace in the 1840s',
+  'GPS is free for everyone because it\'s funded by US taxpayers',
+  'The first YouTube video was uploaded on April 23, 2005',
+  'Computer passwords were invented at MIT in the early 1960s',
+  'The Firefox logo isn\'t a fox — it\'s a red panda',
+  'The first Apple computer sold for $666.66',
+  'Bluetooth is named after a 10th-century Viking king',
+  'The Space Invaders arcade game caused a coin shortage in Japan',
+  'The first SMS text message said "Merry Christmas"',
+  'USB was designed to replace 20+ types of connectors',
+  'The first hard disk drive could only store 5MB',
+  'Ethernet was named after the "luminiferous ether" from physics',
+  'CD-ROMs were originally designed to hold 74 minutes of music',
+  'The inventor of the web, Tim Berners-Lee, gave it away for free',
+  'Computer mice were nicknamed after their tail-like cable',
+  'The first video game console was the Magnavox Odyssey in 1972',
+  'Wi-Fi doesn\'t stand for anything — it\'s just a made-up name',
+  'The Sony Walkman was originally called the "Soundabout"',
+  'The first computer virus was created in 1983 as an experiment',
+  'LED lights were invented in 1962 but only made red light at first',
+  'The Ctrl+Alt+Delete combination was meant to be hard to press accidentally',
+  'The first computer could only do 5,000 calculations per second',
+  'Nintendo means "leave luck to heaven" in Japanese',
+  'The floppy disk icon for "save" is becoming a relic most Gen Z has never seen',
+  'JPEG compression can make a 10MB image into 1MB by throwing away data you won\'t miss',
+  'Moore\'s Law predicted transistor density doubling every 2 years — it held for 50 years',
+  'The first website is still online at info.cern.ch',
+  'HTML was invented in 1991 and hasn\'t fundamentally changed since',
+  'The PNG format was created to replace GIF after patent issues',
+  'Localhost 127.0.0.1 always points to your own computer',
+  'The term "bug" predates computers — Thomas Edison used it in the 1870s',
+  'Amazon was originally going to be called "Cadabra" as in "abracadabra"',
+  'The first banner ad on the web had a 44% click-through rate',
+  'RSS stands for "Really Simple Syndication" and almost nobody uses it anymore',
+  'JavaScript was created in just 10 days in 1995',
+  'The first iPhone didn\'t have copy and paste',
+  'Google\'s original name was "BackRub"',
+  'The GIF format is pronounced "jif" according to its creator (but everyone says "gif")',
+  'TCP/IP was designed to survive a nuclear war',
+  'The "404 Not Found" error was named after a room number at CERN',
+  'MP3 technology is over 30 years old',
+  'Windows 95 had a secret flight simulator in Excel',
+  'The first spam email was sent in 1978 to 400 people',
+  'Linux was created by a 21-year-old Finnish student',
+  'The first computer programmer was a woman in the 1840s',
+  'Bitcoin\'s creator, Satoshi Nakamoto, is still unknown',
+  'QR codes were invented in 1994 for tracking car parts',
+  'The first emoticon was :-) created in 1982',
+  'FORTRAN is the oldest programming language still in use today',
+  'The first dot-com domain was registered in 1985',
+  'The ALT key was originally for "alternate" character input',
+  'IBM\'s Deep Blue beat Kasparov at chess in 1997',
+  'The first computer game was created in 1958 — a tennis simulation',
 ]
 
 // Helper to shuffle array
@@ -42,23 +94,23 @@ export function DocsSearch() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
-  const [loadingMessages, setLoadingMessages] = useState<string[]>(['Searching...', ...shuffleArray(LOADING_MESSAGES_POOL)])
+  const [loadingMessages, setLoadingMessages] = useState<string[]>(['While you wait...', ...shuffleArray(LOADING_MESSAGES_POOL)])
 
-  // Rotate loading messages every 1.8 seconds
+  // Rotate loading messages every 3.5 seconds
   useEffect(() => {
     if (!loading) {
       setLoadingMessageIndex(0)
       // Reshuffle for next time
-      setLoadingMessages(['Searching...', ...shuffleArray(LOADING_MESSAGES_POOL)])
+      setLoadingMessages(['While you wait...', ...shuffleArray(LOADING_MESSAGES_POOL)])
       return
     }
 
     const interval = setInterval(() => {
       setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length)
-    }, 1800)
+    }, 3500)
 
     return () => clearInterval(interval)
-  }, [loading, loadingMessages])
+  }, [loading])
 
   const handleSearch = async (e: React.FormEvent, presetQuery?: string) => {
     e.preventDefault()
@@ -151,8 +203,8 @@ export function DocsSearch() {
               ) : (
                 <div>
                   <div className="mb-3 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--accent-blue)' }}>
-                    <Sparkles size={16} />
-                    <span>AI Answer</span>
+                    <span className="text-base">🐵</span>
+                    <span>GreaseMonkey</span>
                   </div>
                   <div className="prose prose-neutral dark:prose-invert prose-sm max-w-none">
                     <ReactMarkdown
@@ -172,11 +224,11 @@ export function DocsSearch() {
                                   return (
                                     <a
                                       key={idx}
-                                      href={`/review/docs?doc=${slug}`}
+                                      href={`/documents?doc=${slug}`}
                                       className="text-blue-600 hover:underline font-medium"
                                       onClick={(e) => {
                                         e.preventDefault()
-                                        window.location.href = `/review/docs?doc=${slug}`
+                                        window.location.href = `/documents?doc=${slug}`
                                       }}
                                     >
                                       {part}
@@ -187,11 +239,11 @@ export function DocsSearch() {
                                   return (
                                     <a
                                       key={idx}
-                                      href="/review/api-endpoints"
+                                      href="/api-spec"
                                       className="text-blue-600 hover:underline font-medium"
                                       onClick={(e) => {
                                         e.preventDefault()
-                                        window.location.href = '/review/api-endpoints'
+                                        window.location.href = '/api-spec'
                                       }}
                                     >
                                       {part}
@@ -218,11 +270,11 @@ export function DocsSearch() {
                                   return (
                                     <a
                                       key={idx}
-                                      href={`/review/docs?doc=${slug}`}
+                                      href={`/documents?doc=${slug}`}
                                       className="text-blue-600 hover:underline font-medium"
                                       onClick={(e) => {
                                         e.preventDefault()
-                                        window.location.href = `/review/docs?doc=${slug}`
+                                        window.location.href = `/documents?doc=${slug}`
                                       }}
                                     >
                                       {part}
@@ -233,11 +285,11 @@ export function DocsSearch() {
                                   return (
                                     <a
                                       key={idx}
-                                      href="/review/api-endpoints"
+                                      href="/api-spec"
                                       className="text-blue-600 hover:underline font-medium"
                                       onClick={(e) => {
                                         e.preventDefault()
-                                        window.location.href = '/review/api-endpoints'
+                                        window.location.href = '/api-spec'
                                       }}
                                     >
                                       {part}
@@ -279,7 +331,7 @@ export function DocsSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={messages.length > 0 ? 'Ask a follow-up question...' : 'Ask about VBS Intent documentation or API endpoints...'}
+            placeholder={messages.length > 0 ? 'Ask GreaseMonkey a follow-up...' : 'Ask GreaseMonkey about the docs...'}
             className={cn(
               'w-full rounded-lg border pl-12 pr-32 py-3.5',
               'text-sm outline-none transition-all',
@@ -315,8 +367,8 @@ export function DocsSearch() {
               </>
             ) : (
               <>
-                <Sparkles size={14} />
-                <span>AI Search</span>
+                <span className="text-sm">🐵</span>
+                <span>Ask</span>
               </>
             )}
           </button>
@@ -339,7 +391,9 @@ export function DocsSearch() {
       {/* Error Message */}
       {error && (
         <div className="flex items-start gap-3 rounded-lg border p-4" style={{ borderColor: '#ef444480', background: '#ef44441a' }}>
-          <AlertCircle size={18} className="mt-0.5 shrink-0" style={{ color: '#ef4444' }} />
+          <span className="text-lg mt-0.5 shrink-0">
+            {['🙈', '🙉', '🙊'][Math.floor(Math.random() * 3)]}
+          </span>
           <div>
             <div className="font-medium" style={{ color: '#ef4444' }}>Error</div>
             <div className="mt-1 text-sm" style={{ color: '#ef4444e6' }}>{error}</div>
@@ -349,9 +403,9 @@ export function DocsSearch() {
 
       {/* Loading State */}
       {loading && (
-        <div className="rounded-lg border p-6" style={{ borderColor: 'var(--accent-blue)33', background: 'var(--bg-blue-subtle)' }}>
+        <div className="rounded-lg border p-6" style={{ borderColor: 'var(--border-default)', background: 'var(--bg-default)' }}>
           <div className="flex items-center gap-3">
-            <Loader2 size={20} className="animate-spin shrink-0" style={{ color: 'var(--accent-blue)' }} />
+            <span className="text-xl shrink-0">🙉</span>
             <div>
               <div className="text-sm font-medium mb-1" style={{ color: 'var(--accent-blue)' }}>
                 Thinking...
@@ -368,7 +422,7 @@ export function DocsSearch() {
       {messages.length === 0 && !loading && !error && (
         <div className="rounded-lg border p-4" style={{ borderColor: 'var(--border-default)', background: 'var(--bg-subtle)' }}>
           <div className="flex items-center gap-2 text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
-            <span className="text-lg">💡</span>
+            <span className="text-lg">🐵</span>
             <span>Try asking about:</span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -376,9 +430,9 @@ export function DocsSearch() {
               'What is the intent model?',
               'Show me all HBL endpoints',
               'Which API endpoints use UUIDs?',
-              'How does delegation work?',
-              'What\'s the endpoint for booking slots?',
-              'Explain the schema design'
+              'Explain the actor model',
+              'What are the main entities?',
+              'How does the BRD compare to the intent model?'
             ].map((question, idx) => (
               <button
                 key={idx}
@@ -410,7 +464,7 @@ export function DocsSearch() {
       {/* Conversation footer */}
       {messages.length > 0 && !loading && (
         <div className="text-xs text-center pt-2" style={{ color: 'var(--text-muted)' }}>
-          ✨ Generated by AI • Always verify critical information
+          🐵 Generated by GreaseMonkey • Always verify critical information
         </div>
       )}
     </div>

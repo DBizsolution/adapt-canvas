@@ -1,10 +1,10 @@
 import { type ProjectConfig } from '@/lib/project-config-schema'
 
 export const projectConfig: ProjectConfig = {
-  name: 'VBS Intent Model Review',
-  shortName: 'VBS Intent',
+  name: 'VBS Canvas',
+  shortName: 'VBS Canvas',
   iconLetter: 'V',
-  description: 'VBS Intent Model Consensus System — a review tool for business requirements',
+  description: 'Collaborative platform for structuring and reviewing business requirements',
 
   abbreviations: {
     HBL: 'House Bill of Lading',

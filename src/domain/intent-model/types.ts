@@ -1,6 +1,6 @@
 // Co-dependencies: when modifying these types, also update:
-// - src/lib/model-schemas.ts (zod schemas)
-// - src/lib/ai-prompt.ts (hardcoded type definitions in system prompt)
+// - src/lib/model-schemas.ts (zod schemas) — run: pnpm generate:schemas
+// - Run 'pnpm generate:ai-types' to regenerate AI type definitions
 
 export type IntentModel = {
   meta: ModelMeta

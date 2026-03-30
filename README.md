@@ -1,6 +1,6 @@
-# VBS Intent Model Review
+# VBS Canvas
 
-A structured review platform for the ACFS VBS Pickup Portal intent model — actors, entities, journeys, business rules, constraints, and open questions. Teams use it to reach consensus on business requirements before development begins.
+A collaborative platform for structuring and reviewing business requirements. VBS Canvas provides a structured intent model (actors, entities, journeys, business rules, constraints, and open questions) that teams use to reach consensus before development begins.
 
 Built with Next.js, React, TypeScript, TailwindCSS, and ShadCN.
 

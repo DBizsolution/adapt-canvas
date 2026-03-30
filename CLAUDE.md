@@ -1,4 +1,4 @@
-# VBS Intent Model Review
+# VBS Canvas
 
 ## Design Context
 

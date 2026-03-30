@@ -363,7 +363,7 @@ export function Graph3D({ model }: { model: IntentModel }) {
       const ForceGraph3D = mod.default || mod
       const { nodes, links } = buildGraphData(model)
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const THREE = await import('three')
 
       // Load icon textures

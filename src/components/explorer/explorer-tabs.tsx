@@ -1,44 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { Network, BookOpen, Code2, Box } from 'lucide-react'
+import { Network, BookOpen, Code2, Box, Workflow } from 'lucide-react'
 import type { IntentModel } from '@/domain/intent-model/types'
 import { ExplorerCanvas } from './explorer-canvas'
 import { ModelReader } from './model-reader'
 import { ModelSource } from './model-source'
-import { GalaxyView } from './views-3d/galaxy/galaxy-view'
-import { FlowsView } from './views-3d/flows/flows-view'
-import { AnatomyView } from './views-3d/anatomy/anatomy-view'
-import { DomainsView } from './views-3d/domains/domains-view'
 import { Graph3D } from './graph-3d'
-import { Graph3DLifecycle } from './graph-3d-lifecycle'
-import { Graph3DActors } from './graph-3d-actors'
+import { IntentDiagram } from './intent-diagram'
 import type { ExplorerPositions } from '@/lib/explorer-positions-store'
 
 const tabs = [
   { id: 'graph', label: 'Graph', icon: Network },
+  { id: 'intent', label: 'Intent', icon: Workflow },
   { id: '3d', label: '3D', icon: Box },
   { id: 'model', label: 'Model', icon: BookOpen },
   { id: 'source', label: 'Source', icon: Code2 },
 ] as const
 
-const VIEWS_3D = [
-  { id: 'galaxy', label: 'Galaxy' },
-  { id: 'flows', label: 'Flows' },
-  { id: 'anatomy', label: 'Anatomy' },
-  { id: 'domains', label: 'Domains' },
-  { id: 'force', label: 'Force' },
-  { id: 'lifecycle', label: 'Lifecycle' },
-  { id: 'actors', label: 'Actor Layers' },
-] as const
-
-type View3D = (typeof VIEWS_3D)[number]['id']
-
 type TabId = (typeof tabs)[number]['id']
 
 export function ExplorerTabs({ model, savedPositions, modelSource }: { model: IntentModel; savedPositions: ExplorerPositions; modelSource: string }) {
   const [activeTab, setActiveTab] = useState<TabId>('graph')
-  const [view3d, setView3d] = useState<View3D>('galaxy')
 
   return (
     <div className="flex flex-col h-full">
@@ -70,27 +53,6 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
             </button>
           )
         })}
-
-        {/* 3D view selector */}
-        {activeTab === '3d' && (
-          <>
-            <div className="mx-1 h-4 w-px" style={{ background: 'var(--border-default)' }} />
-            {VIEWS_3D.map(view => (
-              <button
-                key={view.id}
-                type="button"
-                onClick={() => setView3d(view.id)}
-                className="px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors duration-200"
-                style={{
-                  color: view3d === view.id ? 'var(--accent-blue)' : 'var(--text-muted)',
-                  background: view3d === view.id ? 'var(--bg-blue-subtle)' : 'transparent',
-                }}
-              >
-                {view.label}
-              </button>
-            ))}
-          </>
-        )}
       </div>
 
       {/* Tab content */}
@@ -98,26 +60,11 @@ export function ExplorerTabs({ model, savedPositions, modelSource }: { model: In
         {activeTab === 'graph' && (
           <ExplorerCanvas model={model} savedPositions={savedPositions} />
         )}
-        {activeTab === '3d' && view3d === 'galaxy' && (
-          <GalaxyView model={model} />
+        {activeTab === 'intent' && (
+          <IntentDiagram model={model} />
         )}
-        {activeTab === '3d' && view3d === 'flows' && (
-          <FlowsView model={model} />
-        )}
-        {activeTab === '3d' && view3d === 'anatomy' && (
-          <AnatomyView model={model} />
-        )}
-        {activeTab === '3d' && view3d === 'domains' && (
-          <DomainsView model={model} />
-        )}
-        {activeTab === '3d' && view3d === 'force' && (
+        {activeTab === '3d' && (
           <Graph3D model={model} />
-        )}
-        {activeTab === '3d' && view3d === 'lifecycle' && (
-          <Graph3DLifecycle model={model} />
-        )}
-        {activeTab === '3d' && view3d === 'actors' && (
-          <Graph3DActors model={model} />
         )}
         {activeTab === 'model' && (
           <ModelReader model={model} />

@@ -5,6 +5,7 @@ import { writeBRD } from '@/lib/brd-generator'
 import { exportContract } from '@/lib/contract-export'
 import type { ModelVersion } from '@/lib/model-store'
 import { computeModelStatus } from '@/lib/model-validation'
+import { validateModelSync } from '@/lib/model-sync-validator'
 
 const ApplyRequestSchema = z.object({
   proposalId: z.string(),
@@ -25,6 +26,22 @@ export async function POST(request: Request) {
     const currentLatest = await getLatestVersionId()
     if (currentLatest !== proposal.latestVersionId) {
       return NextResponse.json({ error: 'version_conflict', currentVersionId: currentLatest }, { status: 409 })
+    }
+
+    // Validate model sync before applying
+    const validation = await validateModelSync(proposal.proposedModel)
+    if (!validation.valid) {
+      return NextResponse.json({
+        error: 'validation_failed',
+        issues: validation.issues,
+        suggestions: validation.suggestions,
+      }, { status: 400 })
+    }
+
+    // Log warnings if any
+    const warnings = validation.issues.filter(i => i.severity === 'warning')
+    if (warnings.length > 0) {
+      console.warn('[Model Sync] Validation warnings:', warnings)
     }
 
     // Recompute status before persisting

@@ -2,7 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 
-const FULL_WIDTH_ROUTES = ['/review/docs', '/review/diff', '/review/ia', '/review/brd', '/review/data-model']
+const FULL_WIDTH_ROUTES = [
+  '/review/docs', '/review/diff', '/review/ia', '/review/brd', '/review/data-model',
+  '/documents', '/versions', '/architecture', '/brd', '/data-model'
+]
 
 function isFullWidthPage(pathname: string) {
   return FULL_WIDTH_ROUTES.some(r => pathname.startsWith(r))

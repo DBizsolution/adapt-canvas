@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import type { IntentModel } from '@/domain/intent-model/types'
 
 function getSuggestions(pathname: string, model: IntentModel): string[] {
-  if (pathname === '/review' || pathname === '/review/') {
+  if (pathname === '/consensus' || pathname === '/consensus/') {
     return [
       'Add a new open question',
       'Add a new business rule',
@@ -12,7 +12,7 @@ function getSuggestions(pathname: string, model: IntentModel): string[] {
     ]
   }
 
-  if (pathname.includes('/diff')) return []
+  if (pathname.includes('/versions')) return []
 
   const segment = pathname.split('/').pop()
 

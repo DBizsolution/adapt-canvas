@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { ModelReaderToc } from './model-reader-toc'
 import type { IntentModel } from '@/domain/intent-model/types'
 
 const SECTION_COLORS = {
@@ -172,8 +171,6 @@ export function ModelReader({ model }: { model: IntentModel }) {
   }
 
   return (
-    <>
-      <ModelReaderToc model={model} containerRef={containerRef} />
       <div ref={containerRef} className="h-full overflow-y-auto custom-scroll" style={{
         background: 'var(--bg-page)',
         fontKerning: 'normal',
@@ -656,6 +653,5 @@ export function ModelReader({ model }: { model: IntentModel }) {
         </div>
         </div>
       </div>
-    </>
   )
 }

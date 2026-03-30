@@ -3,6 +3,7 @@ import type { IntentModel, SectionType } from '@/domain/intent-model/types'
 import { SECTION_TYPE_TO_MODEL_KEY } from '@/domain/intent-model/types'
 import { IntentModelSchema, SectionSchemas } from './model-schemas'
 import { projectConfig } from '@/lib/project-config'
+import { generateTypeDefinitions } from './ai-type-definitions'
 
 let _openai: OpenAI | null = null
 function getOpenAI() {
@@ -10,69 +11,8 @@ function getOpenAI() {
   return _openai
 }
 
-const TYPE_DEFINITIONS = `
-type IntentModel = {
-  meta: { version: string; project: string; lastUpdated: string; status: 'draft' | 'in_review' | 'approved' }
-  actors: Actor[]
-  entities: Entity[]
-  journeys: Journey[]
-  business_rules: BusinessRule[]
-  constraints: Constraint[]
-  open_questions: OpenQuestion[]
-}
-
-type Actor = {
-  id: string          // ${projectConfig.ai.idExamples}
-  name: string
-  description: string
-  auth: string
-  responsibilities: { id: string; description: string; warn?: string; edge?: string }[]
-  // responsibility IDs follow pattern: actorId:rN (e.g. 'wff:r1')
-}
-
-type Entity = {
-  id: string
-  name: string
-  description: string
-  key_fields: { name: string; type: string; description: string; warn?: string }[]
-  lifecycle: {
-    states: string[]
-    transitions: { from: string; to: string; trigger: string; guard?: string; warn?: string }[]
-  }
-}
-
-type Journey = {
-  id: string           // ${projectConfig.ai.journeyIdExamples}
-  name: string
-  primary_actor: string  // must reference an existing actor ID
-  preconditions: string[]
-  steps: { order: number; title: string; detail: string; precondition?: string; warn?: string; edge?: string }[]
-  success_outcome: string
-  warn?: string
-}
-
-type BusinessRule = {
-  id: string           // pattern: 'BR-NNN'
-  description: string
-  applies_to: string[] // must reference existing actor or entity IDs
-  source: string
-  warn?: string
-}
-
-type Constraint = {
-  id: string           // pattern: 'C-NNN'
-  constraint: string
-  type: 'capacity' | 'pricing' | 'access' | 'compliance' | 'temporal' | 'admin'
-}
-
-type OpenQuestion = {
-  id: string           // pattern: 'OQ-NNN'
-  question: string
-  reason: string
-  status: 'open' | 'deferred' | 'resolved'
-  resolution?: string
-}
-`
+// Generate type definitions dynamically from source types
+const TYPE_DEFINITIONS = generateTypeDefinitions()
 
 function buildSystemPrompt(scope: 'full' | 'section', sectionType?: SectionType): string {
   const scopeInstruction = scope === 'full'

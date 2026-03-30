@@ -261,7 +261,7 @@ function DocsPageInner() {
                 Documentation Search
               </h2>
               <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-                Ask questions about VBS Intent documentation using AI-powered search
+                Ask GreaseMonkey questions about VBS Intent documentation
               </p>
               <DocsSearch />
             </div>

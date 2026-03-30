@@ -9,7 +9,7 @@ export default async function QuestionsPage() {
   const intentModel = await getCurrentModel()
   const reviewState = await getReviewState()
 
-  const items = intentModel.openQuestions.map(item => {
+  const items = intentModel.open_questions.map(item => {
     const targetId = buildTargetId('open_question', item.id)
     const review = getReviewForTarget(reviewState.sections, targetId)
     return { item, type: 'open_question' as const, review }

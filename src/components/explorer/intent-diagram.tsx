@@ -357,7 +357,7 @@ export function IntentDiagram({ model }: { model: IntentModel }) {
         position: { x: xPadding + col * 240, y: journeyStartY + row * 110 },
         data: {
           label: journey.name,
-          description: journey.description?.substring(0, 40) || '',
+          description: journey.success_outcome?.substring(0, 40) || '',
         },
       })
     })
@@ -367,7 +367,7 @@ export function IntentDiagram({ model }: { model: IntentModel }) {
     // BUSINESS RULES
     addSection('BUSINESS RULES (selected)')
     const ruleStartY = yOffset
-    const rules = model.rules?.slice(0, 6) || []
+    const rules = model.business_rules?.slice(0, 6) || []
     rules.forEach((rule, i) => {
       const row = Math.floor(i / 3)
       const col = i % 3
@@ -377,7 +377,7 @@ export function IntentDiagram({ model }: { model: IntentModel }) {
         position: { x: xPadding + col * 220, y: ruleStartY + row * 110 },
         data: {
           label: rule.id,
-          description: rule.name?.substring(0, 40) || rule.description?.substring(0, 40) || '',
+          description: rule.description?.substring(0, 40) || '',
         },
       })
     })

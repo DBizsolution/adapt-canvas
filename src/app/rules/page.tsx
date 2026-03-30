@@ -9,7 +9,7 @@ export default async function RulesPage() {
   const intentModel = await getCurrentModel()
   const reviewState = await getReviewState()
 
-  const items = intentModel.businessRules.map(item => {
+  const items = intentModel.business_rules.map(item => {
     const targetId = buildTargetId('business_rule', item.id)
     const review = getReviewForTarget(reviewState.sections, targetId)
     return { item, type: 'business_rule' as const, review }

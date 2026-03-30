@@ -121,6 +121,84 @@ export function HomeCards() {
         </p>
       </div>
 
+      {/* What is the Intent Model */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+          What is the Intent Model?
+        </h2>
+        <p className="text-base leading-relaxed max-w-4xl" style={{ color: 'var(--text-secondary)' }}>
+          The intent model is a structured representation of business requirements that captures <strong>who</strong> interacts with the system (actors), <strong>what</strong> they manage (entities), <strong>how</strong> they accomplish their goals (journeys), and <strong>why</strong> certain behaviors are enforced (business rules and constraints). Unlike traditional documents that scatter requirements across paragraphs and sections, the intent model organizes knowledge into discrete, cross-referenced components that can be queried, validated, and transformed into specifications, tests, and documentation. It serves as a single source of truth that bridges stakeholder conversations and technical implementation.
+        </p>
+      </div>
+
+      {/* How it helps */}
+      <div className="mb-16">
+        <h2 className="text-xs font-semibold uppercase tracking-wider mb-6" style={{ color: 'var(--text-muted)' }}>
+          How it helps
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            className="p-6 rounded-lg"
+            style={{
+              background: 'var(--bg-white)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Engineering
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              Engineers get structured, unambiguous requirements with clear entity relationships and business rules. Journey steps map directly to user stories and acceptance criteria. API specifications and data models are auto-generated from the same source, eliminating translation errors between requirements and implementation.
+            </p>
+          </div>
+
+          <div
+            className="p-6 rounded-lg"
+            style={{
+              background: 'var(--bg-white)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Design
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              Designers use journey maps to identify every screen and interaction pattern needed. Actor roles and their responsibilities inform information architecture decisions. Entity attributes and business rules surface validation requirements, empty states, and error conditions that need design attention before wireframing begins.
+            </p>
+          </div>
+
+          <div
+            className="p-6 rounded-lg"
+            style={{
+              background: 'var(--bg-white)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Product
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              Product managers track consensus on each model section, identify gaps and conflicts early, and maintain a living specification that evolves as requirements change. Open questions are flagged in context, and the structured format makes it easy to scope releases by actor, journey, or feature area without losing system coherence.
+            </p>
+          </div>
+
+          <div
+            className="p-6 rounded-lg"
+            style={{
+              background: 'var(--bg-white)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              AI
+            </h3>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              AI assistants can reason about the system holistically, suggest changes that respect cross-references, generate test cases from journey steps, and draft technical specifications grounded in the model's structure. The intent model provides the schema and constraints that help AI tools stay coherent and aligned with actual requirements.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Card groups */}
       <div className="space-y-12">
         {cardGroups.map(group => (

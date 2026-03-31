@@ -1,5 +1,7 @@
 # VBS Intent Model — Team Guide
 
+> **Note:** This guide is specific to the VBS Pickup Portal implementation. For general platform usage, see the main [README](../../README.md) and [Getting Started](getting-started.md) guide.
+
 How to use the intent model and this platform in your day-to-day work, whether you're a designer, PM, or engineer.
 
 ---

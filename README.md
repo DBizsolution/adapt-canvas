@@ -1,19 +1,21 @@
-# VBS Canvas
+# Intent Model Canvas
 
-A collaborative platform for structuring and reviewing business requirements. VBS Canvas provides a structured intent model (actors, entities, journeys, business rules, constraints, and open questions) that teams use to reach consensus before development begins.
+A collaborative platform for structuring and reviewing business requirements. Intent Model Canvas provides a structured intent model (actors, entities, journeys, business rules, constraints, and open questions) that teams use to reach consensus before development begins.
 
 Built with Next.js, React, TypeScript, TailwindCSS, and ShadCN.
 
-## Current model (v0.8.0)
+## Example model structure
 
-| Pillar | Count | Examples |
-|--------|-------|---------|
-| **Actors** | 5 | LSP, P4TC, Driver, ACFS Internal, Gatehouse |
-| **Entities** | 10 + 5 integrations | HBL, Booking, Pickup Slot, Site, Delivery Order, Delegation, Driver Record, Payment, User, Booking-HBL Link |
-| **Journeys** | 14 | LSP Books a Pickup, ACFS Validates DOs, P4TC Books a Pickup |
-| **Business Rules** | 21 | Booking gates, DO policy, modification cutoffs, fee calculation |
-| **Constraints** | 5 | Desktop only, no persistent P4TC credentials, DB-seeded sites |
-| **Open Questions** | 1 | HBL hierarchy data source (OQ-034) |
+The intent model organizes requirements into six structured pillars:
+
+| Pillar | Purpose | Examples |
+|--------|---------|---------|
+| **Actors** | Who uses the system | User roles, authentication methods, responsibilities |
+| **Entities** | Data objects and their lifecycle | Core business objects with fields and state transitions |
+| **Journeys** | User workflows | Step-by-step flows from actor perspectives |
+| **Business Rules** | Hard constraints | System invariants, validation logic, business policies |
+| **Constraints** | Platform limits | Technical and operational boundaries |
+| **Open Questions** | Unresolved decisions | Decision log for blocking implementation issues |
 
 ## Features
 
@@ -39,16 +41,13 @@ pnpm dev        # starts on http://localhost:4444
 
 ### For new team members
 
-If you're new to the project, see the **[Getting Started Guide](docs/project/getting-started.md)** for:
-- Complete setup instructions for both `vbs-intent` and `vbs-portal`
+See the **[Getting Started Guide](docs/project/getting-started.md)** for:
+- Complete setup instructions
 - Role-specific workflows (Designer, PM, Engineer)
-- How the intent model connects to the frontend code
 - Common tasks and troubleshooting
 
 **Quick links:**
-- [Team Guide](docs/project/team-guide.md) — how to use the platform for reviews and collaboration
-- [BRD to Engineering Process](docs/project/brd-to-engineering-process.md) — the full pipeline from requirements to code
-- [How I Built This](docs/project/how-i-built-this.md) — Rahul's build log and design decisions
+- [Getting Started Guide](docs/project/getting-started.md) — complete setup and role-specific workflows
 
 ## Project structure
 
@@ -118,6 +117,6 @@ Update `src/lib/docs-config.ts` with paths to your project's reference documents
 - `OPENAI_API_KEY` — required for AI-powered model editing
 - `KV_REST_API_URL` / `KV_REST_API_TOKEN` — optional, for Vercel KV storage in production (falls back to local JSON files in dev)
 
-## Related repos
+## Implementation
 
-- **[vbs-portal](https://github.com/DBizsolution/vbs-portal)** — the actual pickup portal frontend (LSP, P4TC, ACFS, Gatehouse views)
+The intent model serves as the source of truth for your implementation. Entity definitions, business rules, and journey steps map directly to code artifacts like TypeScript types, validation schemas, state machines, and API routes.

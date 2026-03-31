@@ -1,5 +1,7 @@
 # Getting Started — VBS Intent Model & Portal
 
+> **Note:** This guide is specific to the VBS Pickup Portal implementation. It documents a real-world usage of the Intent Model Canvas platform. For general setup instructions, see the main [README](../../README.md).
+
 A complete setup guide for designers, PMs, and front-end engineers working on the VBS Pickup Portal project.
 
 ---

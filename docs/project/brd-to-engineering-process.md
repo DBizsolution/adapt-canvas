@@ -1,5 +1,7 @@
 # BRD to UX Flows — Process Map Validation
 
+> **Note:** This document uses VBS (Vehicle Booking System) as a concrete example to demonstrate the Intent Model Canvas workflow.
+
 > Source: [Design → Engineering Process Map (FigJam)](https://www.figma.com/board/y9yjnvvSqH8d8NX6mmeqNf/Design--%3E-Engineering-Process-map)
 > Validated: 2026-02-25
 

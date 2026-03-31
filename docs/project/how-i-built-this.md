@@ -1,5 +1,7 @@
 # How I Built This
 
+> **Note:** This document describes building the VBS Pickup Portal implementation — a specific project demonstrating the Intent Model Canvas platform in use.
+
 > Rahul's build log — a personal account of building the VBS Intent Model Review platform from scratch, the decisions that shaped it, and what I learned along the way.
 >
 > **March 2026**

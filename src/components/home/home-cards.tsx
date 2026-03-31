@@ -114,7 +114,7 @@ export function HomeCards() {
       {/* Header */}
       <div className="mb-12">
         <h1 className="text-4xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
-          VBS Canvas
+          Intent Model Canvas
         </h1>
         <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
           Collaborative platform for structuring and reviewing business requirements

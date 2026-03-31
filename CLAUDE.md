@@ -1,4 +1,4 @@
-# VBS Canvas
+# Intent Model Canvas
 
 ## Design Context
 

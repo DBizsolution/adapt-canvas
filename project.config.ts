@@ -1,9 +1,9 @@
 import { type ProjectConfig } from '@/lib/project-config-schema'
 
 export const projectConfig: ProjectConfig = {
-  name: 'VBS Canvas',
-  shortName: 'VBS Canvas',
-  iconLetter: 'V',
+  name: 'Intent Model Canvas',
+  shortName: 'Intent Model',
+  iconLetter: 'I',
   description: 'Collaborative platform for structuring and reviewing business requirements',
 
   abbreviations: {
